@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readDb, writeDb } from '@/lib/db';
+import { supabase, checkSupabaseStatus } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -222,6 +223,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, likes: found?.likes ?? 0 });
     }
 
+    // 7.6. Check Supabase Health Status
+    if (action === 'CHECK_SUPABASE') {
+      const status = await checkSupabaseStatus();
+      return NextResponse.json({ ok: true, status });
+    }
+
     // 8. Role-Protected Actions
     const cleanPass = (password || '').trim();
     const isSuper = cleanPass === db.settings.superAdminPassword;
@@ -399,6 +406,22 @@ export async function POST(req: NextRequest) {
           notifications: [notif, ...state.notifications],
         }));
         return NextResponse.json({ ok: true, notifications: updatedDb.notifications });
+      }
+
+      if (action === 'SYNC_SUPABASE') {
+        const full = await readDb();
+        const { error } = await supabase.from('app_state').upsert(
+          {
+            key: 'main',
+            data: full,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'key' }
+        );
+        if (error) {
+          return NextResponse.json({ ok: false, error: error.message }, { status: 400 });
+        }
+        return NextResponse.json({ ok: true, message: 'সফলভাবে Supabase ক্লাউড ডেটাবেজে সম্পূর্ণ তথ্য সিঙ্ক হয়েছে!' });
       }
     }
 

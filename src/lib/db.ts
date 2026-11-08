@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { supabase } from './supabase';
 import {
   Product,
   MapSpotCustomData,
@@ -379,6 +380,28 @@ export function runAtomic<T>(task: () => Promise<T>): Promise<T> {
 }
 
 export async function readDb(): Promise<DatabaseSchema> {
+  // 1. Try reading from Supabase cloud database if available
+  try {
+    const { data, error } = await supabase
+      .from('app_state')
+      .select('data')
+      .eq('key', 'main')
+      .maybeSingle();
+
+    if (!error && data && data.data) {
+      const remoteDb = data.data as DatabaseSchema;
+      // Also cache to local file for offline fallback
+      try {
+        await fs.mkdir(DATA_DIR, { recursive: true });
+        await fs.writeFile(DB_FILE, JSON.stringify(remoteDb, null, 2), 'utf-8');
+      } catch {}
+      return remoteDb;
+    }
+  } catch (err) {
+    // Supabase unavailable or table not created yet, silently continue to local file
+  }
+
+  // 2. Local / bundled file fallback
   try {
     await fs.mkdir(DATA_DIR, { recursive: true });
     const raw = await fs.readFile(DB_FILE, 'utf-8');
@@ -405,12 +428,34 @@ export async function writeDb(updater: (db: DatabaseSchema) => DatabaseSchema | 
   return runAtomic(async () => {
     const current = await readDb();
     const updated = await updater(current);
+
+    // 1. Write to local file (immediate, always safe)
     try {
       await fs.mkdir(DATA_DIR, { recursive: true });
       await fs.writeFile(DB_FILE, JSON.stringify(updated, null, 2), 'utf-8');
     } catch (err) {
       console.warn('Failed to write db file:', err);
     }
+
+    // 2. Sync to Supabase cloud database
+    try {
+      const { error } = await supabase
+        .from('app_state')
+        .upsert(
+          {
+            key: 'main',
+            data: updated,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'key' }
+        );
+      if (error) {
+        console.warn('Supabase sync notice:', error.message);
+      }
+    } catch (sbErr) {
+      console.warn('Supabase network notice:', sbErr);
+    }
+
     return updated;
   });
 }

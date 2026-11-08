@@ -27,6 +27,8 @@ import {
   Heart,
   Edit3,
   Camera,
+  Database,
+  Copy,
 } from 'lucide-react';
 import {
   Product,
@@ -718,6 +720,62 @@ export default function AdminPage() {
       }
     } catch (err: any) {
       alert('সার্ভার যোগাযোগে ত্রুটি: ' + err.message);
+    }
+  };
+
+  // Supabase Status & Cloud Sync State
+  const [supabaseStatus, setSupabaseStatus] = useState<{
+    online: boolean;
+    tableReady: boolean;
+    synced: boolean;
+    lastUpdated?: string | null;
+    error?: string | null;
+  } | null>(null);
+  const [checkingSupabase, setCheckingSupabase] = useState(false);
+  const [syncingSupabase, setSyncingSupabase] = useState(false);
+
+  const handleCheckSupabase = async () => {
+    setCheckingSupabase(true);
+    try {
+      const res = await fetch('/api/store', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'CHECK_SUPABASE' }),
+      });
+      const data = await res.json();
+      if (data.ok && data.status) {
+        setSupabaseStatus(data.status);
+      }
+    } catch (err: any) {
+      alert('Supabase স্ট্যাটাস চেক ত্রুটি: ' + err.message);
+    } finally {
+      setCheckingSupabase(false);
+    }
+  };
+
+  const handleSyncSupabase = async () => {
+    setSyncingSupabase(true);
+    const currentPass = getActivePass();
+    try {
+      const res = await fetch('/api/store', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'SYNC_SUPABASE',
+          password: currentPass,
+        }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        showToast('✓ সফলভাবে Supabase ক্লাউড ডেটাবেজে সম্পূর্ণ তথ্য সিঙ্ক হয়েছে!');
+        handleCheckSupabase();
+      } else {
+        alert(data.error || 'সিঙ্ক ব্যর্থ হয়েছে। Supabase-এ app_state টেবিল তৈরি আছে কিনা নিশ্চিত করুন।');
+      }
+    } catch (err: any) {
+      alert('সার্ভার যোগাযোগে ত্রুটি: ' + err.message);
+    } finally {
+      setSyncingSupabase(false);
     }
   };
 
@@ -1786,6 +1844,120 @@ export default function AdminPage() {
                     </button>
                   </div>
                 </form>
+              </div>
+
+              {/* Supabase Cloud Database Status & 1-Click Sync */}
+              <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                      <Database className="w-5 h-5 text-emerald-600" />
+                      <span>Supabase ক্লাউড ডেটাবেজ স্ট্যাটাস (Vercel Production)</span>
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Vercel সার্ভারলেস ডিপ্লয়মেন্টে পারসিস্টেন্ট ক্লাউড স্টোরেজের জন্য Supabase ইন্টিগ্রেশন
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={handleCheckSupabase}
+                      disabled={checkingSupabase}
+                      className="px-3.5 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold transition flex items-center gap-1.5"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${checkingSupabase ? 'animate-spin' : ''}`} />
+                      <span>{checkingSupabase ? 'চেক হচ্ছে...' : 'স্ট্যাটাস যাচাই'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleSyncSupabase}
+                      disabled={syncingSupabase}
+                      className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
+                    >
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>{syncingSupabase ? 'সিঙ্ক হচ্ছে...' : 'ক্লাউডে সম্পূর্ণ ডেটা সিঙ্ক করুন'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Status Result Display */}
+                {supabaseStatus && (
+                  <div
+                    className={`p-4 rounded-2xl border text-xs space-y-2 ${
+                      supabaseStatus.tableReady && supabaseStatus.synced
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                        : supabaseStatus.online && !supabaseStatus.tableReady
+                        ? 'bg-amber-50 border-amber-200 text-amber-900'
+                        : 'bg-red-50 border-red-200 text-red-900'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between font-bold">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`w-2.5 h-2.5 rounded-full ${
+                            supabaseStatus.tableReady && supabaseStatus.synced
+                              ? 'bg-emerald-500 animate-pulse'
+                              : supabaseStatus.online && !supabaseStatus.tableReady
+                              ? 'bg-amber-500'
+                              : 'bg-red-500'
+                          }`}
+                        />
+                        <span>
+                          {supabaseStatus.tableReady && supabaseStatus.synced
+                            ? '✓ Supabase ক্লাউড ডেটাবেজ সম্পূর্ণ সক্রিয় ও লাইভ সিঙ্কড!'
+                            : supabaseStatus.online && !supabaseStatus.tableReady
+                            ? '⚠️ Supabase প্রজেক্ট অনলাইনে আছে, কিন্তু app_state টেবিল তৈরি করা হয়নি'
+                            : '✕ Supabase সংযোগে সমস্যা'}
+                        </span>
+                      </div>
+                      {supabaseStatus.lastUpdated && (
+                        <span className="text-[11px] opacity-80">
+                          সর্বশেষ আপডেট: {new Date(supabaseStatus.lastUpdated).toLocaleTimeString('bn-BD')}
+                        </span>
+                      )}
+                    </div>
+
+                    {supabaseStatus.error && (
+                      <p className="text-[11px] font-medium opacity-90">{supabaseStatus.error}</p>
+                    )}
+
+                    {!supabaseStatus.tableReady && (
+                      <div className="pt-2 border-t border-amber-200/60 space-y-2">
+                        <p className="font-bold text-[11px]">
+                          💡 Supabase ড্যাশবোর্ডে গিয়ে এই ৩ লাইনের SQL রান করুন (SQL Editor):
+                        </p>
+                        <div className="relative bg-slate-900 text-emerald-300 p-3 rounded-xl font-mono text-[11px] overflow-x-auto">
+                          <pre>{`CREATE TABLE IF NOT EXISTS public.app_state (
+    key text PRIMARY KEY,
+    data jsonb NOT NULL,
+    updated_at timestamptz DEFAULT now()
+);
+ALTER TABLE public.app_state ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow anon all" ON public.app_state FOR ALL USING (true) WITH CHECK (true);`}</pre>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(`CREATE TABLE IF NOT EXISTS public.app_state (
+    key text PRIMARY KEY,
+    data jsonb NOT NULL,
+    updated_at timestamptz DEFAULT now()
+);
+ALTER TABLE public.app_state ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow anon all" ON public.app_state FOR ALL USING (true) WITH CHECK (true);`);
+                              showToast('✓ SQL কোড ক্লিপবোর্ডে কপি হয়েছে!');
+                            }}
+                            className="absolute top-2 right-2 px-2.5 py-1 rounded bg-white/20 hover:bg-white/30 text-white text-[10px] font-bold flex items-center gap-1 transition"
+                          >
+                            <Copy className="w-3 h-3" />
+                            <span>কপি করুন</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Dynamic Delivery Charges, WhatsApp & Passwords */}
