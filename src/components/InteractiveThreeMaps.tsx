@@ -15,21 +15,74 @@ import {
   Image as ImageIcon,
   ChevronRight,
   Share2,
-  X,
-  Compass,
-  Layers,
-  ZoomIn,
-  ZoomOut,
-  RotateCcw,
-  Camera,
-  ExternalLink,
-  Flame,
 } from 'lucide-react';
 import { RU_CAMPUS_PLACES, RU_CAMPUS_VIEWBOX, RuPlaceSvgData } from '@/lib/ruCampusSvg';
 import { RAJSHAHI_PDF_REGIONS, RAJSHAHI_PDF_MAP_VIEWBOX, RajshahiPdfRegionData } from '@/lib/rajshahiPdfRegions';
 import { RAJSHAHI_DISTRICT_SVGS, RAJSHAHI_VIEWBOX } from '@/lib/rajshahiDistrictsSvg';
 import { DIVISION_DISTRICT_META, DIVISION_SPOTS, DivisionSpotItem } from '@/lib/divisionSpotsData';
 import { MapSpotCustomData, DetailBlock } from '@/types';
+import CampusMapExplorer from '@/components/CampusMapExplorer';
+
+// RU Campus groupings
+const RU_CATEGORIES = [
+  {
+    title: 'একাডেমিক ভবন ও অনুষদসমূহ',
+    ids: [
+      'agri_faculty',
+      'fine_arts',
+      'science_complex',
+      'first_science',
+      'second_science',
+      'fourth_science',
+      'central_library',
+      'admin_building',
+      'varendra_research',
+    ],
+  },
+  {
+    title: 'আবাসিক হলসমূহ (ছাত্র ও ছাত্রী হল)',
+    ids: [
+      'rokeya_hall',
+      'mannujan_hall',
+      'taposhi_rabeya',
+      'begum_khaleda',
+      'rahamatunnesa_hall',
+      'zia_hall',
+      'habibur_hall',
+      'motihar_hall',
+      'madar_bux_hall',
+      'sohrawardi_hall',
+      'bangabandhu_hall',
+      'shamsuzzoha_hall',
+      'sher_e_bangla_hall',
+    ],
+  },
+  {
+    title: 'ঐতিহাসিক চত্বর, গেট ও দর্শনীয় স্থান',
+    ids: [
+      'paris_road',
+      'shaheed_minar',
+      'tukitaki_chottor',
+      'shabash_bd',
+      'tscc',
+      'juberi_bhavan',
+      'ru_stadium',
+      'main_gate',
+      'kazla_gate',
+      'binodpur_gate',
+      'ruet_junction',
+      'botanical_garden',
+      'moti_lake_north',
+      'moti_lake_south',
+      'ibn_sina_medical',
+      'ru_press',
+      'ru_central_mosque',
+      'teachers_quarters',
+      'badminton_gym',
+      'charukola_gate',
+    ],
+  },
+];
 
 export default function InteractiveThreeMaps() {
   // 1 -> 2 -> 3 tab order (Default: RU Campus)
@@ -40,42 +93,18 @@ export default function InteractiveThreeMaps() {
   const [selectedPdfId, setSelectedPdfId] = useState<string>('pdf_ru');
   const [selectedDistrictId, setSelectedDistrictId] = useState<string>('rajshahi');
 
-  // Visited states (saved in localStorage)
+  // Visited states
   const [visitedRuIds, setVisitedRuIds] = useState<string[]>([]);
   const [visitedPdfIds, setVisitedPdfIds] = useState<string[]>([]);
   const [visitedDivSpotIds, setVisitedDivSpotIds] = useState<string[]>([]);
 
-  // Zoom & Pan state for Stage 1 Map
-  const [ruMapZoom, setRuMapZoom] = useState(1);
+  // Search filter
+  const [ruSearch, setRuSearch] = useState('');
 
-  // Hover Tooltip State
-  const [tooltip, setTooltip] = useState<{
-    x: number;
-    y: number;
-    text: string;
-    sub?: string;
-  } | null>(null);
-
-  // Unified Modern Bottom Sheet Drawer State (for all 3 maps)
-  const [activeDrawer, setActiveDrawer] = useState<{
-    id: string;
-    stage: 'ru_campus' | 'rajshahi_district' | 'division';
-    nameBn: string;
-    nameEn?: string;
-    rankNo?: string;
-    categoryBn: string;
-    imageUrl: string;
-    desc: string;
-    traffic?: string;
-    gate?: string;
-    isVisited: boolean;
-    onToggleVisit: () => void;
-  } | null>(null);
-
-  // Custom data loaded from DB
+  // Custom data loaded from DB (multiple images & multiple title+details blocks)
   const [customSpotsMap, setCustomSpotsMap] = useState<Record<string, MapSpotCustomData>>({});
 
-  // Full-page detail view (NO cramped floating popup)
+  // Full-page detail view (NO floating modal)
   const [fullPageDetail, setFullPageDetail] = useState<{
     spotId: string;
     nameBn: string;
@@ -87,7 +116,7 @@ export default function InteractiveThreeMaps() {
   } | null>(null);
   const [activeGalleryIdx, setActiveGalleryIdx] = useState(0);
 
-  // Certificate / Share card modal
+  // Certificate / Share card modal & mandatory name lock
   const [showShareModal, setShowShareModal] = useState(false);
   const [explorerName, setExplorerName] = useState('');
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -135,7 +164,7 @@ export default function InteractiveThreeMaps() {
     localStorage.setItem('ru_visited_division_v2', JSON.stringify(next));
   };
 
-  // Dedicated Full-Page Spot Details Handler (Never cramped popup)
+  // Dedicated Full-Page Spot Details Handler (No Floating Modal)
   const openSpotFullPage = (
     spotId: string,
     defaultName: string,
@@ -178,30 +207,7 @@ export default function InteractiveThreeMaps() {
     currentDistrictSpots.length > 0
       ? Math.round((currentDistrictVisitedCount / currentDistrictSpots.length) * 100)
       : 0;
-
-  // Active stage metrics
-  const activeMetrics =
-    stage === 'ru_campus'
-      ? {
-          title: 'রাবি ক্যাম্পাস পরিক্রমা',
-          countText: `${visitedRuIds.length} / ৪২টি স্থান`,
-          percent: ruPercent,
-          rankLabel:
-            ruPercent >= 80 ? '🏆 ক্যাম্পাস মাস্টার এক্সপ্লোরার' : ruPercent >= 40 ? '🌿 মতিহার পরিব্রাজক' : '🚶 প্যারিস রোড পথিক',
-        }
-      : stage === 'rajshahi_district'
-      ? {
-          title: 'রাজশাহী জেলা পরিক্রমা',
-          countText: `${visitedPdfIds.length} / ২২টি অঞ্চল`,
-          percent: pdfPercent,
-          rankLabel: pdfPercent >= 70 ? '👑 বরেন্দ্র হেরিটেজ অভিযাত্রী' : '🌊 পদ্মা পাড়ের পরিব্রাজক',
-        }
-      : {
-          title: 'রাজশাহী বিভাগ পরিক্রমা',
-          countText: `${visitedDivSpotIds.length} / ${DIVISION_SPOTS.length}টি স্পট`,
-          percent: Math.round((visitedDivSpotIds.length / DIVISION_SPOTS.length) * 100),
-          rankLabel: '🗺️ উত্তরবঙ্গ ভ্রমণ চ্যাম্পিয়ন',
-        };
+  const totalDivisionPercent = Math.round((visitedDivSpotIds.length / DIVISION_SPOTS.length) * 100);
 
   // Certificate / Share card generation
   const handleDownloadCertificate = () => {
@@ -240,7 +246,9 @@ export default function InteractiveThreeMaps() {
         ? 'রাজশাহী বিশ্ববিদ্যালয় ক্যাম্পাস পরিক্রমা (৪২টি স্থান)'
         : stage === 'rajshahi_district'
         ? 'রাজশাহী জেলা ভ্রমণ সনদ (২২টি অঞ্চল)'
-        : 'রাজশাহী বিভাগ ভ্রমণ সনদ';
+        : `রাজশাহী বিভাগ ও ${
+            DIVISION_DISTRICT_META.find((d) => d.id === selectedDistrictId)?.nameBn || 'জেলা'
+          } ভ্রমণ সনদ`;
     ctx.fillText(mapTitle, 540, 195);
 
     // Explorer Name
@@ -249,6 +257,15 @@ export default function InteractiveThreeMaps() {
     ctx.fillText(explorerName.trim(), 540, 305);
 
     // Metric Box
+    const activePct =
+      stage === 'ru_campus' ? ruPercent : stage === 'rajshahi_district' ? pdfPercent : currentDistrictPercent;
+    const activeCountText =
+      stage === 'ru_campus'
+        ? `${visitedRuIds.length} / ৪২টি ক্যাম্পাস স্পট সম্পন্ন`
+        : stage === 'rajshahi_district'
+        ? `${visitedPdfIds.length} / ২২টি অঞ্চল সম্পন্ন`
+        : `${currentDistrictVisitedCount} / ${currentDistrictSpots.length}টি দর্শনীয় স্থান সম্পন্ন`;
+
     ctx.fillStyle = 'rgba(250, 204, 21, 0.12)';
     ctx.fillRect(190, 360, 700, 220);
     ctx.strokeStyle = '#facc15';
@@ -257,11 +274,11 @@ export default function InteractiveThreeMaps() {
 
     ctx.fillStyle = '#facc15';
     ctx.font = 'bold 90px sans-serif';
-    ctx.fillText(`${activeMetrics.percent}% ভ্রমণ সম্পন্ন`, 540, 480);
+    ctx.fillText(`${activePct}% ভ্রমণ সম্পন্ন`, 540, 480);
 
     ctx.fillStyle = '#e2e8f0';
     ctx.font = 'bold 30px sans-serif';
-    ctx.fillText(activeMetrics.countText, 540, 545);
+    ctx.fillText(activeCountText, 540, 545);
 
     // Highlights
     ctx.fillStyle = '#ffffff';
@@ -273,7 +290,7 @@ export default function InteractiveThreeMaps() {
         ? RU_CAMPUS_PLACES.filter((p) => visitedRuIds.includes(p.id)).map((p) => `✓ ${p.shortBn}`)
         : stage === 'rajshahi_district'
         ? RAJSHAHI_PDF_REGIONS.filter((r) => visitedPdfIds.includes(r.id)).map((r) => `✓ ${r.nameBn}`)
-        : DIVISION_SPOTS.filter((s) => visitedDivSpotIds.includes(s.id)).map((s) => `✓ ${s.nameBn}`);
+        : currentDistrictSpots.filter((s) => visitedDivSpotIds.includes(s.id)).map((s) => `✓ ${s.nameBn}`);
 
     ctx.fillStyle = '#a7f3d0';
     ctx.font = '24px sans-serif';
@@ -281,573 +298,422 @@ export default function InteractiveThreeMaps() {
       ctx.fillText('এখনও কোনো স্থান টিক দেওয়া হয়নি', 540, 740);
     } else {
       visitedNames.slice(0, 10).forEach((name, idx) => {
-        const x = idx < 5 ? 320 : 760;
-        const y = 730 + (idx % 5) * 60;
-        ctx.fillText(name, x, y);
+        ctx.fillText(name, 540, 735 + idx * 42);
       });
     }
 
     // Footer
     ctx.fillStyle = '#94a3b8';
     ctx.font = '22px sans-serif';
-    ctx.fillText(`ইস্যু তারিখ: ${new Date().toLocaleDateString('bn-BD')} • ruinsider.com`, 540, 1220);
+    ctx.fillText('ruinsiders.vercel.app • রাজশাহী বিশ্ববিদ্যালয় অফিশিয়াল ক্যাম্পাস পোর্টাল', 540, 1255);
 
-    const dataUrl = canvas.toDataURL('image/png');
     const link = document.createElement('a');
-    link.download = `RU_Explorer_${explorerName.trim().replace(/\s+/g, '_')}.png`;
-    link.href = dataUrl;
+    link.download = `ru-insiders-explorer-${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
     link.click();
   };
 
   // ============================================================================
-  // FULL PAGE DEDICATED VIEW (Strict Mobile Ergonomics: No Cramped Popup)
+  // 1. DEDICATED FULL-PAGE DETAILS VIEW (No Floating Modal)
   // ============================================================================
   if (fullPageDetail) {
+    const isCurrentlyVisited =
+      visitedRuIds.includes(fullPageDetail.spotId) ||
+      visitedPdfIds.includes(fullPageDetail.spotId) ||
+      visitedDivSpotIds.includes(fullPageDetail.spotId);
+
     return (
-      <div className="min-h-screen bg-slate-50 py-6 px-4 sm:px-6 lg:px-8 space-y-6 max-w-5xl mx-auto">
-        {/* Back Button */}
-        <button
-          onClick={() => setFullPageDetail(null)}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 font-bold text-sm hover:bg-slate-100 transition shadow-sm"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>← ম্যাপে ফিরে যান</span>
-        </button>
+      <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+        {/* Top Action Bar with Back Button */}
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+          <button
+            onClick={() => setFullPageDetail(null)}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 transition"
+          >
+            <ArrowLeft className="w-4 h-4" /> ← ম্যাপে ফিরে যান
+          </button>
 
-        {/* Header Hero Card */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <span className="bg-emerald-100 text-emerald-800 text-xs font-black px-3 py-1 rounded-full">
-                অফিসিয়াল স্পট নির্দেশিকা
-              </span>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mt-2">
-                {fullPageDetail.nameBn}
-              </h1>
-              <p className="text-sm text-slate-500 mt-1">{fullPageDetail.subtitleBn}</p>
-            </div>
+          <button
+            onClick={fullPageDetail.onToggleVisit}
+            className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-extrabold transition ${
+              isCurrentlyVisited
+                ? 'bg-emerald-600 text-white shadow-md'
+                : 'bg-amber-400 text-slate-950 hover:bg-amber-500'
+            }`}
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            {isCurrentlyVisited ? '✓ আমি এই জায়গা ঘুরেছি (সম্পন্ন)' : 'আমি এই জায়গা ঘুরেছি (টিক দিন)'}
+          </button>
+        </div>
 
-            <button
-              onClick={() => {
-                fullPageDetail.onToggleVisit();
-                setFullPageDetail({ ...fullPageDetail, isVisited: !fullPageDetail.isVisited });
-              }}
-              className={`px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-black transition flex items-center gap-2 shadow-sm ${
-                fullPageDetail.isVisited
-                  ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                  : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
-              }`}
-            >
-              <Check className="w-4 h-4" />
-              <span>{fullPageDetail.isVisited ? '✓ এই স্থানে ভ্রমণ করেছি' : 'এখানে ঘুরেছি? টিক দিন'}</span>
-            </button>
+        {/* Spot Title Card */}
+        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+          <span className="inline-block bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold px-3 py-1 rounded-full mb-3">
+            সম্পূর্ণ চিত্রশালা ও বিবরণ
+          </span>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">{fullPageDetail.nameBn}</h1>
+          <p className="text-sm sm:text-base text-slate-500 mt-1">{fullPageDetail.subtitleBn}</p>
+        </div>
+
+        {/* Multi-Image Gallery */}
+        <div className="bg-white rounded-3xl border border-slate-200 p-4 sm:p-6 shadow-sm space-y-4">
+          <div className="w-full aspect-[16/9] rounded-2xl overflow-hidden bg-slate-100 border border-slate-200">
+            <img
+              src={fullPageDetail.images[activeGalleryIdx] || fullPageDetail.images[0]}
+              alt={fullPageDetail.nameBn}
+              className="w-full h-full object-cover"
+            />
           </div>
 
-          {/* Image Gallery */}
-          <div className="space-y-3 pt-4 border-t border-slate-100">
-            <div className="aspect-video w-full rounded-2xl overflow-hidden bg-slate-900 relative shadow-inner">
-              <img
-                src={fullPageDetail.images[activeGalleryIdx] || fullPageDetail.images[0]}
-                alt={fullPageDetail.nameBn}
-                className="w-full h-full object-cover"
-              />
-            </div>
-
-            {fullPageDetail.images.length > 1 && (
-              <div className="flex items-center gap-2 overflow-x-auto pb-2">
+          {fullPageDetail.images.length > 1 && (
+            <div>
+              <p className="text-xs font-bold text-slate-600 mb-2 flex items-center gap-1.5">
+                <ImageIcon className="w-4 h-4 text-blue-600" /> এই স্থানের আরও ছবি ({fullPageDetail.images.length}টি ছবি):
+              </p>
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
                 {fullPageDetail.images.map((imgUrl, idx) => (
                   <button
                     key={idx}
                     onClick={() => setActiveGalleryIdx(idx)}
-                    className={`w-20 h-14 rounded-xl overflow-hidden border-2 shrink-0 transition ${
-                      activeGalleryIdx === idx ? 'border-amber-400 ring-2 ring-amber-300' : 'border-slate-200 opacity-70'
+                    className={`aspect-[16/10] rounded-xl overflow-hidden border-2 transition ${
+                      activeGalleryIdx === idx
+                        ? 'border-blue-600 ring-2 ring-blue-300'
+                        : 'border-slate-200 opacity-75 hover:opacity-100'
                     }`}
                   >
-                    <img src={imgUrl} alt={`Thumb ${idx + 1}`} className="w-full h-full object-cover" />
+                    <img src={imgUrl} alt="" className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
-        {/* Detail Sections */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
-          <h2 className="text-lg font-black text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-amber-500" />
-            <span>স্থানটির ইতিহাস, তথ্য ও তাৎপর্য</span>
-          </h2>
+        {/* Unlimited Title + Details Blocks */}
+        <div className="space-y-4">
+          {fullPageDetail.detailSections.map((sec, idx) => (
+            <div key={sec.id || idx} className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+              <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 border-b border-slate-100 pb-3 mb-3">
+                {sec.title}
+              </h2>
+              <p className="text-sm sm:text-base text-slate-700 leading-relaxed whitespace-pre-line">
+                {sec.content}
+              </p>
+            </div>
+          ))}
+        </div>
 
-          <div className="space-y-5">
-            {fullPageDetail.detailSections.map((sec, idx) => (
-              <div key={sec.id || idx} className="space-y-1.5 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                <h3 className="text-sm sm:text-base font-extrabold text-slate-900">{sec.title}</h3>
-                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line">
-                  {sec.content}
-                </p>
-              </div>
-            ))}
-          </div>
+        {/* Bottom Back Button */}
+        <div className="text-center pt-4">
+          <button
+            onClick={() => setFullPageDetail(null)}
+            className="px-6 py-3 rounded-xl bg-slate-900 text-white font-bold text-sm hover:bg-slate-800 transition"
+          >
+            ← ম্যাপে ফিরে যান
+          </button>
         </div>
       </div>
     );
   }
 
-  // ============================================================================
-  // MAIN VIEWPORT: UNIFIED 3-STAGE INTERACTIVE MAP
-  // ============================================================================
+  // Active Spot Selected Data for Summary Cards
+  const activeRuPlace = RU_CAMPUS_PLACES.find((p) => p.id === selectedRuId) || RU_CAMPUS_PLACES[0];
+  const activePdfRegion = RAJSHAHI_PDF_REGIONS.find((r) => r.id === selectedPdfId) || RAJSHAHI_PDF_REGIONS[0];
+  const activeDistrictMeta = DIVISION_DISTRICT_META.find((d) => d.id === selectedDistrictId) || DIVISION_DISTRICT_META[0];
+
   return (
-    <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 space-y-5 relative">
-      {/* 1. Unified Progress & Trophy Banner */}
-      <div className="bg-gradient-to-r from-emerald-950 via-emerald-900 to-slate-900 text-white rounded-3xl p-5 sm:p-7 shadow-lg border border-emerald-800/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
-        <div className="space-y-2 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="bg-amber-400 text-slate-950 font-black text-xs px-3 py-1 rounded-full shadow-sm">
-              {activeMetrics.rankLabel}
-            </span>
-            <span className="text-emerald-200 text-xs font-bold">
-              {activeMetrics.title}
-            </span>
-          </div>
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 py-6 space-y-6">
+      <canvas ref={canvasRef} className="hidden" />
 
-          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
-            <Compass className="w-6 h-6 text-amber-300" />
-            <span>রাবি ক্যাম্পাস ও রাজশাহী ইন্টারঅ্যাক্টিভ ভেক্টর ম্যাপ</span>
-          </h2>
-
-          {/* Unified Progress Bar */}
-          <div className="space-y-1 max-w-md pt-1">
-            <div className="flex items-center justify-between text-xs font-bold text-emerald-200">
-              <span>ভ্রমণ অগ্রগতি: {activeMetrics.countText}</span>
-              <span className="text-amber-300 font-black">{activeMetrics.percent}% সম্পন্ন</span>
-            </div>
-            <div className="w-full bg-black/40 rounded-full h-3 p-0.5 overflow-hidden border border-emerald-700/60">
-              <div
-                className="bg-gradient-to-r from-emerald-400 to-amber-300 h-full rounded-full transition-all duration-500 shadow-sm"
-                style={{ width: `${activeMetrics.percent}%` }}
-              />
-            </div>
+      {/* Page Title & Certificate Call to Action */}
+      <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold px-2.5 py-0.5 rounded-full">
+              ইন্টারঅ্যাক্টিভ এক্সপ্লোরার
+            </span>
+            <span className="text-xs text-slate-500 font-semibold">• ৩টি স্তরের ডিজিটাল মানচিত্র</span>
           </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+            রাজশাহী বিশ্ববিদ্যালয় ও বিভাগীয় পর্যটন মানচিত্র
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-600 mt-1">
+            আপনি কতটুকু ঘুরলেন? যে স্থানগুলো ভ্রমণ করেছেন সেগুলোতে টিক দিয়ে ভ্রমণ সনদ ও শেয়ার কার্ড ডাউনলোড করুন।
+          </p>
         </div>
 
         <button
           onClick={() => setShowShareModal(true)}
-          className="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs sm:text-sm shadow-md flex items-center gap-2 shrink-0 transition"
+          className="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-extrabold text-sm shadow-md flex items-center gap-2 shrink-0 transition"
         >
-          <Trophy className="w-4 h-4 text-slate-950" />
+          <Trophy className="w-5 h-5 text-slate-950" />
           <span>ভ্রমণ সনদ ও শেয়ার কার্ড →</span>
         </button>
       </div>
 
-      {/* 2. Unified 3-Stage Switcher Tabs (1 -> 2 -> 3) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 p-1.5 bg-slate-200/90 rounded-2xl shadow-inner">
+      {/* Tabs in Exact Priority Order: 1 -> 2 -> 3 */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 p-1.5 bg-slate-200/80 rounded-2xl">
         <button
-          type="button"
-          onClick={() => {
-            setStage('ru_campus');
-            setActiveDrawer(null);
-          }}
-          className={`py-3 px-4 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 transition cursor-pointer ${
+          onClick={() => setStage('ru_campus')}
+          className={`py-3 px-4 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 transition ${
             stage === 'ru_campus'
               ? 'bg-emerald-800 text-white shadow-md'
               : 'text-slate-700 hover:bg-white/60'
           }`}
         >
-          <span>🎓 ১. রাবি ক্যাম্পাস ({visitedRuIds.length}/৪২ স্পট)</span>
+          <span>🎓 ১. রাবি ক্যাম্পাস (৩ডি ক্যাম্পাস ম্যাপ)</span>
         </button>
 
         <button
-          type="button"
-          onClick={() => {
-            setStage('rajshahi_district');
-            setActiveDrawer(null);
-          }}
-          className={`py-3 px-4 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 transition cursor-pointer ${
+          onClick={() => setStage('rajshahi_district')}
+          className={`py-3 px-4 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 transition ${
             stage === 'rajshahi_district'
               ? 'bg-emerald-800 text-white shadow-md'
               : 'text-slate-700 hover:bg-white/60'
           }`}
         >
-          <span>🏙️ ২. রাজশাহী জেলা ({visitedPdfIds.length}/২২ অঞ্চল)</span>
+          <span>🏙️ ২. রাজশাহী জেলা ({visitedPdfIds.length}/২২)</span>
         </button>
 
         <button
-          type="button"
-          onClick={() => {
-            setStage('division');
-            setActiveDrawer(null);
-          }}
-          className={`py-3 px-4 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 transition cursor-pointer ${
+          onClick={() => setStage('division')}
+          className={`py-3 px-4 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 transition ${
             stage === 'division'
               ? 'bg-emerald-800 text-white shadow-md'
               : 'text-slate-700 hover:bg-white/60'
           }`}
         >
-          <span>🗺️ ৩. রাজশাহী বিভাগ ({visitedDivSpotIds.length}/{DIVISION_SPOTS.length} স্পট)</span>
+          <span>🗺️ ৩. রাজশাহী বিভাগ ({visitedDivSpotIds.length}/{DIVISION_SPOTS.length})</span>
         </button>
       </div>
 
       {/* ============================================================================ */}
-      {/* STAGE 1: RU CAMPUS 42 CONTIGUOUS TERRITORIES & ROAD NETWORK (Unseen RU Map) */}
+      {/* STAGE 1: RU CAMPUS (3D / 2D MASTERPLAN EXPLORER) */}
       {/* ============================================================================ */}
       {stage === 'ru_campus' && (
-        <div className="relative bg-[#f6f4ec] rounded-3xl border border-stone-300 shadow-xl overflow-hidden p-2 sm:p-4">
-          {/* Canvas Sub-Header */}
-          <div className="flex flex-wrap items-center justify-between pb-2 mb-2 border-b border-stone-300/80 text-xs px-2 gap-2">
-            <span className="font-extrabold text-stone-800 flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-emerald-700" />
-              <span>রাবি ক্যাম্পাসের ৪২টি টেরিটরি ও সড়ক নেটওয়ার্ক • যেকোনো স্থানে স্পর্শ করে বিস্তারিত ও ছবি দেখুন</span>
-            </span>
+        <div className="w-full">
+          <CampusMapExplorer />
+        </div>
+      )}
 
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => setRuMapZoom((z) => Math.min(z + 0.2, 2.2))}
-                className="p-1.5 rounded-lg bg-white border border-stone-300 text-stone-700 hover:bg-stone-100 shadow-sm"
-                title="বড় করুন"
-              >
-                <ZoomIn className="w-3.5 h-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setRuMapZoom((z) => Math.max(z - 0.2, 0.8))}
-                className="p-1.5 rounded-lg bg-white border border-stone-300 text-stone-700 hover:bg-stone-100 shadow-sm"
-                title="ছোট করুন"
-              >
-                <ZoomOut className="w-3.5 h-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setRuMapZoom(1)}
-                className="p-1.5 rounded-lg bg-white border border-stone-300 text-stone-700 hover:bg-stone-100 shadow-sm"
-                title="রিসেট ভিউ"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-              </button>
+      {/* ============================================================================ */}
+      {/* STAGE 2: RAJSHAHI DISTRICT (22 REGIONS) */}
+      {/* ============================================================================ */}
+      {stage === 'rajshahi_district' && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Left Column: Progress & Region Chips */}
+          <div className="lg:col-span-5 space-y-4">
+            <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
+                <span>রাজশাহী জেলা পরিক্রমা (২২ অঞ্চল)</span>
+                <span className="text-emerald-600 font-extrabold">{pdfPercent}% সম্পন্ন</span>
+              </div>
+              <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                <div
+                  className="bg-emerald-500 h-full rounded-full transition-all duration-500"
+                  style={{ width: `${pdfPercent}%` }}
+                />
+              </div>
+              <p className="text-[11px] text-slate-500 mt-2">
+                ২২টি পুলিশি অঞ্চল ও দর্শনীয় এলাকার মধ্যে {visitedPdfIds.length}টি সম্পন্ন হয়েছে।
+              </p>
+            </div>
+
+            {/* Selected Region Preview Card */}
+            {activePdfRegion && (
+              <div className="bg-white rounded-2xl border-2 border-amber-400 p-4 shadow-sm space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-20 h-20 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
+                    <img
+                      src={customSpotsMap[activePdfRegion.id]?.images?.[0] || activePdfRegion.imageUrl}
+                      alt={activePdfRegion.nameBn}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                      অঞ্চল #{activePdfRegion.rankNo}
+                    </span>
+                    <h3 className="text-sm font-extrabold text-slate-900 truncate mt-1">
+                      {activePdfRegion.nameBn}
+                    </h3>
+                    <p className="text-xs text-slate-500 line-clamp-2 mt-0.5">
+                      {activePdfRegion.descriptionBn}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                  <button
+                    onClick={() => togglePdfRegion(activePdfRegion.id)}
+                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                      visitedPdfIds.includes(activePdfRegion.id)
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
+                    }`}
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    {visitedPdfIds.includes(activePdfRegion.id) ? 'ঘুরেছি ✓' : 'আমি ঘুরেছি'}
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      openSpotFullPage(
+                        activePdfRegion.id,
+                        activePdfRegion.nameBn,
+                        activePdfRegion.nameEn,
+                        activePdfRegion.imageUrl,
+                        activePdfRegion.descriptionBn,
+                        visitedPdfIds.includes(activePdfRegion.id),
+                        () => togglePdfRegion(activePdfRegion.id)
+                      )
+                    }
+                    className="py-2 px-3.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold transition flex items-center gap-1"
+                  >
+                    <Eye className="w-3.5 h-3.5" /> বিস্তারিত ও ছবি
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Region List */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-2 max-h-[520px] overflow-y-auto">
+              <h4 className="text-xs font-bold text-slate-800 pb-2 border-b border-slate-100">
+                সকল ২২টি অঞ্চল তালিকা
+              </h4>
+              <div className="space-y-1.5">
+                {RAJSHAHI_PDF_REGIONS.map((region) => {
+                  const isSelected = selectedPdfId === region.id;
+                  const isVisited = visitedPdfIds.includes(region.id);
+                  return (
+                    <div
+                      key={region.id}
+                      onClick={() => setSelectedPdfId(region.id)}
+                      className={`p-2.5 rounded-xl text-left border cursor-pointer transition flex items-center justify-between gap-2 ${
+                        isSelected
+                          ? 'border-amber-400 bg-amber-50/60 ring-2 ring-amber-300'
+                          : isVisited
+                          ? 'border-emerald-200 bg-emerald-50/40'
+                          : 'border-slate-200 bg-white hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <span className="text-[10px] font-extrabold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                          {region.rankNo}
+                        </span>
+                        <span className="text-xs font-bold text-slate-800 truncate">
+                          {region.nameBn}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          togglePdfRegion(region.id);
+                        }}
+                        className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 border transition ${
+                          isVisited
+                            ? 'bg-emerald-600 border-emerald-600 text-white'
+                            : 'border-slate-300 text-transparent hover:border-slate-400'
+                        }`}
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
-          {/* SVG Canvas */}
-          <div className="w-full aspect-[16/10] sm:aspect-[16/9] min-h-[480px] max-h-[75vh] relative select-none overflow-hidden rounded-2xl bg-[#f6f4ec]">
-            <svg
-              viewBox={RU_CAMPUS_VIEWBOX}
-              className="w-full h-full transition-transform duration-200"
-              style={{ transform: `scale(${ruMapZoom})` }}
-            >
-              <defs>
-                <filter id="ru-territory-shadow" x="-5%" y="-5%" width="110%" height="110%">
-                  <feDropShadow dx="0" dy="4" stdDeviation="5" floodColor="#57534e" floodOpacity="0.18" />
-                </filter>
-              </defs>
+          {/* Right Column: Base Map + 22 Vector Polygons */}
+          <div className="lg:col-span-7 bg-[#022c22] rounded-3xl border border-emerald-900 shadow-xl overflow-hidden p-3 sm:p-5 flex flex-col">
+            <div className="flex items-center justify-between pb-3 text-xs text-emerald-200 font-semibold border-b border-emerald-900">
+              <span className="flex items-center gap-1.5 text-amber-300 font-bold">
+                <Sparkles className="w-4 h-4" /> রাজশাহী জেলা ২২-অঞ্চল ভেক্টর ম্যাপ
+              </span>
+              <span>পদ্মা তীরবর্তী অঞ্চলসহ ২২টি সীমানা</span>
+            </div>
 
-              {/* 1. Base Turf & Railway Base */}
-              <polygon
-                points="72,118 1152,118 1110,535 552,608 106,690 68,355"
-                fill="#ebe6d8"
-                stroke="#d6d0c0"
-                strokeWidth="2"
-                strokeLinejoin="round"
-              />
-              <polygon
-                points="155,18 655,28 635,112 145,112"
-                fill="#ebe6d8"
-                stroke="#d6d0c0"
-                strokeWidth="1.5"
-                strokeLinejoin="round"
+            <div className="w-full aspect-[1/1] relative my-auto rounded-2xl overflow-hidden border border-emerald-950 bg-slate-900">
+              {/* Detailed Background Map Image */}
+              <img
+                src="/campus/rajshahi-district-detailed-map.jpg"
+                alt="Rajshahi District Map"
+                className="absolute inset-0 w-full h-full object-cover opacity-60 pointer-events-none"
               />
 
-              {/* 2. Official Highway & Internal Roads */}
-              {/* Rajshahi-Natore Highway */}
-              <path
-                d="M 95,692 L 395,624 L 555,598 L 785,562 L 1135,524"
-                fill="none"
-                stroke="#15803d"
-                strokeWidth="14"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeOpacity="0.85"
-              />
-              {/* Internal Road Borders */}
-              <path
-                d="
-                  M 480,592 L 480,475
-                  M 254,475 L 895,475
-                  M 254,645 L 254,122
-                  M 450,475 L 450,24
-                  M 450,220 L 968,258
-                  M 658,220 L 658,125
-                  M 756,250 L 756,475
-                  M 895,258 L 895,475
-                  M 254,360 L 450,360
-                  M 450,296 L 605,296
-                  M 968,258 L 1030,45
-                "
-                fill="none"
-                stroke="#cfc7b2"
-                strokeWidth="13"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              {/* Internal Road Fill */}
-              <path
-                d="
-                  M 480,592 L 480,475
-                  M 254,475 L 895,475
-                  M 254,645 L 254,122
-                  M 450,475 L 450,24
-                  M 450,220 L 968,258
-                  M 658,220 L 658,125
-                  M 756,250 L 756,475
-                  M 895,258 L 895,475
-                  M 254,360 L 450,360
-                  M 450,296 L 605,296
-                  M 968,258 L 1030,45
-                "
-                fill="none"
-                stroke="#15803d"
-                strokeWidth="9"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
+              {/* Vector Overlay Polygons */}
+              <svg
+                viewBox={RAJSHAHI_PDF_MAP_VIEWBOX}
+                className="absolute inset-0 w-full h-full"
+                preserveAspectRatio="xMidYMid meet"
+              >
+                {RAJSHAHI_PDF_REGIONS.map((region) => {
+                  const isSelected = selectedPdfId === region.id;
+                  const isVisited = visitedPdfIds.includes(region.id);
 
-              {/* Pedestrian Walkways */}
-              <path
-                d="M 105,128 L 254,128 M 254,128 L 254,250"
-                fill="none"
-                stroke="#0d9488"
-                strokeWidth="5"
-                strokeDasharray="4 5"
-                strokeOpacity="0.75"
-              />
-
-              {/* Zoha Chattar / Roundabout */}
-              <circle cx="480" cy="475" r="14" fill="#15803d" stroke="#ffffff" strokeWidth="2.5" />
-              <circle cx="480" cy="475" r="6" fill="#fef08a" />
-
-              {/* Rajshahi-Dhaka Railway line */}
-              <line x1="55" y1="118" x2="1158" y2="118" stroke="#57534e" strokeWidth="4" strokeOpacity="0.8" />
-              <line x1="55" y1="118" x2="1158" y2="118" stroke="#f7f5ee" strokeWidth="2.2" strokeDasharray="8 8" />
-
-              {/* 3. 42 Contiguous Territory Polygons */}
-              <g filter="url(#ru-territory-shadow)">
-                {RU_CAMPUS_PLACES.map((place) => {
-                  const isSelected = selectedRuId === place.id;
-                  const isVisited = visitedRuIds.includes(place.id);
-                  const custom = customSpotsMap[place.id];
-                  const displayName = custom?.nameBn || place.nameBn;
-                  const shortName = place.shortBn || displayName;
-
-                  let fillColor = '#ded8ca';
-                  if (isVisited) fillColor = '#1f7a44';
-                  else if (isSelected) fillColor = '#fef08a';
+                  let fillColor = '#1e293b';
+                  if (isVisited) {
+                    fillColor = '#059669';
+                  }
 
                   return (
                     <g
-                      key={place.id}
-                      onClick={() => {
-                        setSelectedRuId(place.id);
-                        setActiveDrawer({
-                          id: place.id,
-                          stage: 'ru_campus',
-                          nameBn: displayName,
-                          nameEn: place.nameEn,
-                          rankNo: place.rankNo,
-                          categoryBn: 'রাবি ক্যাম্পাস স্পট',
-                          imageUrl: custom?.images?.[0] || place.imageUrl,
-                          desc: place.descriptionBn,
-                          traffic: place.id === 'paris_road' ? '🚶 পথচারী ও সাইকেল পথ' : '🛺 রিক্সা ও 🚗 কার সড়ক',
-                          isVisited,
-                          onToggleVisit: () => toggleRuSpot(place.id),
-                        });
-                      }}
-                      onMouseEnter={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        setTooltip({
-                          x: rect.left + rect.width / 2,
-                          y: rect.top - 10,
-                          text: displayName,
-                          sub: isVisited ? '✓ ঘুরে দেখা হয়েছে' : 'ক্লিক করে তথ্য দেখুন',
-                        });
-                      }}
-                      onMouseLeave={() => setTooltip(null)}
-                      className="cursor-pointer group transition-all duration-200"
+                      key={region.id}
+                      onClick={() => setSelectedPdfId(region.id)}
+                      className="cursor-pointer transition-all duration-300"
                     >
                       <path
-                        d={place.d}
+                        d={region.d}
                         fill={fillColor}
-                        stroke={isSelected ? '#f59e0b' : '#f6f4ec'}
-                        strokeWidth={isSelected ? 4 : 2}
-                        className="transition-colors duration-200 group-hover:brightness-95"
+                        fillOpacity={isVisited ? 0.75 : 0.45}
+                        stroke={isSelected ? '#facc15' : '#ffffff'}
+                        strokeWidth={isSelected ? 6 : 2}
+                        className={isSelected ? 'glow-selected-polygon' : 'hover:fill-opacity-80'}
                       />
-
-                      {/* Rank Pin Circle */}
+                      {/* Region Rank Label */}
                       <circle
-                        cx={place.center.x}
-                        cy={place.center.y}
-                        r="12"
-                        fill={isVisited ? '#15803d' : '#1e293b'}
+                        cx={region.center.x}
+                        cy={region.center.y}
+                        r="24"
+                        fill={isVisited ? '#059669' : '#0f172a'}
                         stroke="#ffffff"
-                        strokeWidth="2"
+                        strokeWidth="3"
                       />
                       <text
-                        x={place.center.x}
-                        y={place.center.y}
+                        x={region.center.x}
+                        y={region.center.y}
                         textAnchor="middle"
                         dominantBaseline="middle"
                         fill="#ffffff"
-                        fontSize="9.5"
+                        fontSize="20"
                         fontWeight="bold"
-                        className="pointer-events-none"
+                        pointerEvents="none"
                       >
-                        {place.rankNo}
-                      </text>
-
-                      {/* Label */}
-                      <text
-                        x={place.center.x}
-                        y={place.center.y + 19}
-                        textAnchor="middle"
-                        fill="#1c1917"
-                        fontSize="11"
-                        fontWeight="700"
-                        stroke="#ffffff"
-                        strokeWidth="3.5"
-                        strokeLinejoin="round"
-                        paintOrder="stroke fill"
-                        className="pointer-events-none"
-                      >
-                        {shortName}
+                        {region.rankNo}
                       </text>
                     </g>
                   );
                 })}
-              </g>
+              </svg>
+            </div>
 
-              {/* Legend */}
-              <g transform="translate(560, 686)" className="pointer-events-none">
-                <rect x="0" y="0" width="600" height="46" rx="12" fill="#ffffff" fillOpacity="0.95" stroke="#d6d3d1" strokeWidth="1.2" />
-                <circle cx="20" cy="23" r="8" fill="#1f7a44" />
-                <text x="36" y="27" fontSize="11" fontWeight="700" fill="#15803d">ভ্রমণ সম্পন্ন</text>
-
-                <circle cx="140" cy="23" r="8" fill="#ded8ca" stroke="#888" strokeWidth="1" />
-                <text x="156" y="27" fontSize="11" fontWeight="700" fill="#44403c">অদেখা স্থান</text>
-
-                <rect x="250" y="15" width="22" height="15" rx="3" fill="#15803d" />
-                <text x="280" y="27" fontSize="11" fontWeight="700" fill="#166534">🛺 রিক্সা ও কার সড়ক</text>
-
-                <rect x="420" y="15" width="18" height="15" rx="3" fill="#0d9488" strokeDasharray="3 3" />
-                <text x="445" y="27" fontSize="11" fontWeight="700" fill="#115e59">🚶 শুধু পথচারী</text>
-              </g>
-            </svg>
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-3 text-[11px] text-emerald-300 border-t border-emerald-900 mt-2">
+              <span className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-[#059669]" /> ঘোরার পর এলাকা সবুজ হয়ে যাবে
+              </span>
+              <span className="text-amber-300 font-bold">সিলেক্ট করলে উজ্জ্বল হলুদ গ্লো (#facc15)</span>
+            </div>
           </div>
         </div>
       )}
 
       {/* ============================================================================ */}
-      {/* STAGE 2: RAJSHAHI DISTRICT 22 REGIONS */}
-      {/* ============================================================================ */}
-      {stage === 'rajshahi_district' && (
-        <div className="relative bg-[#022c22] rounded-3xl border border-emerald-900 shadow-xl overflow-hidden p-3 sm:p-5 flex flex-col">
-          <div className="flex items-center justify-between pb-3 text-xs text-emerald-200 font-semibold border-b border-emerald-900">
-            <span className="flex items-center gap-1.5 text-amber-300 font-bold">
-              <Sparkles className="w-4 h-4" /> রাজশাহী জেলা ২২-অঞ্চল ভেক্টর ম্যাপ • যেকোনো অঞ্চলে স্পর্শ করে তথ্য দেখুন
-            </span>
-            <span>পদ্মা তীরবর্তী অঞ্চলসহ ২২টি সীমানা ({visitedPdfIds.length}/২২ সম্পন্ন)</span>
-          </div>
-
-          <div className="w-full aspect-[16/10] sm:aspect-[16/9] min-h-[480px] max-h-[75vh] relative rounded-2xl overflow-hidden border border-emerald-950 bg-slate-900 my-auto">
-            {/* Background Map Image */}
-            <img
-              src="/campus/rajshahi-district-detailed-map.jpg"
-              alt="Rajshahi District Map"
-              className="absolute inset-0 w-full h-full object-cover opacity-60 pointer-events-none"
-            />
-
-            {/* Vector Overlay Polygons */}
-            <svg
-              viewBox={RAJSHAHI_PDF_MAP_VIEWBOX}
-              className="absolute inset-0 w-full h-full"
-              preserveAspectRatio="xMidYMid meet"
-            >
-              {RAJSHAHI_PDF_REGIONS.map((region) => {
-                const isSelected = selectedPdfId === region.id;
-                const isVisited = visitedPdfIds.includes(region.id);
-
-                let fillColor = '#1e293b';
-                if (isVisited) fillColor = '#059669';
-
-                return (
-                  <g
-                    key={region.id}
-                    onClick={() => {
-                      setSelectedPdfId(region.id);
-                      setActiveDrawer({
-                        id: region.id,
-                        stage: 'rajshahi_district',
-                        nameBn: region.nameBn,
-                        nameEn: region.nameEn,
-                        rankNo: region.rankNo,
-                        categoryBn: 'রাজশাহী জেলা অঞ্চল',
-                        imageUrl: customSpotsMap[region.id]?.images?.[0] || region.imageUrl,
-                        desc: region.descriptionBn,
-                        isVisited,
-                        onToggleVisit: () => togglePdfRegion(region.id),
-                      });
-                    }}
-                    onMouseEnter={(e) => {
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      setTooltip({
-                        x: rect.left + rect.width / 2,
-                        y: rect.top - 10,
-                        text: region.nameBn,
-                        sub: isVisited ? '✓ ঘুরে দেখা হয়েছে' : 'ক্লিক করে তথ্য দেখুন',
-                      });
-                    }}
-                    onMouseLeave={() => setTooltip(null)}
-                    className="cursor-pointer group transition-all duration-300"
-                  >
-                    <path
-                      d={region.d}
-                      fill={fillColor}
-                      fillOpacity={isVisited ? 0.8 : 0.45}
-                      stroke={isSelected ? '#facc15' : '#ffffff'}
-                      strokeWidth={isSelected ? 6 : 2}
-                      className={isSelected ? 'glow-selected-polygon' : 'hover:fill-opacity-80'}
-                    />
-                    {/* Rank Circle */}
-                    <circle
-                      cx={region.center.x}
-                      cy={region.center.y}
-                      r="24"
-                      fill={isVisited ? '#059669' : '#0f172a'}
-                      stroke="#ffffff"
-                      strokeWidth="3"
-                    />
-                    <text
-                      x={region.center.x}
-                      y={region.center.y}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fill="#ffffff"
-                      fontSize="20"
-                      fontWeight="bold"
-                      className="pointer-events-none"
-                    >
-                      {region.rankNo}
-                    </text>
-                  </g>
-                );
-              })}
-            </svg>
-          </div>
-        </div>
-      )}
-
-      {/* ============================================================================ */}
-      {/* STAGE 3: RAJSHAHI DIVISION 8 DISTRICTS & 32 SPOTS */}
+      {/* STAGE 3: RAJSHAHI DIVISION (8 DISTRICTS) */}
       {/* ============================================================================ */}
       {stage === 'division' && (
-        <div className="space-y-4">
+        <div className="space-y-6">
           {/* Top 8 District Selector Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
             {DIVISION_DISTRICT_META.map((meta) => {
@@ -876,255 +742,241 @@ export default function InteractiveThreeMaps() {
             })}
           </div>
 
-          <div className="bg-[#022c22] rounded-3xl border border-emerald-900 shadow-xl p-3 sm:p-5 flex flex-col">
-            <div className="flex items-center justify-between pb-3 text-xs text-emerald-200 font-semibold border-b border-emerald-900">
-              <span className="flex items-center gap-1.5 text-amber-300 font-bold">
-                <Sparkles className="w-4 h-4" /> রাজশাহী বিভাগ ৮-জেলা ভেক্টর ম্যাপ • জেলা ও স্পট স্পর্শ করে তথ্য দেখুন
-              </span>
-              <span>{DIVISION_DISTRICT_META.find((d) => d.id === selectedDistrictId)?.nameBn || 'রাজশাহী'} জেলার দর্শনীয় স্থান</span>
-            </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Left: 8 District Vector Map */}
+            <div className="lg:col-span-6 bg-[#022c22] rounded-3xl border border-emerald-900 shadow-xl p-4 sm:p-6 flex flex-col">
+              <div className="flex items-center justify-between pb-3 text-xs text-emerald-200 font-semibold border-b border-emerald-900">
+                <span className="flex items-center gap-1.5 text-amber-300 font-bold">
+                  <Sparkles className="w-4 h-4" /> রাজশাহী বিভাগ ৮-জেলা ভেক্টর ম্যাপ
+                </span>
+                <span>জেলায় ক্লিক করে সিলেক্ট করুন</span>
+              </div>
 
-            <div className="w-full aspect-[16/10] sm:aspect-[16/9] min-h-[480px] max-h-[75vh] relative rounded-2xl overflow-hidden border border-emerald-950 bg-slate-900 my-auto">
-              <svg viewBox={RAJSHAHI_VIEWBOX} className="w-full h-full p-2">
-                {RAJSHAHI_DISTRICT_SVGS.map((distSvg) => {
-                  const isSelected = selectedDistrictId === distSvg.id;
-                  const distMeta = DIVISION_DISTRICT_META.find((m) => m.id === distSvg.id);
-                  const distSpots = DIVISION_SPOTS.filter((s) => s.districtId === distSvg.id);
-                  const visitedCount = distSpots.filter((s) => visitedDivSpotIds.includes(s.id)).length;
-                  const isFullyVisited = distSpots.length > 0 && visitedCount === distSpots.length;
+              <div className="w-full aspect-[245/220] relative my-auto">
+                <svg
+                  viewBox={RAJSHAHI_VIEWBOX}
+                  className="w-full h-full"
+                  preserveAspectRatio="xMidYMid meet"
+                >
+                  {RAJSHAHI_DISTRICT_SVGS.map((district) => {
+                    const isSelected = selectedDistrictId === district.id;
+                    const distSpots = DIVISION_SPOTS.filter((s) => s.districtId === district.id);
+                    const visitedCount = distSpots.filter((s) => visitedDivSpotIds.includes(s.id)).length;
+                    const isAllVisited = distSpots.length > 0 && visitedCount === distSpots.length;
 
-                  return (
-                    <g
-                      key={distSvg.id}
-                      onClick={() => {
-                        setSelectedDistrictId(distSvg.id);
-                        const firstSpot = distSpots[0];
-                        if (firstSpot) {
-                          const distName = distMeta?.nameBn || distSvg.nameBn;
-                          setActiveDrawer({
-                            id: firstSpot.id,
-                            stage: 'division',
-                            nameBn: firstSpot.nameBn,
-                            nameEn: distName,
-                            rankNo: firstSpot.rankNo,
-                            categoryBn: `${distName} দর্শনীয় স্থান`,
-                            imageUrl: firstSpot.imageUrl,
-                            desc: firstSpot.summaryBn,
-                            isVisited: visitedDivSpotIds.includes(firstSpot.id),
-                            onToggleVisit: () => toggleDivSpot(firstSpot.id),
-                          });
-                        }
-                      }}
-                      className="cursor-pointer transition-all duration-300 group"
-                    >
-                      <path
-                        d={distSvg.d}
-                        fill={isFullyVisited ? '#059669' : isSelected ? '#15803d' : '#0f172a'}
-                        fillOpacity={isSelected ? 0.9 : 0.65}
-                        stroke={isSelected ? '#facc15' : '#10b981'}
-                        strokeWidth={isSelected ? 4 : 1.5}
-                        className="group-hover:fill-emerald-800 transition-colors"
-                      />
-                      <text
-                        x={distSvg.label.x}
-                        y={distSvg.label.y}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        fill="#ffffff"
-                        fontSize="8"
-                        fontWeight="bold"
-                        stroke="#022c22"
-                        strokeWidth="1.5"
-                        paintOrder="stroke fill"
-                        className="pointer-events-none"
+                    let fillColor = '#1e293b';
+                    if (isAllVisited) fillColor = '#059669';
+                    else if (visitedCount > 0) fillColor = '#065f46';
+
+                    return (
+                      <g
+                        key={district.id}
+                        onClick={() => setSelectedDistrictId(district.id)}
+                        className="cursor-pointer transition-all duration-300"
                       >
-                        {distSvg.nameBn}
-                      </text>
-                    </g>
-                  );
-                })}
-              </svg>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ============================================================================ */}
-      {/* UNIFIED MODERN BOTTOM SHEET DRAWER (FOR ALL 3 MAPS) */}
-      {/* ============================================================================ */}
-      {activeDrawer && (
-        <div className="fixed inset-x-0 bottom-0 z-50 p-2 sm:p-4 max-w-3xl mx-auto animate-in slide-in-from-bottom-6 duration-300">
-          <div className="bg-white/95 backdrop-blur-md rounded-3xl border-2 border-emerald-600/30 shadow-2xl p-4 sm:p-6 relative">
-            {/* Drag handle */}
-            <div className="w-12 h-1.5 rounded-full bg-slate-300 mx-auto mb-3" />
-
-            {/* Close button */}
-            <button
-              type="button"
-              onClick={() => setActiveDrawer(null)}
-              className="absolute top-4 right-4 p-2 rounded-full hover:bg-slate-100 text-slate-500 font-bold transition"
-              title="বন্ধ করুন"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              {/* Spot Thumbnail Photo */}
-              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0 shadow-sm relative group">
-                <img
-                  src={activeDrawer.imageUrl}
-                  alt={activeDrawer.nameBn}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                {activeDrawer.isVisited && (
-                  <span className="absolute top-1.5 left-1.5 bg-emerald-600 text-white rounded-full p-1 shadow">
-                    <Check className="w-3 h-3" />
-                  </span>
-                )}
+                        <path
+                          d={district.d}
+                          fill={fillColor}
+                          fillOpacity={0.9}
+                          stroke={isSelected ? '#facc15' : '#ffffff'}
+                          strokeWidth={isSelected ? 2.5 : 0.8}
+                          className={isSelected ? 'glow-selected-polygon' : 'hover:fill-opacity-100'}
+                        />
+                        <text
+                          x={district.label.x}
+                          y={district.label.y}
+                          textAnchor="middle"
+                          fill="#ffffff"
+                          fontSize="7"
+                          fontWeight="bold"
+                          pointerEvents="none"
+                        >
+                          {district.nameBn}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </svg>
               </div>
 
-              {/* Spot Details & Information */}
-              <div className="flex-1 min-w-0 space-y-1.5">
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">
-                    {activeDrawer.categoryBn}
-                  </span>
-                  {activeDrawer.rankNo && (
-                    <span className="bg-slate-100 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                      #{activeDrawer.rankNo}
-                    </span>
-                  )}
-                  {activeDrawer.traffic && (
-                    <span className="bg-amber-100 text-amber-900 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                      {activeDrawer.traffic}
-                    </span>
-                  )}
+              <div className="flex items-center justify-between pt-3 text-[11px] text-emerald-300 border-t border-emerald-900 mt-2">
+                <span>সিলেক্টেড জেলা: {activeDistrictMeta.nameBn}</span>
+                <span className="text-amber-300 font-bold">মোট পর্যটন অগ্রগতি: {totalDivisionPercent}%</span>
+              </div>
+            </div>
+
+            {/* Right: Tourist Spot Cards for the Selected District */}
+            <div className="lg:col-span-6 space-y-4">
+              <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900">
+                    {activeDistrictMeta.nameBn}র দর্শনীয় স্থানসমূহ
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    ঘুরে দেখা স্থানগুলো টিক দিয়ে মার্ক করুন ({currentDistrictVisitedCount}/{currentDistrictSpots.length})
+                  </p>
                 </div>
-
-                <h3 className="text-base sm:text-lg font-black text-slate-900 truncate">
-                  {activeDrawer.nameBn}
-                </h3>
-
-                <p className="text-xs text-slate-600 line-clamp-2">
-                  {activeDrawer.desc}
-                </p>
-
-                {/* Action Buttons */}
-                <div className="flex flex-wrap items-center gap-2 pt-2">
-                  {/* Visit Toggle Button */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      activeDrawer.onToggleVisit();
-                      setActiveDrawer((prev) => (prev ? { ...prev, isVisited: !prev.isVisited } : null));
-                    }}
-                    className={`px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-sm ${
-                      activeDrawer.isVisited
-                        ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                        : 'bg-slate-100 hover:bg-slate-200 text-slate-800'
-                    }`}
-                  >
-                    <Check className="w-4 h-4" />
-                    <span>{activeDrawer.isVisited ? '✓ এই স্থানটি ঘুরেছি' : 'এখানে ঘুরেছি? টিক দিন'}</span>
-                  </button>
-
-                  {/* Dedicated Full Page View Link */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const drawerData = activeDrawer;
-                      setActiveDrawer(null);
-                      openSpotFullPage(
-                        drawerData.id,
-                        drawerData.nameBn,
-                        drawerData.nameEn || '',
-                        drawerData.imageUrl,
-                        drawerData.desc,
-                        drawerData.isVisited,
-                        drawerData.onToggleVisit
-                      );
-                    }}
-                    className="px-4 py-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
-                  >
-                    <Eye className="w-4 h-4" />
-                    <span>সম্পূর্ণ বিস্তারিত ও ছবি দেখুন →</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Floating Hover Tooltip */}
-      {tooltip && (
-        <div
-          className="fixed z-40 bg-slate-950/90 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-xl pointer-events-none transition-opacity -translate-x-1/2 -translate-y-full border border-slate-700 backdrop-blur-sm"
-          style={{ left: `${tooltip.x}px`, top: `${tooltip.y}px` }}
-        >
-          <p>{tooltip.text}</p>
-          {tooltip.sub && <p className="text-[10px] text-amber-300 font-medium">{tooltip.sub}</p>}
-        </div>
-      )}
-
-      {/* Certificate / Share Card Modal */}
-      {showShareModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl relative">
-            <button
-              onClick={() => setShowShareModal(false)}
-              className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-100 text-slate-500 font-bold"
-            >
-              ✕
-            </button>
-
-            <div className="text-center space-y-1">
-              <span className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center mx-auto text-xl">
-                🏆
-              </span>
-              <h3 className="text-xl font-black text-slate-900 pt-1">
-                অফিসিয়াল ভ্রমণ সনদ ও শেয়ার কার্ড
-              </h3>
-              <p className="text-xs text-slate-500">
-                আপনার নাম লিখে ডিজিটাল ভ্রমণ সনদ তৈরি করুন এবং সোশ্যাল মিডিয়ায় শেয়ার করুন
-              </p>
-            </div>
-
-            <div className="space-y-3 pt-2">
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700">আপনার পূর্ণ নাম লিখুন *</label>
-                <input
-                  type="text"
-                  placeholder="যেমন: তানভীর আহমেদ"
-                  value={explorerName}
-                  onChange={(e) => setExplorerName(e.target.value)}
-                  className="w-full text-xs sm:text-sm border border-slate-200 rounded-xl p-3 font-bold"
-                />
-              </div>
-
-              <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-100 flex items-center justify-between text-xs font-bold text-emerald-900">
-                <span>বর্তমান অগ্রগতি:</span>
-                <span className="text-emerald-700 font-extrabold">
-                  {activeMetrics.countText} ({activeMetrics.percent}%)
+                <span className="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                  {currentDistrictPercent}% ভ্রমণ
                 </span>
               </div>
 
-              <canvas ref={canvasRef} className="hidden" />
+              <div className="space-y-3 max-h-[580px] overflow-y-auto pr-1">
+                {currentDistrictSpots.map((spot) => {
+                  const isVisited = visitedDivSpotIds.includes(spot.id);
+                  return (
+                    <div
+                      key={spot.id}
+                      className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3 hover:border-slate-300 transition"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-20 h-20 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
+                          <img
+                            src={customSpotsMap[spot.id]?.images?.[0] || spot.imageUrl}
+                            alt={spot.nameBn}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                            স্পট #{spot.rankNo}
+                          </span>
+                          <h4 className="text-sm font-extrabold text-slate-900 truncate mt-1">
+                            {spot.nameBn}
+                          </h4>
+                          <p className="text-[11px] text-slate-500 font-medium">📍 {spot.locationBn}</p>
+                          <p className="text-xs text-slate-600 line-clamp-2 mt-1">
+                            {spot.summaryBn}
+                          </p>
+                        </div>
+                      </div>
 
+                      <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                        <button
+                          onClick={() => toggleDivSpot(spot.id)}
+                          className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                            isVisited
+                              ? 'bg-emerald-600 text-white'
+                              : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
+                          }`}
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          {isVisited ? 'ঘুরেছি ✓' : 'আমি ঘুরেছি'}
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            openSpotFullPage(
+                              spot.id,
+                              spot.nameBn,
+                              spot.locationBn,
+                              spot.imageUrl,
+                              spot.summaryBn,
+                              isVisited,
+                              () => toggleDivSpot(spot.id)
+                            )
+                          }
+                          className="py-2 px-3.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold transition flex items-center gap-1"
+                        >
+                          <Eye className="w-3.5 h-3.5" /> বিস্তারিত ও ছবি
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================================ */}
+      {/* 2. SHAREABLE CERTIFICATE MODAL WITH MANDATORY NAME INPUT LOCK */}
+      {/* ============================================================================ */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-lg rounded-3xl border border-slate-200 shadow-2xl p-6 sm:p-8 space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <span className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                  <Trophy className="w-5 h-5" />
+                </span>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-base">ভ্রমণ সনদ ও শেয়ার কার্ড</h3>
+                  <p className="text-xs text-slate-500">আপনার অর্জিত স্কোর সামাজিক মাধ্যমে শেয়ার করুন</p>
+                </div>
+              </div>
               <button
-                type="button"
-                onClick={handleDownloadCertificate}
-                disabled={!explorerName.trim()}
-                className={`w-full py-3.5 rounded-2xl text-xs sm:text-sm font-black transition flex items-center justify-center gap-2 shadow-md ${
-                  explorerName.trim()
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white'
-                    : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                }`}
+                onClick={() => setShowShareModal(false)}
+                className="text-slate-400 hover:text-slate-700 text-lg font-bold"
               >
-                <Download className="w-4 h-4" />
-                <span>ডিজিটাল সনদ ডাউনলোড করুন (PNG)</span>
+                ✕
               </button>
             </div>
+
+            {/* Certificate Preview Box */}
+            <div className="bg-gradient-to-br from-emerald-950 to-slate-900 rounded-2xl p-6 text-white text-center border-2 border-amber-400 space-y-3">
+              <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider">
+                RU Insiders Official Explorer Card
+              </span>
+              <h4 className="text-lg font-extrabold text-white">
+                {stage === 'ru_campus'
+                  ? 'রাজশাহী বিশ্ববিদ্যালয় ক্যাম্পাস পরিক্রমা'
+                  : stage === 'rajshahi_district'
+                  ? 'রাজশাহী জেলা ভ্রমণ সনদ'
+                  : 'রাজশাহী বিভাগ ও পর্যটন পরিক্রমা'}
+              </h4>
+              <p className="text-2xl font-black text-amber-400">
+                {stage === 'ru_campus'
+                  ? `${ruPercent}% স্থান ভ্রমণ সম্পন্ন`
+                  : stage === 'rajshahi_district'
+                  ? `${pdfPercent}% অঞ্চল ভ্রমণ সম্পন্ন`
+                  : `${currentDistrictPercent}% দর্শনীয় স্থান সম্পন্ন`}
+              </p>
+              <p className="text-xs text-emerald-200">
+                সনদে আপনার নাম: <span className="font-bold underline">{explorerName.trim() || '(নাম লিখুন)'}</span>
+              </p>
+            </div>
+
+            {/* Mandatory Name Input */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
+                <span>আপনার নাম লিখুন (বাধ্যতামূলক):</span>
+                {!explorerName.trim() && (
+                  <span className="text-rose-600 text-[11px] font-semibold flex items-center gap-1">
+                    <Lock className="w-3 h-3" /> নাম না লিখলে লক থাকবে
+                  </span>
+                )}
+              </label>
+              <input
+                type="text"
+                placeholder="যেমন: মাহিম আহমেদ / রাবি শিক্ষার্থী"
+                value={explorerName}
+                onChange={(e) => setExplorerName(e.target.value)}
+                className="w-full text-sm border border-slate-200 rounded-xl px-3.5 py-3 focus:outline-none focus:border-amber-500 font-bold text-slate-900"
+              />
+            </div>
+
+            {/* Download Button (Strictly Locked until name is entered) */}
+            <button
+              onClick={handleDownloadCertificate}
+              disabled={!explorerName.trim()}
+              className={`w-full py-3.5 rounded-2xl font-extrabold text-sm flex items-center justify-center gap-2 transition shadow-md ${
+                explorerName.trim()
+                  ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 cursor-pointer'
+                  : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+              }`}
+            >
+              {explorerName.trim() ? (
+                <>
+                  <Download className="w-4 h-4" /> হাই-রেজুলুশন সনদ ডাউনলোড করুন (PNG)
+                </>
+              ) : (
+                <>
+                  <Lock className="w-4 h-4" /> ডাউনলোড করতে আগে আপনার নাম লিখুন
+                </>
+              )}
+            </button>
           </div>
         </div>
       )}
