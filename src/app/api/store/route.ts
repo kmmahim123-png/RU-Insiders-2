@@ -201,10 +201,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
+    // 7.5. Toggle Article Like (Persistent Like Engine)
+    if (action === 'TOGGLE_LIKE') {
+      const { articleId, increment } = payload || {};
+      if (!articleId) {
+        return NextResponse.json({ ok: false, error: 'Article ID required' }, { status: 400 });
+      }
+      const updatedDb = await writeDb((state) => ({
+        ...state,
+        articles: state.articles.map((a) => {
+          if (a.id === articleId) {
+            const currentLikes = typeof a.likes === 'number' ? a.likes : 0;
+            const newLikes = increment ? currentLikes + 1 : Math.max(0, currentLikes - 1);
+            return { ...a, likes: newLikes };
+          }
+          return a;
+        }),
+      }));
+      const found = updatedDb.articles.find((a) => a.id === articleId);
+      return NextResponse.json({ ok: true, likes: found?.likes ?? 0 });
+    }
+
     // 8. Role-Protected Actions
-    const isSuper = password === db.settings.superAdminPassword;
-    const isProdMgr = password === db.settings.productManagerPassword;
-    const matchedClub = db.clubs.find((c) => c.password === password);
+    const cleanPass = (password || '').trim();
+    const isSuper = cleanPass === db.settings.superAdminPassword;
+    const isProdMgr = cleanPass === db.settings.productManagerPassword;
+    const matchedClub = db.clubs.find((c) => c.password === cleanPass);
 
     // Product & Order Manager + Super Admin Actions
     if (action === 'SAVE_PRODUCT' && (isSuper || isProdMgr)) {
@@ -294,13 +316,22 @@ export async function POST(req: NextRequest) {
             ? state.articles.map((a) => (a.id === article.id ? article : a))
             : [article, ...state.articles];
 
+          // If article is breaking news, sync with settings breakingNews
+          let breakingNews = [...(state.settings.breakingNews || [])];
+          if (article.category === 'ব্রেকিং নিউজ' || article.isBreaking) {
+            const headline = `🔥 ${article.title}`;
+            if (!breakingNews.some((b) => b.includes(article.title))) {
+              breakingNews = [headline, ...breakingNews];
+            }
+          }
+
           const notifications = sendPush
             ? [
                 {
                   id: `notif-${Date.now()}`,
-                  title: `📰 ${article.title}`,
+                  title: article.category === 'ব্রেকিং নিউজ' ? `🔥 ব্রেকিং নিউজ: ${article.title}` : `📰 ${article.title}`,
                   message: `${article.authorName} (${article.category})`,
-                  link: `/inside-ru`,
+                  link: `/inside-ru/${article.id}`,
                   sendChromePush: true,
                   createdAt: new Date().toISOString(),
                 },
@@ -308,9 +339,14 @@ export async function POST(req: NextRequest) {
               ]
             : state.notifications;
 
-          return { ...state, articles, notifications };
+          return { ...state, articles, settings: { ...state.settings, breakingNews }, notifications };
         });
-        return NextResponse.json({ ok: true, articles: updatedDb.articles, notifications: updatedDb.notifications });
+        return NextResponse.json({
+          ok: true,
+          articles: updatedDb.articles,
+          settings: updatedDb.settings,
+          notifications: updatedDb.notifications,
+        });
       }
 
       if (action === 'APPROVE_ARTICLE') {

@@ -27,6 +27,12 @@ export default function InsideRuDetailPage() {
   const [officialWhatsapp, setOfficialWhatsapp] = useState('8801700000000');
 
   useEffect(() => {
+    // Check local liked state
+    try {
+      const likedMap = JSON.parse(localStorage.getItem('ru_liked_articles') || '{}');
+      if (likedMap[articleId]) setHasLiked(true);
+    } catch {}
+
     fetch('/api/store')
       .then((r) => r.json())
       .then((data) => {
@@ -35,7 +41,7 @@ export default function InsideRuDetailPage() {
           const found = data.articles.find((a: InsideRuArticle) => a.id === articleId);
           if (found) {
             setArticle(found);
-            setLikes(found.likes || 1);
+            setLikes(typeof found.likes === 'number' ? found.likes : 0);
           }
         }
       })
@@ -43,14 +49,37 @@ export default function InsideRuDetailPage() {
       .finally(() => setLoading(false));
   }, [articleId]);
 
-  const handleLike = () => {
-    if (!hasLiked) {
-      setLikes((prev) => prev + 1);
-      setHasLiked(true);
-    } else {
-      setLikes((prev) => prev - 1);
-      setHasLiked(false);
-    }
+  const handleLike = async () => {
+    const nextLiked = !hasLiked;
+    setHasLiked(nextLiked);
+    setLikes((prev) => (nextLiked ? prev + 1 : Math.max(0, prev - 1)));
+
+    // Save to localStorage
+    try {
+      const likedMap = JSON.parse(localStorage.getItem('ru_liked_articles') || '{}');
+      if (nextLiked) {
+        likedMap[articleId] = true;
+      } else {
+        delete likedMap[articleId];
+      }
+      localStorage.setItem('ru_liked_articles', JSON.stringify(likedMap));
+    } catch {}
+
+    // Persist to server
+    try {
+      const res = await fetch('/api/store', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'TOGGLE_LIKE',
+          payload: { articleId, increment: nextLiked },
+        }),
+      });
+      const data = await res.json();
+      if (data.ok && typeof data.likes === 'number') {
+        setLikes(data.likes);
+      }
+    } catch {}
   };
 
   const handleShare = () => {

@@ -192,8 +192,9 @@ export default function NavbarAndAuth() {
             backgroundPosition: 'center',
           }}
         >
-          <div className="relative flex items-center justify-center w-36 h-36 rounded-full border-4 border-amber-400 shadow-[0_0_50px_rgba(250,204,21,0.6)] animate-pulse bg-white/10 backdrop-blur-md p-3">
-            <img src="/logo.png" alt="RU Insiders" className="w-full h-full object-contain rounded-full" />
+          <div className="relative flex items-center justify-center w-36 h-36 rounded-full border-4 border-amber-400 shadow-[0_0_50px_rgba(250,204,21,0.6)] bg-white/10 backdrop-blur-md p-3 overflow-hidden">
+            <img src="/logo-center.png" alt="RU Insiders" className="absolute inset-0 w-full h-full object-contain p-2" />
+            <img src="/logo-hands.png" alt="Rotating Hands" className="absolute inset-0 w-full h-full object-contain animate-[spin_12s_linear_infinite]" />
           </div>
           <h1 className="mt-6 text-3xl sm:text-5xl font-extrabold tracking-tight drop-shadow-lg">
             RU Insiders
@@ -207,42 +208,26 @@ export default function NavbarAndAuth() {
         </div>
       )}
 
-      {/* 2. Top Bar */}
-      <div className="bg-slate-900 text-slate-100 text-xs py-2 px-4 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2 font-medium">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            <span>RU Insiders Official Store • মতিহার ক্যাম্পাস ও সারা বাংলাদেশে ক্যাশ অন ডেলিভারি</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <a
-              href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('আসসালামু আলাইকুম! আমি RU Insiders থেকে কাস্টম অর্ডার/তথ্য জানতে চাই।')}`}
-              target="_blank"
-              rel="noreferrer"
-              className="text-emerald-400 hover:underline flex items-center gap-1 font-semibold"
-            >
-              <MessageCircle className="w-3.5 h-3.5" /> WhatsApp সরাসরি মেসেজ
-            </a>
-            <Link href="/admin" className="text-amber-400 hover:underline flex items-center gap-1 font-semibold">
-              <ShieldCheck className="w-3.5 h-3.5" /> Admin & Club Portal
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. Main Header */}
+      {/* 2. Main Header (Top Bar removed as requested) */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2">
-          {/* Logo & Brand */}
-          <Link href="/" className="flex items-center gap-2.5">
-            <img
-              src="/logo.png"
-              alt="RU Insiders Logo"
-              className="w-10 h-10 rounded-full border border-amber-400 object-cover bg-slate-50"
-            />
+          {/* Logo & Brand with Animated Rotating Hands */}
+          <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+            <div className="relative w-11 h-11 rounded-full border-2 border-amber-400 bg-white flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
+              <img
+                src="/logo-center.png"
+                alt="RU Emblem"
+                className="absolute inset-0 w-full h-full object-contain p-1"
+              />
+              <img
+                src="/logo-hands.png"
+                alt="Rotating Hands"
+                className="absolute inset-0 w-full h-full object-contain animate-[spin_12s_linear_infinite]"
+              />
+            </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-lg sm:text-xl text-slate-900 tracking-tight">
+                <span className="font-extrabold text-lg sm:text-xl text-slate-900 tracking-tight group-hover:text-blue-700 transition">
                   RU Insiders
                 </span>
                 <span className="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold px-2 py-0.5 rounded-full">
@@ -250,7 +235,7 @@ export default function NavbarAndAuth() {
                 </span>
               </div>
               <p className="hidden sm:inline-block text-[11px] text-slate-500">
-                রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল মার্চেন্ডাইজ স্টোর
+                রাজশাহী বিশ্ববিদ্যালয় ক্যাম্পাস পোর্টাল
               </p>
             </div>
           </Link>
@@ -386,10 +371,31 @@ export default function NavbarAndAuth() {
               </button>
             )}
 
+            {/* WhatsApp Direct Chat Button */}
+            <a
+              href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('আসসালামু আলাইকুম! আমি RU Insiders থেকে সরাসরি যোগাযোগ করছি।')}`}
+              target="_blank"
+              rel="noreferrer"
+              className="h-11 px-3 sm:px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1.5 text-xs font-bold shadow-sm transition shrink-0"
+              title="WhatsApp সরাসরি চ্যাট"
+            >
+              <MessageCircle className="w-4 h-4 fill-white" />
+              <span className="hidden sm:inline">WhatsApp</span>
+            </a>
+
+            {/* Admin Portal Shortcut */}
+            <Link
+              href="/admin"
+              className="h-11 px-2.5 rounded-xl border border-slate-200 text-slate-600 hover:text-amber-600 hover:bg-slate-50 flex items-center justify-center transition shrink-0"
+              title="অ্যাডমিন ও ক্লাব পোর্টাল"
+            >
+              <ShieldCheck className="w-4 h-4" />
+            </Link>
+
             {/* Shopping Bag Button */}
             <Link
               href="/cart"
-              className="w-11 h-11 rounded-xl border border-slate-200 flex items-center justify-center text-slate-800 hover:bg-slate-100 relative"
+              className="w-11 h-11 rounded-xl border border-slate-200 flex items-center justify-center text-slate-800 hover:bg-slate-100 relative shrink-0"
               aria-label="Shopping Cart"
             >
               <ShoppingBag className="w-5 h-5" />
@@ -403,7 +409,7 @@ export default function NavbarAndAuth() {
             {/* Mobile Hamburger Menu Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden w-11 h-11 rounded-xl border border-slate-200 flex items-center justify-center text-slate-800"
+              className="lg:hidden w-11 h-11 rounded-xl border border-slate-200 flex items-center justify-center text-slate-800 shrink-0"
               aria-label="Toggle Navigation"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -411,9 +417,9 @@ export default function NavbarAndAuth() {
           </div>
         </div>
 
-        {/* 4. Breaking News Ticker (Clickable to Inside RU News Portal) */}
+        {/* 4. Breaking News Ticker (Clickable to Inside RU Breaking News Portal) */}
         <Link
-          href="/inside-ru"
+          href="/inside-ru?category=ব্রেকিং নিউজ"
           className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white px-3 py-2 text-xs block hover:opacity-95 transition group shadow-inner cursor-pointer"
           title="Inside RU নিউজ পোর্টালে সম্পূর্ণ সংবাদ ও সাহিত্য পড়ুন"
         >

@@ -18,8 +18,10 @@ import {
 } from 'lucide-react';
 
 const CATEGORIES = [
+  '🔥 ব্রেকিং নিউজ',
   'ক্যাম্পাস নিউজ',
   'গল্প ও স্মৃতিচারণ',
+  'চারুকলা ও সাহিত্য',
   'সাহিত্য ও কবিতা',
   'গবেষণা ও পেপার',
   'কৃতি শিক্ষার্থী ও ট্যালেন্ট',
@@ -58,10 +60,30 @@ export default function InsideRuPage() {
       const savedUser = JSON.parse(localStorage.getItem('ru_user_session') || 'null');
       if (savedUser?.name) setSubAuthor(savedUser.name);
     } catch {}
+
+    // Check URL query parameters for direct category navigation (e.g. from breaking news ticker)
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const catParam = urlParams.get('category');
+      if (catParam) {
+        if (catParam.includes('ব্রেকিং') || catParam.toLowerCase().includes('breaking')) {
+          setActiveCategory('🔥 ব্রেকিং নিউজ');
+        } else {
+          setActiveCategory(catParam);
+        }
+      }
+    }
   }, []);
 
   const filteredArticles = articles.filter((a) => {
-    const matchCat = activeCategory === 'all' || a.category === activeCategory;
+    const isBreakingCat = activeCategory === '🔥 ব্রেকিং নিউজ';
+    const matchCat =
+      activeCategory === 'all'
+        ? true
+        : isBreakingCat
+        ? a.category === 'ব্রেকিং নিউজ' || a.category === '🔥 ব্রেকিং নিউজ' || Boolean(a.isBreaking)
+        : a.category === activeCategory;
+
     const matchSearch =
       !search ||
       a.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -161,14 +183,21 @@ export default function InsideRuPage() {
             </button>
 
             {CATEGORIES.map((cat) => {
-              const count = articles.filter((a) => a.category === cat).length;
+              const isBreaking = cat === '🔥 ব্রেকিং নিউজ';
+              const count = articles.filter((a) =>
+                isBreaking
+                  ? a.category === 'ব্রেকিং নিউজ' || a.category === '🔥 ব্রেকিং নিউজ' || Boolean(a.isBreaking)
+                  : a.category === cat
+              ).length;
               return (
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
-                  className={`py-2 px-4 rounded-xl text-xs font-bold shrink-0 transition ${
+                  className={`py-2 px-4 rounded-xl text-xs font-bold shrink-0 transition flex items-center gap-1.5 ${
                     activeCategory === cat
-                      ? 'bg-blue-700 text-white shadow-sm'
+                      ? isBreaking
+                        ? 'bg-rose-600 text-white shadow-sm font-black'
+                        : 'bg-blue-700 text-white shadow-sm'
                       : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
                   }`}
                 >

@@ -85,7 +85,16 @@ export interface ClubApplication {
 export interface InsideRuArticle {
   id: string;
   title: string;
-  category: 'ক্যাম্পাস নিউজ' | 'গল্প ও স্মৃতিচারণ' | 'সাহিত্য ও কবিতা' | 'গবেষণা ও পেপার' | 'কৃতি শিক্ষার্থী ও ট্যালেন্ট' | 'ক্যাম্পাস গান ও সুর';
+  category:
+    | 'ব্রেকিং নিউজ'
+    | 'ক্যাম্পাস নিউজ'
+    | 'গল্প ও স্মৃতিচারণ'
+    | 'চারুকলা ও সাহিত্য'
+    | 'সাহিত্য ও কবিতা'
+    | 'গবেষণা ও পেপার'
+    | 'কৃতি শিক্ষার্থী ও ট্যালেন্ট'
+    | 'ক্যাম্পাস গান ও সুর'
+    | string;
   authorName: string;
   department: string;
   whatsappNumber?: string; // লেখকের বা নির্দিষ্ট যোগাযোগের WhatsApp নাম্বার
@@ -94,6 +103,7 @@ export interface InsideRuArticle {
   detailSections: DetailBlock[];
   likes: number;
   status: 'Published' | 'Pending';
+  isBreaking?: boolean;
   createdAt: string;
 }
 

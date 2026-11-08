@@ -23,6 +23,10 @@ import {
   RefreshCw,
   ExternalLink,
   Sparkles,
+  Flame,
+  Heart,
+  Edit3,
+  Camera,
 } from 'lucide-react';
 import {
   Product,
@@ -201,6 +205,115 @@ export default function AdminPage() {
   const [sendProdPush, setSendProdPush] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
 
+  // Article Modal State
+  const [showArticleModal, setShowArticleModal] = useState(false);
+  const [editArticle, setEditArticle] = useState<InsideRuArticle>({
+    id: '',
+    title: '',
+    category: 'ব্রেকিং নিউজ',
+    authorName: 'সেন্ট্রাল ডেস্ক',
+    department: 'RU Insiders অফিশিয়াল',
+    whatsappNumber: '8801700000000',
+    images: ['/campus/paris-road-rain.jpg'],
+    summary: '',
+    detailSections: [{ id: 'sec-1', title: 'বিস্তারিত সংবাদ ও বিবরণ', content: '' }],
+    likes: 25,
+    status: 'Published',
+    isBreaking: true,
+    createdAt: new Date().toISOString(),
+  });
+  const [sendArticlePush, setSendArticlePush] = useState(false);
+  const [articleCategoryFilter, setArticleCategoryFilter] = useState('all');
+
+  const handleOpenAddArticle = (isBreaking: boolean = false) => {
+    setEditArticle({
+      id: `art-${Date.now()}`,
+      title: '',
+      category: isBreaking ? 'ব্রেকিং নিউজ' : 'ক্যাম্পাস নিউজ',
+      authorName: 'সেন্ট্রাল ডেস্ক',
+      department: 'RU Insiders',
+      whatsappNumber: settings?.whatsappNumber || '8801700000000',
+      images: ['/campus/paris-road-rain.jpg'],
+      summary: '',
+      detailSections: [{ id: 'sec-1', title: 'মূল বিবরণ ও সংবাদ', content: '' }],
+      likes: Math.floor(15 + Math.random() * 20),
+      status: 'Published',
+      isBreaking: isBreaking,
+      createdAt: new Date().toISOString(),
+    });
+    setSendArticlePush(true);
+    setShowArticleModal(true);
+  };
+
+  const handleOpenEditArticle = (art: InsideRuArticle) => {
+    setEditArticle({
+      ...art,
+      detailSections: art.detailSections?.length
+        ? [...art.detailSections]
+        : [{ id: 'sec-1', title: 'মূল বিবরণ', content: '' }],
+      images: art.images?.length ? [...art.images] : ['/campus/paris-road-rain.jpg'],
+    });
+    setSendArticlePush(false);
+    setShowArticleModal(true);
+  };
+
+  const handleSaveArticle = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editArticle.title.trim()) {
+      alert('অনুগ্রহ করে নিউজের শিরোনাম লিখুন');
+      return;
+    }
+
+    const currentPass = password.trim() || sessionStorage.getItem('ru_admin_pass') || '';
+    try {
+      const res = await fetch('/api/store', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'SAVE_ARTICLE',
+          password: currentPass,
+          payload: { article: editArticle, sendChromePush: sendArticlePush },
+        }),
+      });
+      const data = await res.json();
+      if (data.ok && data.articles) {
+        setArticles(data.articles);
+        if (data.settings) setSettings(data.settings);
+        setShowArticleModal(false);
+        showToast('✓ নিউজ ও ছবি সফলভাবে সংরক্ষিত ও প্রকাশিত হয়েছে!');
+      } else {
+        alert(data.error || 'সংরক্ষণ ব্যর্থ হয়েছে। পাসওয়ার্ড বা তথ্যে সমস্যা থাকতে পারে।');
+      }
+    } catch (err: any) {
+      alert('সার্ভার যোগাযোগে সমস্যা: ' + err.message);
+    }
+  };
+
+  const handleDeleteArticle = async (id: string) => {
+    if (!confirm('আপনি কি নিশ্চিত যে এই নিউজ বা লেখাটি মুছে ফেলতে চান?')) return;
+    const currentPass = password.trim() || sessionStorage.getItem('ru_admin_pass') || '';
+    try {
+      const res = await fetch('/api/store', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'DELETE_ARTICLE',
+          password: currentPass,
+          payload: { articleId: id },
+        }),
+      });
+      const data = await res.json();
+      if (data.ok && data.articles) {
+        setArticles(data.articles);
+        showToast('✓ নিউজ মুছে ফেলা হয়েছে');
+      } else {
+        alert(data.error || 'মুছে ফেলা সম্ভব হয়নি');
+      }
+    } catch (err: any) {
+      alert('ত্রুটি: ' + err.message);
+    }
+  };
+
   const handleOpenAddProduct = () => {
     setEditProduct({
       id: `prod-${Date.now()}`,
@@ -227,7 +340,7 @@ export default function AdminPage() {
     setShowProductModal(true);
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: 'product' | 'map') => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: 'product' | 'map' | 'article') => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
@@ -249,6 +362,11 @@ export default function AdminPage() {
             ...prev,
             images: [...prev.images, ...data.urls],
           }));
+        } else if (target === 'article') {
+          setEditArticle((prev) => ({
+            ...prev,
+            images: [...prev.images.filter((img) => img !== '/campus/paris-road-rain.jpg'), ...data.urls],
+          }));
         }
         showToast('✓ ছবি সফলভাবে আপলোড হয়েছে!');
       } else {
@@ -269,13 +387,14 @@ export default function AdminPage() {
       return;
     }
 
+    const currentPass = password.trim() || (typeof window !== 'undefined' ? sessionStorage.getItem('ru_admin_pass') || '' : '');
     try {
       const res = await fetch('/api/store', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'SAVE_PRODUCT',
-          password,
+          password: currentPass,
           payload: { product: editProduct, sendChromePush: sendProdPush },
         }),
       });
@@ -284,19 +403,24 @@ export default function AdminPage() {
         setProducts(data.products);
         setShowProductModal(false);
         showToast('✓ পণ্য সফলভাবে সংরক্ষিত হয়েছে!');
+      } else {
+        alert(data.error || 'পণ্য সংরক্ষণ করা সম্ভব হয়নি');
       }
-    } catch {}
+    } catch (err: any) {
+      alert('সার্ভার সমস্যা: ' + err.message);
+    }
   };
 
   const handleDeleteProduct = async (id: string) => {
     if (!confirm('আপনি কি নিশ্চিত যে এই পণ্যটি মুছে ফেলতে চান?')) return;
+    const currentPass = password.trim() || (typeof window !== 'undefined' ? sessionStorage.getItem('ru_admin_pass') || '' : '');
     try {
       const res = await fetch('/api/store', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'DELETE_PRODUCT',
-          password,
+          password: currentPass,
           payload: { productId: id },
         }),
       });
@@ -304,19 +428,24 @@ export default function AdminPage() {
       if (data.ok && data.products) {
         setProducts(data.products);
         showToast('✓ পণ্য মুছে ফেলা হয়েছে');
+      } else {
+        alert(data.error || 'পণ্য মুছতে সমস্যা হয়েছে');
       }
-    } catch {}
+    } catch (err: any) {
+      alert('সার্ভার সমস্যা: ' + err.message);
+    }
   };
 
   // Order Status Update
   const handleUpdateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
+    const currentPass = password.trim() || (typeof window !== 'undefined' ? sessionStorage.getItem('ru_admin_pass') || '' : '');
     try {
       const res = await fetch('/api/store', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'UPDATE_ORDER_STATUS',
-          password,
+          password: currentPass,
           payload: { orderId, status: newStatus },
         }),
       });
@@ -324,8 +453,12 @@ export default function AdminPage() {
       if (data.ok && data.orders) {
         setOrders(data.orders);
         showToast(`✓ অর্ডার স্ট্যাটাস "${newStatus}" আপডেট হয়েছে`);
+      } else {
+        alert(data.error || 'স্ট্যাটাস আপডেট ব্যর্থ হয়েছে');
       }
-    } catch {}
+    } catch (err: any) {
+      alert('সার্ভার সমস্যা: ' + err.message);
+    }
   };
 
   // ============================================================================
@@ -385,14 +518,18 @@ export default function AdminPage() {
     }
   };
 
+  const getActivePass = () =>
+    password.trim() || (typeof window !== 'undefined' ? sessionStorage.getItem('ru_admin_pass') || '' : '');
+
   const handleSaveMapSpot = async () => {
+    const currentPass = getActivePass();
     try {
       const res = await fetch('/api/store', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'SAVE_MAP_SPOT',
-          password,
+          password: currentPass,
           payload: { spot: editMapSpot },
         }),
       });
@@ -400,21 +537,26 @@ export default function AdminPage() {
       if (data.ok && data.mapSpots) {
         setMapSpots(data.mapSpots);
         showToast('✓ ম্যাপ স্পট তথ্য ও ছবি সফলভাবে সংরক্ষিত হয়েছে!');
+      } else {
+        alert(data.error || 'ম্যাপ স্পট তথ্য সংরক্ষণ করা যায়নি');
       }
-    } catch {}
+    } catch (err: any) {
+      alert('সার্ভার যোগাযোগে ত্রুটি: ' + err.message);
+    }
   };
 
   // ============================================================================
   // CLUB APPLICATION APPROVAL / REJECTION
   // ============================================================================
   const handleUpdateClubApp = async (appId: string, newStatus: 'Approved' | 'Rejected') => {
+    const currentPass = getActivePass();
     try {
       const res = await fetch('/api/store', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'UPDATE_CLUB_APP',
-          password,
+          password: currentPass,
           payload: { appId, status: newStatus },
         }),
       });
@@ -422,19 +564,24 @@ export default function AdminPage() {
       if (data.ok && data.applications) {
         setClubApplications(data.applications);
         showToast(`✓ আবেদন স্ট্যাটাস "${newStatus}" করা হয়েছে`);
+      } else {
+        alert(data.error || 'স্ট্যাটাস আপডেট ব্যর্থ হয়েছে');
       }
-    } catch {}
+    } catch (err: any) {
+      alert('সার্ভার যোগাযোগে ত্রুটি: ' + err.message);
+    }
   };
 
   // Article approval (Super Admin)
   const handleApproveArticle = async (articleId: string, status: 'Published' | 'Pending') => {
+    const currentPass = getActivePass();
     try {
       const res = await fetch('/api/store', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'APPROVE_ARTICLE',
-          password,
+          password: currentPass,
           payload: { articleId, status },
         }),
       });
@@ -442,19 +589,24 @@ export default function AdminPage() {
       if (data.ok && data.articles) {
         setArticles(data.articles);
         showToast(`✓ লেখা স্ট্যাটাস আপডেট হয়েছে`);
+      } else {
+        alert(data.error || 'লেখা স্ট্যাটাস আপডেট ব্যর্থ হয়েছে');
       }
-    } catch {}
+    } catch (err: any) {
+      alert('সার্ভার যোগাযোগে ত্রুটি: ' + err.message);
+    }
   };
 
   // Alumni approval (Super Admin)
   const handleApproveAlumni = async (alumniId: string, approved: boolean) => {
+    const currentPass = getActivePass();
     try {
       const res = await fetch('/api/store', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'APPROVE_ALUMNI',
-          password,
+          password: currentPass,
           payload: { alumniId, approved },
         }),
       });
@@ -462,8 +614,37 @@ export default function AdminPage() {
       if (data.ok && data.alumni) {
         setAlumni(data.alumni);
         showToast('✓ অ্যালামনাই অনুমোদন স্ট্যাটাস আপডেট হয়েছে');
+      } else {
+        alert(data.error || 'অ্যালামনাই অনুমোদন ব্যর্থ হয়েছে');
       }
-    } catch {}
+    } catch (err: any) {
+      alert('সার্ভার যোগাযোগে ত্রুটি: ' + err.message);
+    }
+  };
+
+  const handleDeleteAlumni = async (alumniId: string) => {
+    if (!confirm('আপনি কি এই অ্যালামনাই প্রোফাইলটি মুছে ফেলতে চান?')) return;
+    const currentPass = getActivePass();
+    try {
+      const res = await fetch('/api/store', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'DELETE_ALUMNI',
+          password: currentPass,
+          payload: { alumniId },
+        }),
+      });
+      const data = await res.json();
+      if (data.ok && data.alumni) {
+        setAlumni(data.alumni);
+        showToast('✓ অ্যালামনাই প্রোফাইল মুছে ফেলা হয়েছে');
+      } else {
+        alert(data.error || 'অ্যালামনাই মুছতে সমস্যা হয়েছে');
+      }
+    } catch (err: any) {
+      alert('সার্ভার ত্রুটি: ' + err.message);
+    }
   };
 
   // Settings & Passwords Save (Super Admin)
@@ -479,21 +660,26 @@ export default function AdminPage() {
       return;
     }
 
+    const currentPass = getActivePass();
     try {
       const res = await fetch('/api/store', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'UPDATE_SETTINGS',
-          password,
+          password: currentPass,
           payload: { settings, clubs },
         }),
       });
       const data = await res.json();
       if (data.ok) {
         showToast('✓ সেটিংস ও পাসওয়ার্ড সফলভাবে আপডেট হয়েছে!');
+      } else {
+        alert(data.error || 'সেটিংস আপডেট ব্যর্থ হয়েছে');
       }
-    } catch {}
+    } catch (err: any) {
+      alert('সার্ভার যোগাযোগে ত্রুটি: ' + err.message);
+    }
   };
 
   // Broadcast Notification State
@@ -506,13 +692,14 @@ export default function AdminPage() {
     e.preventDefault();
     if (!broadcastTitle.trim() || !broadcastMsg.trim()) return;
 
+    const currentPass = getActivePass();
     try {
       const res = await fetch('/api/store', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'SEND_BROADCAST',
-          password,
+          password: currentPass,
           payload: {
             title: broadcastTitle.trim(),
             message: broadcastMsg.trim(),
@@ -526,8 +713,12 @@ export default function AdminPage() {
         showToast('✓ নোটিফিকেশন ব্রডকাস্ট পাঠানো হয়েছে!');
         setBroadcastTitle('');
         setBroadcastMsg('');
+      } else {
+        alert(data.error || 'ব্রডকাস্ট পাঠাতে সমস্যা হয়েছে');
       }
-    } catch {}
+    } catch (err: any) {
+      alert('সার্ভার যোগাযোগে ত্রুটি: ' + err.message);
+    }
   };
 
   // ============================================================================
@@ -1236,65 +1427,197 @@ export default function AdminPage() {
           )}
 
           {/* ============================================================================ */}
-          {/* TAB 4: INSIDE RU ARTICLES APPROVAL */}
+          {/* TAB 4: INSIDE RU ARTICLES & BREAKING NEWS MANAGEMENT */}
           {/* ============================================================================ */}
           {role === 'SUPER_ADMIN' && activeTab === 'articles' && (
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
-              <h2 className="text-lg font-black text-slate-900">
-                Inside RU শিক্ষার্থীদের লেখা ও পেপার অনুমোদন
-              </h2>
+            <div className="space-y-6">
+              {/* Header & Quick Action Buttons */}
+              <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
+                    <Newspaper className="w-6 h-6 text-blue-600" />
+                    <span>Inside RU নিউজ, সাহিত্য ও ব্রেকিং নিউজ ব্যবস্থাপনা</span>
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-1">
+                    ক্যাম্পাস নিউজ, ব্রেকিং নিউজ, গল্প, সাহিত্য ও চারুকলার লেখা ও ছবি আপলোড এবং এডিট করুন ({articles.length}টি কনটেন্ট)
+                  </p>
+                </div>
 
-              <div className="divide-y divide-slate-100">
-                {articles.map((art) => (
-                  <div key={art.id} className="py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div className="space-y-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                          {art.category}
-                        </span>
-                        <span
-                          className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
-                            art.status === 'Published'
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : 'bg-amber-100 text-amber-800'
-                          }`}
-                        >
-                          {art.status}
-                        </span>
+                <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+                  <button
+                    type="button"
+                    onClick={() => handleOpenAddArticle(true)}
+                    className="flex-1 md:flex-initial px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition"
+                  >
+                    <Flame className="w-4 h-4 fill-amber-300 text-amber-300 animate-pulse" />
+                    <span>🔥 নতুন ব্রেকিং নিউজ যোগ করুন</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleOpenAddArticle(false)}
+                    className="flex-1 md:flex-initial px-4 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-extrabold text-xs shadow-sm flex items-center justify-center gap-2 transition"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>+ সাধারণ নিউজ বা লেখা যোগ করুন</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Category Filter Chips */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+                {[
+                  { id: 'all', label: `সকল লেখা (${articles.length})` },
+                  { id: 'breaking', label: `🔥 ব্রেকিং নিউজ (${articles.filter(a => a.isBreaking || a.category === 'ব্রেকিং নিউজ').length})` },
+                  { id: 'ক্যাম্পাস নিউজ', label: 'ক্যাম্পাস নিউজ' },
+                  { id: 'গল্প ও স্মৃতিচারণ', label: 'গল্প ও স্মৃতিচারণ' },
+                  { id: 'চারুকলা ও সাহিত্য', label: 'চারুকলা ও সাহিত্য' },
+                  { id: 'সাহিত্য ও কবিতা', label: 'সাহিত্য ও কবিতা' },
+                  { id: 'গবেষণা ও পেপার', label: 'গবেষণা ও পেপার' },
+                ].map((cat) => {
+                  const isActive = articleCategoryFilter === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setArticleCategoryFilter(cat.id)}
+                      className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition ${
+                        isActive
+                          ? 'bg-slate-900 text-white shadow-sm'
+                          : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      {cat.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Articles List Cards */}
+              <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm divide-y divide-slate-100">
+                {(() => {
+                  const filtered = articles.filter((a) => {
+                    if (articleCategoryFilter === 'all') return true;
+                    if (articleCategoryFilter === 'breaking') return a.isBreaking || a.category === 'ব্রেকিং নিউজ';
+                    return a.category === articleCategoryFilter;
+                  });
+
+                  if (filtered.length === 0) {
+                    return (
+                      <div className="py-12 text-center text-slate-400 text-xs">
+                        এই ক্যাটাগরিতে এখনো কোনো আর্টিকেল বা নিউজ নেই। উপরের বাটনে চাপ দিয়ে নতুন তৈরি করুন।
                       </div>
-                      <h3 className="text-sm font-extrabold text-slate-900">{art.title}</h3>
-                      <p className="text-xs text-slate-500">
-                        লেখক: {art.authorName} ({art.department})
-                      </p>
-                    </div>
+                    );
+                  }
 
-                    <div className="flex items-center gap-2 shrink-0">
-                      {art.status !== 'Published' ? (
+                  return filtered.map((art) => (
+                    <div key={art.id} className="py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                      <div className="flex items-start gap-3.5 min-w-0 flex-1">
+                        {/* Thumbnail */}
+                        <div className="relative w-20 h-16 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
+                          <img
+                            src={art.images?.[0] || '/campus/paris-road-rain.jpg'}
+                            alt={art.title}
+                            className="w-full h-full object-cover"
+                          />
+                          {art.images && art.images.length > 1 && (
+                            <span className="absolute bottom-1 right-1 bg-black/70 text-white text-[9px] px-1 py-0.2 rounded font-bold">
+                              +{art.images.length - 1}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Text Info */}
+                        <div className="space-y-1 min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <span
+                              className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                                art.isBreaking || art.category === 'ব্রেকিং নিউজ'
+                                  ? 'bg-red-100 text-red-700 border border-red-200'
+                                  : 'bg-blue-50 text-blue-700 border border-blue-200'
+                              }`}
+                            >
+                              {art.isBreaking ? '🔥 ব্রেকিং নিউজ' : art.category}
+                            </span>
+
+                            <span
+                              className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                                art.status === 'Published'
+                                  ? 'bg-emerald-100 text-emerald-800'
+                                  : 'bg-amber-100 text-amber-800'
+                              }`}
+                            >
+                              {art.status === 'Published' ? '✓ প্রকাশিত (Live)' : '⏳ ড্রাফট / পেন্ডিং'}
+                            </span>
+
+                            <span className="text-[10px] font-bold text-rose-600 bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-full flex items-center gap-1">
+                              <Heart className="w-3 h-3 fill-rose-500" />
+                              <span>{art.likes ?? 0}</span>
+                            </span>
+                          </div>
+
+                          <h3 className="text-sm sm:text-base font-extrabold text-slate-900 line-clamp-1">
+                            {art.title}
+                          </h3>
+
+                          <p className="text-xs text-slate-500 line-clamp-1">
+                            লেখক: <span className="font-bold text-slate-700">{art.authorName}</span> ({art.department})
+                            {art.summary ? ` • ${art.summary}` : ''}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex flex-wrap items-center gap-2 shrink-0 w-full md:w-auto justify-end">
                         <button
-                          onClick={() => handleApproveArticle(art.id, 'Published')}
-                          className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold"
+                          type="button"
+                          onClick={() => handleOpenEditArticle(art)}
+                          className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center gap-1.5 transition"
+                          title="এডিট ও ছবি যোগ করুন"
                         >
-                          প্রকাশ করুন (Publish)
+                          <Edit3 className="w-3.5 h-3.5 text-blue-600" />
+                          <span>এডিট ও ছবি</span>
                         </button>
-                      ) : (
+
+                        {art.status !== 'Published' ? (
+                          <button
+                            type="button"
+                            onClick={() => handleApproveArticle(art.id, 'Published')}
+                            className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-sm"
+                          >
+                            পাবলিশ করুন
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleApproveArticle(art.id, 'Pending')}
+                            className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold transition"
+                          >
+                            আনপাবলিশ
+                          </button>
+                        )}
+
+                        <Link
+                          href={`/inside-ru/${art.id}`}
+                          target="_blank"
+                          className="p-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 transition"
+                          title="সরাসরি পেজে দেখুন"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </Link>
+
                         <button
-                          onClick={() => handleApproveArticle(art.id, 'Pending')}
-                          className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold"
+                          type="button"
+                          onClick={() => handleDeleteArticle(art.id)}
+                          className="p-2 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition"
+                          title="মুছে ফেলুন"
                         >
-                          আন-পাবলিশ করুন
+                          <Trash2 className="w-4 h-4" />
                         </button>
-                      )}
-                      <Link
-                        href={`/inside-ru/${art.id}`}
-                        target="_blank"
-                        className="p-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50"
-                        title="পড়ুন"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                      </Link>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ));
+                })()}
               </div>
             </div>
           )}
@@ -1528,6 +1851,62 @@ export default function AdminPage() {
                     onChange={(e) => setSettings({ ...settings, whatsappNumber: e.target.value })}
                     className="w-full text-xs sm:text-sm border border-slate-200 rounded-xl p-2.5 font-bold"
                   />
+                </div>
+
+                {/* Breaking News Ticker Manager */}
+                <div className="pt-4 border-t border-slate-100 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
+                        <Flame className="w-4 h-4 text-red-600" />
+                        <span>হোমপেজ ব্রেকিং নিউজ টিকার তালিকা (Ticker Headlines)</span>
+                      </h4>
+                      <p className="text-xs text-slate-500">
+                        এখানে থাকা প্রতিটি শিরোনাম হোমপেজের লাল টিকারে পর্যায়ক্রমে দেখাবে
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const currentNews = settings.breakingNews || [];
+                        setSettings({
+                          ...settings,
+                          breakingNews: [...currentNews, '🔥 নতুন ব্রেকিং নিউজ শিরোনাম লিখুন...'],
+                        });
+                      }}
+                      className="text-xs text-blue-700 font-bold hover:underline"
+                    >
+                      + নতুন টিকার যোগ করুন
+                    </button>
+                  </div>
+
+                  <div className="space-y-2">
+                    {(settings.breakingNews || []).map((headline, hIdx) => (
+                      <div key={hIdx} className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={headline}
+                          onChange={(e) => {
+                            const updated = [...(settings.breakingNews || [])];
+                            updated[hIdx] = e.target.value;
+                            setSettings({ ...settings, breakingNews: updated });
+                          }}
+                          className="flex-1 text-xs border border-slate-200 rounded-xl p-2.5 font-bold"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updated = (settings.breakingNews || []).filter((_, i) => i !== hIdx);
+                            setSettings({ ...settings, breakingNews: updated });
+                          }}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg border border-red-200 text-xs"
+                          title="টিকার মুছুন"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Password Management */}
@@ -1863,6 +2242,290 @@ export default function AdminPage() {
                 className="w-full py-3.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-extrabold text-sm shadow-md transition"
               >
                 পণ্য সংরক্ষণ করুন
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* ============================================================================ */}
+      {/* ARTICLE & BREAKING NEWS ADD / EDIT MODAL */}
+      {/* ============================================================================ */}
+      {showArticleModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[92vh] overflow-y-auto p-6 sm:p-8 space-y-5 shadow-2xl relative my-auto">
+            <button
+              onClick={() => setShowArticleModal(false)}
+              className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-100 text-slate-500 font-bold"
+            >
+              ✕
+            </button>
+
+            <div>
+              <span
+                className={`text-[10px] font-black px-2.5 py-1 rounded-full ${
+                  editArticle.isBreaking
+                    ? 'bg-red-100 text-red-700 border border-red-200'
+                    : 'bg-blue-100 text-blue-700 border border-blue-200'
+                }`}
+              >
+                {editArticle.isBreaking ? '🔥 ব্রেকিং নিউজ মোড' : '📰 সাধারণ প্রকাশনা'}
+              </span>
+              <h2 className="text-lg sm:text-xl font-black text-slate-900 mt-2">
+                {editArticle.isBreaking ? 'ব্রেকিং নিউজ তৈরি বা সম্পাদনা' : 'নিউজ বা লেখা সম্পাদনা'}
+              </h2>
+              <p className="text-xs text-slate-500">
+                শিরোনাম, ছবি, অনুচ্ছেদ এবং লাইক সংখ্যা নির্ধারণ করে প্রকাশ করুন
+              </p>
+            </div>
+
+            <form onSubmit={handleSaveArticle} className="space-y-4">
+              {/* Title */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700">নিউজের বাংলা শিরোনাম *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="আকর্ষণীয় ও সুস্পষ্ট শিরোনাম লিখুন..."
+                  value={editArticle.title}
+                  onChange={(e) => setEditArticle({ ...editArticle, title: e.target.value })}
+                  className="w-full text-xs sm:text-sm border border-slate-200 rounded-xl p-2.5 font-bold"
+                />
+              </div>
+
+              {/* Category & Likes */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700">ক্যাটাগরি নির্বাচন</label>
+                  <select
+                    value={editArticle.category}
+                    onChange={(e) => {
+                      const cat = e.target.value as any;
+                      setEditArticle({
+                        ...editArticle,
+                        category: cat,
+                        isBreaking: cat === 'ব্রেকিং নিউজ' ? true : editArticle.isBreaking,
+                      });
+                    }}
+                    className="w-full text-xs sm:text-sm border border-slate-200 rounded-xl p-2.5 bg-white font-bold"
+                  >
+                    <option value="ব্রেকিং নিউজ">🔥 ব্রেকিং নিউজ</option>
+                    <option value="ক্যাম্পাস নিউজ">📰 ক্যাম্পাস নিউজ</option>
+                    <option value="গল্প ও স্মৃতিচারণ">📖 গল্প ও স্মৃতিচারণ</option>
+                    <option value="চারুকলা ও সাহিত্য">🎨 চারুকলা ও সাহিত্য</option>
+                    <option value="সাহিত্য ও কবিতা">✍️ সাহিত্য ও কবিতা</option>
+                    <option value="গবেষণা ও পেপার">🔬 গবেষণা ও পেপার</option>
+                    <option value="কৃতি শিক্ষার্থী ও ট্যালেন্ট">🌟 কৃতি শিক্ষার্থী ও ট্যালেন্ট</option>
+                    <option value="ক্যাম্পাস গান ও সুর">🎵 ক্যাম্পাস গান ও সুর</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
+                    <Heart className="w-3.5 h-3.5 fill-red-500 text-red-500" />
+                    <span>❤️ লাইক সংখ্যা (Admin Editable)</span>
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={editArticle.likes ?? 0}
+                    onChange={(e) => setEditArticle({ ...editArticle, likes: Number(e.target.value) })}
+                    className="w-full text-xs sm:text-sm border border-slate-200 rounded-xl p-2.5 font-bold text-red-600"
+                  />
+                </div>
+              </div>
+
+              {/* Author details */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700">লেখক / প্রতিবেদকের নাম</label>
+                  <input
+                    type="text"
+                    required
+                    value={editArticle.authorName}
+                    onChange={(e) => setEditArticle({ ...editArticle, authorName: e.target.value })}
+                    className="w-full text-xs sm:text-sm border border-slate-200 rounded-xl p-2.5"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700">বিভাগ / সংগঠন</label>
+                  <input
+                    type="text"
+                    required
+                    value={editArticle.department}
+                    onChange={(e) => setEditArticle({ ...editArticle, department: e.target.value })}
+                    className="w-full text-xs sm:text-sm border border-slate-200 rounded-xl p-2.5"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700">WhatsApp নাম্বার</label>
+                  <input
+                    type="text"
+                    value={editArticle.whatsappNumber || ''}
+                    onChange={(e) => setEditArticle({ ...editArticle, whatsappNumber: e.target.value })}
+                    className="w-full text-xs sm:text-sm border border-slate-200 rounded-xl p-2.5"
+                  />
+                </div>
+              </div>
+
+              {/* Short Summary */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700">সংক্ষিপ্ত সারসংক্ষেপ (Summary)</label>
+                <textarea
+                  rows={2}
+                  placeholder="নিউজের সংক্ষিপ্ত সারসংক্ষেপ..."
+                  value={editArticle.summary}
+                  onChange={(e) => setEditArticle({ ...editArticle, summary: e.target.value })}
+                  className="w-full text-xs sm:text-sm border border-slate-200 rounded-xl p-2.5"
+                />
+              </div>
+
+              {/* Multiple Images Upload & Gallery */}
+              <div className="space-y-2 pt-2 border-t border-slate-100">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-extrabold text-slate-800 flex items-center gap-1">
+                    <Camera className="w-3.5 h-3.5 text-blue-600" />
+                    <span>ছবির গ্যালারি (Multiple Images):</span>
+                  </label>
+                  <label className="cursor-pointer text-xs font-bold text-blue-700 hover:text-blue-800 flex items-center gap-1 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">
+                    <Upload className="w-3 h-3" />
+                    <span>{uploadingImage ? 'আপলোড হচ্ছে...' : 'নতুন ছবি আপলোড'}</span>
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      disabled={uploadingImage}
+                      onChange={(e) => handleFileUpload(e, 'article')}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+
+                {/* Current Images List */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {editArticle.images.map((imgUrl, imgIdx) => (
+                    <div key={imgIdx} className="relative group rounded-xl overflow-hidden border border-slate-200 aspect-video bg-slate-100">
+                      <img src={imgUrl} alt={`Image ${imgIdx + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = editArticle.images.filter((_, i) => i !== imgIdx);
+                          setEditArticle({ ...editArticle, images: updated.length ? updated : ['/campus/paris-road-rain.jpg'] });
+                        }}
+                        className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-90 hover:opacity-100 transition shadow"
+                        title="ছবি মুছুন"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Multiple Detail Sections (Title + Content) */}
+              <div className="space-y-3 pt-2 border-t border-slate-100">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-extrabold text-slate-800">
+                    বিস্তারিত অনুচ্ছেদসমূহ (Multiple Sections):
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setEditArticle((prev) => ({
+                        ...prev,
+                        detailSections: [
+                          ...(prev.detailSections || []),
+                          { id: `sec-${Date.now()}`, title: 'নতুন অনুচ্ছেদ', content: '' },
+                        ],
+                      }))
+                    }
+                    className="text-xs text-blue-700 font-bold hover:underline"
+                  >
+                    + নতুন অনুচ্ছেদ যোগ করুন
+                  </button>
+                </div>
+
+                {(editArticle.detailSections || []).map((sec, idx) => (
+                  <div key={sec.id || idx} className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <input
+                        type="text"
+                        placeholder="অনুচ্ছেদের শিরোনাম (যেমন: পেছনের গল্প)"
+                        value={sec.title}
+                        onChange={(e) => {
+                          const updated = [...(editArticle.detailSections || [])];
+                          updated[idx].title = e.target.value;
+                          setEditArticle({ ...editArticle, detailSections: updated });
+                        }}
+                        className="flex-1 text-xs font-bold border border-slate-200 rounded-lg p-2 bg-white"
+                      />
+                      {(editArticle.detailSections?.length || 0) > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updated = (editArticle.detailSections || []).filter((_, i) => i !== idx);
+                            setEditArticle({ ...editArticle, detailSections: updated });
+                          }}
+                          className="text-red-500 hover:text-red-700 text-xs"
+                        >
+                          মুছুন
+                        </button>
+                      )}
+                    </div>
+                    <textarea
+                      rows={3}
+                      placeholder="বিস্তারিত লেখা ও বিবরণ..."
+                      value={sec.content}
+                      onChange={(e) => {
+                        const updated = [...(editArticle.detailSections || [])];
+                        updated[idx].content = e.target.value;
+                        setEditArticle({ ...editArticle, detailSections: updated });
+                      }}
+                      className="w-full text-xs border border-slate-200 rounded-lg p-2 bg-white"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* Breaking News & Push Flags */}
+              <div className="pt-2 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <label className="text-xs font-bold text-slate-700 flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={editArticle.isBreaking}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setEditArticle({
+                        ...editArticle,
+                        isBreaking: checked,
+                        category: checked ? 'ব্রেকিং নিউজ' : editArticle.category,
+                      });
+                    }}
+                    className="rounded text-red-600 focus:ring-red-500"
+                  />
+                  <span className="text-red-700 font-extrabold flex items-center gap-1">
+                    <Flame className="w-3.5 h-3.5 fill-red-600 text-red-600" />
+                    <span>🔥 হোমপেজ ব্রেকিং নিউজ টিকারে যুক্ত করুন</span>
+                  </span>
+                </label>
+
+                <label className="text-xs font-bold text-slate-700 flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={sendArticlePush}
+                    onChange={(e) => setSendArticlePush(e.target.checked)}
+                    className="rounded text-blue-600"
+                  />
+                  <span>🔔 Chrome পুশ নোটিফিকেশন পাঠান</span>
+                </label>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 text-white font-extrabold text-sm shadow-md transition"
+              >
+                ✓ নিউজ ও ছবি সংরক্ষণ করুন
               </button>
             </form>
           </div>
