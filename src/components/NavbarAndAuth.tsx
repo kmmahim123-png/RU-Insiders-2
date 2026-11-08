@@ -17,6 +17,7 @@ import {
   MessageCircle,
   ShieldCheck,
   ArrowRight,
+  Lock,
 } from 'lucide-react';
 
 export interface UserSession {
@@ -273,73 +274,104 @@ export default function NavbarAndAuth() {
             <div className="relative">
               <button
                 onClick={() => setNotifOpen(!notifOpen)}
-                className="w-11 h-11 rounded-xl border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-100 relative"
+                className="w-11 h-11 rounded-xl border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-100 relative transition"
                 aria-label="Notifications"
               >
                 <Bell className="w-5 h-5" />
                 {notifications.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center animate-pulse">
                     {notifications.length}
                   </span>
                 )}
               </button>
 
               {notifOpen && (
-                <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl border border-slate-200 shadow-2xl p-4 z-50">
-                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                    <h4 className="font-bold text-slate-900 text-sm">ক্যাম্পাস ও অফার নোটিফিকেশন</h4>
-                    <button
-                      onClick={requestChromeNotification}
-                      className={`text-xs px-2.5 py-1 rounded-lg font-bold transition ${
-                        pushPerm === 'granted'
-                          ? 'bg-emerald-50 text-emerald-700'
-                          : 'bg-blue-600 text-white hover:bg-blue-700'
-                      }`}
-                    >
-                      {pushPerm === 'granted' ? '✓ Chrome Push চালু আছে' : '🔔 Chrome Push চালু করুন'}
-                    </button>
-                  </div>
+                <>
+                  {/* Backdrop for outside click dismissal on all screen sizes */}
+                  <div
+                    className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-50 transition-opacity"
+                    onClick={() => setNotifOpen(false)}
+                  />
 
-                  <div className="max-h-56 overflow-y-auto divide-y divide-slate-100 my-2">
-                    {notifications.map((n) => (
-                      <Link
-                        key={n.id}
-                        href={n.link || '/'}
-                        onClick={() => setNotifOpen(false)}
-                        className="block py-2.5 hover:bg-slate-50 px-2 rounded-lg"
-                      >
-                        <p className="text-xs font-bold text-slate-900">{n.title}</p>
-                        <p className="text-xs text-slate-600 mt-0.5">{n.message}</p>
-                      </Link>
-                    ))}
-                  </div>
-
-                  <form onSubmit={handleSubscribe} className="pt-2 border-t border-slate-100 space-y-2">
-                    <p className="text-[11px] text-slate-500 font-medium">
-                      WhatsApp বা ইমেইলে সবার আগে আপডেট পেতে যুক্ত হোন:
-                    </p>
-                    <div className="flex gap-1.5">
-                      <input
-                        type="text"
-                        value={subContact}
-                        onChange={(e) => setSubContact(e.target.value)}
-                        placeholder="আপনার WhatsApp নাম্বার বা ইমেইল"
-                        className="flex-1 text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:border-blue-500"
-                      />
+                  {/* Mobile-Optimized Dropdown / Drawer Modal */}
+                  <div className="fixed inset-x-3 top-20 sm:top-16 sm:inset-x-auto sm:right-6 sm:w-96 max-h-[85vh] flex flex-col bg-white rounded-3xl sm:rounded-2xl border border-slate-200 shadow-2xl p-4 sm:p-5 z-50 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="flex items-center justify-between pb-3 border-b border-slate-100 shrink-0">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                          <Bell className="w-4 h-4" />
+                        </div>
+                        <h4 className="font-bold text-slate-900 text-sm">ক্যাম্পাস ও অফার নোটিফিকেশন</h4>
+                      </div>
                       <button
-                        type="submit"
-                        className="bg-blue-700 text-white text-xs font-bold px-3 py-2 rounded-lg hover:bg-blue-800"
+                        onClick={() => setNotifOpen(false)}
+                        className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition"
+                        aria-label="Close"
                       >
-                        যুক্ত হোন
+                        <X className="w-4 h-4" />
                       </button>
                     </div>
-                    {subSuccess && (
-                      <p className="text-[11px] text-emerald-600 font-bold">
-                        ✓ আপনার নাম্বার/ইমেইল সফলভাবে যুক্ত হয়েছে!
+
+                    {/* Push Permission Toggle Button */}
+                    <div className="pt-2.5 pb-2 shrink-0">
+                      <button
+                        onClick={requestChromeNotification}
+                        className={`w-full text-xs py-2 px-3 rounded-xl font-bold transition flex items-center justify-center gap-1.5 shadow-xs ${
+                          pushPerm === 'granted'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700'
+                        }`}
+                      >
+                        {pushPerm === 'granted' ? '✓ Chrome Push চালু আছে' : '🔔 ব্রাউজার নোটিফিকেশন চালু করুন'}
+                      </button>
+                    </div>
+
+                    {/* Notification items scroll area */}
+                    <div className="flex-1 overflow-y-auto divide-y divide-slate-100 my-1 pr-1 overscroll-contain max-h-56">
+                      {notifications.length === 0 ? (
+                        <p className="text-xs text-slate-400 text-center py-6">বর্তমানে কোনো নতুন নোটিফিকেশন নেই</p>
+                      ) : (
+                        notifications.map((n) => (
+                          <Link
+                            key={n.id}
+                            href={n.link || '/'}
+                            onClick={() => setNotifOpen(false)}
+                            className="block py-2.5 hover:bg-slate-50 px-2.5 rounded-xl transition group"
+                          >
+                            <p className="text-xs font-bold text-slate-900 group-hover:text-blue-600">{n.title}</p>
+                            <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">{n.message}</p>
+                          </Link>
+                        ))
+                      )}
+                    </div>
+
+                    {/* WhatsApp / Email Form */}
+                    <form onSubmit={handleSubscribe} className="pt-3 border-t border-slate-100 space-y-2 shrink-0">
+                      <p className="text-[11px] text-slate-500 font-medium">
+                        WhatsApp বা ইমেইলে সবার আগে আপডেট পেতে যুক্ত হোন:
                       </p>
-                    )}
-                  </form>
-                </div>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={subContact}
+                          onChange={(e) => setSubContact(e.target.value)}
+                          placeholder="আপনার WhatsApp নাম্বার বা ইমেইল"
+                          className="flex-1 text-xs border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-blue-500"
+                        />
+                        <button
+                          type="submit"
+                          className="bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-blue-800 shrink-0 transition"
+                        >
+                          যুক্ত হোন
+                        </button>
+                      </div>
+                      {subSuccess && (
+                        <p className="text-[11px] text-emerald-600 font-bold">
+                          ✓ আপনার নাম্বার/ইমেইল সফলভাবে যুক্ত হয়েছে!
+                        </p>
+                      )}
+                    </form>
+                  </div>
+                </>
               )}
             </div>
 
@@ -465,11 +497,11 @@ export default function NavbarAndAuth() {
         )}
       </header>
 
-      {/* 5. Google Account Chooser Modal (Zero Redirect) */}
+      {/* 5. Google Account Chooser Modal (Zero Redirect, Mobile Ergonomic) */}
       {showGoogleModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-md rounded-3xl border border-slate-200 shadow-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between">
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-150">
+          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-slate-200 shadow-2xl p-5 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto overscroll-contain">
+            <div className="flex items-center justify-between pb-1 border-b border-slate-100">
               <div className="flex items-center gap-2">
                 <span className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 font-extrabold flex items-center justify-center">
                   G
@@ -479,7 +511,11 @@ export default function NavbarAndAuth() {
                   <p className="text-xs text-slate-500">লগইন করলে Chrome ব্রাউজার নোটিফিকেশন চালু হবে</p>
                 </div>
               </div>
-              <button onClick={() => setShowGoogleModal(false)} className="p-1 text-slate-400 hover:text-slate-700">
+              <button 
+                onClick={() => setShowGoogleModal(false)} 
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition"
+                aria-label="Close"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -496,12 +532,12 @@ export default function NavbarAndAuth() {
                 }
                 className="w-full flex items-center gap-3 p-3 rounded-2xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/40 text-left transition"
               >
-                <img src="/logo.png" alt="Mahim" className="w-10 h-10 rounded-full border border-slate-200" />
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-slate-900">Mahim (Primary Admin)</p>
-                  <p className="text-xs text-slate-500">kmmahim123@gmail.com</p>
+                <img src="/logo.png" alt="Mahim" className="w-10 h-10 rounded-full border border-slate-200 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-slate-900 truncate">Mahim (Primary Admin)</p>
+                  <p className="text-xs text-slate-500 truncate">kmmahim123@gmail.com</p>
                 </div>
-                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
               </button>
 
               <button
@@ -515,12 +551,12 @@ export default function NavbarAndAuth() {
                 }
                 className="w-full flex items-center gap-3 p-3 rounded-2xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/40 text-left transition"
               >
-                <img src="/logo.png" alt="Student" className="w-10 h-10 rounded-full border border-slate-200" />
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-slate-900">রাবি শিক্ষার্থী (Campus Verified)</p>
-                  <p className="text-xs text-slate-500">student@ru.ac.bd</p>
+                <img src="/logo.png" alt="Student" className="w-10 h-10 rounded-full border border-slate-200 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-slate-900 truncate">রাবি শিক্ষার্থী (Campus Verified)</p>
+                  <p className="text-xs text-slate-500 truncate">student@ru.ac.bd</p>
                 </div>
-                <CheckCircle2 className="w-5 h-5 text-blue-600" />
+                <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0" />
               </button>
             </div>
 
@@ -531,14 +567,14 @@ export default function NavbarAndAuth() {
                 placeholder="আপনার নাম"
                 value={customName}
                 onChange={(e) => setCustomName(e.target.value)}
-                className="w-full text-sm border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-blue-500"
+                className="w-full text-base sm:text-sm border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-blue-500"
               />
               <input
                 type="email"
                 placeholder="yourname@gmail.com"
                 value={customEmail}
                 onChange={(e) => setCustomEmail(e.target.value)}
-                className="w-full text-sm border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-blue-500"
+                className="w-full text-base sm:text-sm border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-blue-500"
               />
               <button
                 onClick={() => {
@@ -550,10 +586,22 @@ export default function NavbarAndAuth() {
                     role: 'visitor',
                   });
                 }}
-                className="w-full py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold text-sm"
+                className="w-full py-3 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold text-sm shadow-sm transition"
               >
                 লগইন ও নোটিফিকেশন চালু করুন
               </button>
+            </div>
+
+            {/* Direct Admin & Club Portal Link */}
+            <div className="pt-2 border-t border-slate-100">
+              <Link
+                href="/admin"
+                onClick={() => setShowGoogleModal(false)}
+                className="w-full py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition"
+              >
+                <Lock className="w-3.5 h-3.5 text-amber-400" />
+                <span>অ্যাডমিন ও ক্লাব পাসওয়ার্ড পোর্টাল →</span>
+              </Link>
             </div>
           </div>
         </div>
