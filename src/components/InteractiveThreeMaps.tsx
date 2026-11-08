@@ -21,6 +21,7 @@ import { RAJSHAHI_PDF_REGIONS, RAJSHAHI_PDF_MAP_VIEWBOX, RajshahiPdfRegionData }
 import { RAJSHAHI_DISTRICT_SVGS, RAJSHAHI_VIEWBOX } from '@/lib/rajshahiDistrictsSvg';
 import { DIVISION_DISTRICT_META, DIVISION_SPOTS, DivisionSpotItem } from '@/lib/divisionSpotsData';
 import { MapSpotCustomData, DetailBlock } from '@/types';
+import CampusMapExplorer from '@/components/CampusMapExplorer';
 
 // RU Campus groupings
 const RU_CATEGORIES = [
@@ -460,7 +461,7 @@ export default function InteractiveThreeMaps() {
               : 'text-slate-700 hover:bg-white/60'
           }`}
         >
-          <span>🎓 ১. রাবি ক্যাম্পাস ({visitedRuIds.length}/৪২)</span>
+          <span>🎓 ১. রাবি ক্যাম্পাস (৩ডি ক্যাম্পাস ম্যাপ)</span>
         </button>
 
         <button
@@ -487,240 +488,11 @@ export default function InteractiveThreeMaps() {
       </div>
 
       {/* ============================================================================ */}
-      {/* STAGE 1: RU CAMPUS (42 SPOTS) */}
+      {/* STAGE 1: RU CAMPUS (3D / 2D MASTERPLAN EXPLORER) */}
       {/* ============================================================================ */}
       {stage === 'ru_campus' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Left Column: Search, Categories & Progress */}
-          <div className="lg:col-span-5 space-y-4">
-            {/* Progress Card */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-                <span>রাবি ক্যাম্পাস পরিক্রমা</span>
-                <span className="text-emerald-600 font-extrabold">{ruPercent}% সম্পন্ন</span>
-              </div>
-              <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-                <div
-                  className="bg-emerald-500 h-full rounded-full transition-all duration-500"
-                  style={{ width: `${ruPercent}%` }}
-                />
-              </div>
-              <p className="text-[11px] text-slate-500 mt-2">
-                ৪২টি ঐতিহাসিক স্থান ও ভবনের মধ্যে {visitedRuIds.length}টি স্থান আপনার ঘুরে দেখা হয়েছে।
-              </p>
-            </div>
-
-            {/* Selected Spot Details Preview Card */}
-            {activeRuPlace && (
-              <div className="bg-white rounded-2xl border-2 border-amber-400 p-4 shadow-sm space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="w-20 h-20 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
-                    <img
-                      src={customSpotsMap[activeRuPlace.id]?.images?.[0] || activeRuPlace.imageUrl}
-                      alt={activeRuPlace.nameBn}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <span className="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                      স্পট #{activeRuPlace.rankNo}
-                    </span>
-                    <h3 className="text-sm font-extrabold text-slate-900 truncate mt-1">
-                      {activeRuPlace.nameBn}
-                    </h3>
-                    <p className="text-xs text-slate-500 line-clamp-2 mt-0.5">
-                      {activeRuPlace.descriptionBn}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
-                  <button
-                    onClick={() => toggleRuSpot(activeRuPlace.id)}
-                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-                      visitedRuIds.includes(activeRuPlace.id)
-                        ? 'bg-emerald-600 text-white'
-                        : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
-                    }`}
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                    {visitedRuIds.includes(activeRuPlace.id) ? 'ঘুরেছি ✓' : 'আমি ঘুরেছি'}
-                  </button>
-
-                  <button
-                    onClick={() =>
-                      openSpotFullPage(
-                        activeRuPlace.id,
-                        activeRuPlace.nameBn,
-                        activeRuPlace.shortBn,
-                        activeRuPlace.imageUrl,
-                        activeRuPlace.descriptionBn,
-                        visitedRuIds.includes(activeRuPlace.id),
-                        () => toggleRuSpot(activeRuPlace.id)
-                      )
-                    }
-                    className="py-2 px-3.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold transition flex items-center gap-1"
-                  >
-                    <Eye className="w-3.5 h-3.5" /> বিস্তারিত ও ছবি
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Search Box */}
-            <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-              <input
-                type="text"
-                placeholder="ভবন, হল বা চত্বরের নাম দিয়ে খুঁজুন..."
-                value={ruSearch}
-                onChange={(e) => setRuSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 text-xs sm:text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500 shadow-sm"
-              />
-            </div>
-
-            {/* Categorized Spot List */}
-            <div className="space-y-4 max-h-[620px] overflow-y-auto pr-1">
-              {RU_CATEGORIES.map((cat, catIdx) => {
-                const categoryPlaces = RU_CAMPUS_PLACES.filter((p) => cat.ids.includes(p.id)).filter((p) =>
-                  ruSearch ? p.nameBn.includes(ruSearch) || p.shortBn.includes(ruSearch) : true
-                );
-                if (categoryPlaces.length === 0) return null;
-
-                return (
-                  <div key={catIdx} className="bg-white rounded-2xl border border-slate-200 p-3.5 shadow-sm">
-                    <h4 className="text-xs font-bold text-slate-800 pb-2 mb-2 border-b border-slate-100 flex items-center justify-between">
-                      <span>{cat.title}</span>
-                      <span className="text-[10px] text-slate-500 font-semibold">
-                        {categoryPlaces.filter((p) => visitedRuIds.includes(p.id)).length}/{categoryPlaces.length}
-                      </span>
-                    </h4>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                      {categoryPlaces.map((place) => {
-                        const isSelected = selectedRuId === place.id;
-                        const isVisited = visitedRuIds.includes(place.id);
-                        return (
-                          <div
-                            key={place.id}
-                            onClick={() => setSelectedRuId(place.id)}
-                            className={`p-2 rounded-xl text-left border cursor-pointer transition flex items-center justify-between gap-1.5 ${
-                              isSelected
-                                ? 'border-amber-400 bg-amber-50/60 ring-2 ring-amber-300'
-                                : isVisited
-                                ? 'border-emerald-200 bg-emerald-50/50'
-                                : 'border-slate-200 bg-white hover:bg-slate-50'
-                            }`}
-                          >
-                            <span className="text-xs font-bold text-slate-800 truncate">
-                              {place.shortBn}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleRuSpot(place.id);
-                              }}
-                              className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 border transition ${
-                                isVisited
-                                  ? 'bg-emerald-600 border-emerald-600 text-white'
-                                  : 'border-slate-300 text-transparent hover:border-slate-400'
-                              }`}
-                            >
-                              <Check className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Right Column: 2D Interactive Vector SVG Map */}
-          <div className="lg:col-span-7 bg-[#022c22] rounded-3xl border border-emerald-900 shadow-xl overflow-hidden p-3 sm:p-5 flex flex-col">
-            <div className="flex items-center justify-between pb-3 text-xs text-emerald-200 font-semibold border-b border-emerald-900">
-              <span className="flex items-center gap-1.5 text-amber-300 font-bold">
-                <Sparkles className="w-4 h-4" /> রাবি ক্যাম্পাস ২ডি ভেক্টর ম্যাপ
-              </span>
-              <span>যেকোনো স্থানে ক্লিক করে সিলেক্ট করুন</span>
-            </div>
-
-            <div className="w-full aspect-[1200/750] relative my-auto">
-              <svg
-                viewBox={RU_CAMPUS_VIEWBOX}
-                className="w-full h-full"
-                preserveAspectRatio="xMidYMid meet"
-              >
-                {/* Background Roads / Campus Accent Paths */}
-                <rect width="1200" height="750" fill="#042f2e" rx="16" />
-                <line x1="100" y1="300" x2="730" y2="300" stroke="#059669" strokeWidth="8" strokeOpacity="0.4" />
-                <line x1="280" y1="36" x2="280" y2="710" stroke="#059669" strokeWidth="6" strokeOpacity="0.3" />
-                <line x1="450" y1="36" x2="450" y2="710" stroke="#059669" strokeWidth="6" strokeOpacity="0.3" />
-
-                {/* 42 Interactive Polygons */}
-                {RU_CAMPUS_PLACES.map((place) => {
-                  const isSelected = selectedRuId === place.id;
-                  const isVisited = visitedRuIds.includes(place.id);
-
-                  let fillColor = '#1e293b'; // Unvisited dark blueprint slate
-                  if (isVisited) {
-                    fillColor = '#059669'; // Visited emerald green
-                  }
-
-                  return (
-                    <g
-                      key={place.id}
-                      onClick={() => setSelectedRuId(place.id)}
-                      className="cursor-pointer transition-all duration-300"
-                    >
-                      <path
-                        d={place.d}
-                        fill={fillColor}
-                        fillOpacity={isVisited ? 0.95 : 0.75}
-                        stroke={isSelected ? '#facc15' : '#ffffff'}
-                        strokeWidth={isSelected ? 3.5 : 1.2}
-                        className={isSelected ? 'glow-selected-polygon' : 'hover:fill-opacity-100'}
-                      />
-                      {/* Short label */}
-                      <text
-                        x={place.center.x}
-                        y={place.center.y}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        fill="#ffffff"
-                        fontSize={place.bbox.w > 130 ? '11' : '9'}
-                        fontWeight="bold"
-                        pointerEvents="none"
-                        style={{ textShadow: '0 1px 3px rgba(0,0,0,0.85)' }}
-                      >
-                        {place.shortBn}
-                      </text>
-                    </g>
-                  );
-                })}
-              </svg>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-between gap-2 pt-3 text-[11px] text-emerald-300 border-t border-emerald-900 mt-2">
-              <div className="flex items-center gap-3">
-                <span className="flex items-center gap-1">
-                  <span className="w-3 h-3 rounded-full bg-[#1e293b] border border-white" /> বাকি আছে
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-3 h-3 rounded-full bg-[#059669] border border-white" /> ঘুরেছি ✓
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-3 h-3 rounded-full bg-amber-400 border border-white" /> সিলেক্টেড
-                </span>
-              </div>
-              <span className="text-amber-300 font-bold">
-                ক্লিক করলে অটো-স্ক্রল হবে না
-              </span>
-            </div>
-          </div>
+        <div className="w-full">
+          <CampusMapExplorer />
         </div>
       )}
 
