@@ -266,7 +266,7 @@ export default function AdminPage() {
       return;
     }
 
-    const currentPass = password.trim() || sessionStorage.getItem('ru_admin_pass') || '';
+    const currentPass = getActivePass();
     try {
       const res = await fetch('/api/store', {
         method: 'POST',
@@ -277,7 +277,18 @@ export default function AdminPage() {
           payload: { article: editArticle, sendChromePush: sendArticlePush },
         }),
       });
-      const data = await res.json();
+      const text = await res.text();
+      let data: any = {};
+      try {
+        data = JSON.parse(text);
+      } catch {
+        if (res.status === 413) {
+          alert('নিউজের তথ্যের আকার অতিরিক্ত বড় (৪.৫ MB পার করেছে)। ছবির সাইজ ছোট করুন।');
+          return;
+        }
+        alert(`সার্ভার ত্রুটি (${res.status}): ${text.slice(0, 100)}`);
+        return;
+      }
       if (data.ok && data.articles) {
         setArticles(data.articles);
         if (data.settings) setSettings(data.settings);
@@ -342,17 +353,82 @@ export default function AdminPage() {
     setShowProductModal(true);
   };
 
+  const compressImageFile = async (file: File, maxWidth = 1200, quality = 0.82): Promise<File> => {
+    if (!file.type.startsWith('image/') || file.type.includes('svg') || file.type.includes('gif')) {
+      return file;
+    }
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(file);
+            return;
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) {
+                resolve(file);
+                return;
+              }
+              const compressedFile = new File([blob], file.name.replace(/\.[^.]+$/, '.webp'), {
+                type: 'image/webp',
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            },
+            'image/webp',
+            quality
+          );
+        };
+        img.onerror = () => resolve(file);
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => resolve(file);
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: 'product' | 'map' | 'article') => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     setUploadingImage(true);
     try {
+      showToast('ছবি অপ্টিমাইজ ও আপলোড হচ্ছে...');
+      const compressedFiles = await Promise.all(
+        Array.from(files).map((f) => compressImageFile(f))
+      );
+
       const formData = new FormData();
-      Array.from(files).forEach((file) => formData.append('files', file));
+      compressedFiles.forEach((file) => formData.append('files', file));
 
       const res = await fetch('/api/upload', { method: 'POST', body: formData });
-      const data = await res.json();
+      const text = await res.text();
+      let data: any = {};
+      try {
+        data = JSON.parse(text);
+      } catch {
+        if (res.status === 413) {
+          alert('ছবির সাইজ অনেক বড় (৪.৫ MB লিমিট পার করেছে)। কম রেজ্যুলেশনের ছবি নির্বাচন করুন।');
+          return;
+        }
+        alert(`সার্ভার আপলোড ত্রুটি (${res.status}): ${text.slice(0, 100)}`);
+        return;
+      }
+
       if (data.ok && data.urls?.length) {
         if (target === 'product') {
           setEditProduct((prev) => ({
@@ -370,7 +446,7 @@ export default function AdminPage() {
             images: [...prev.images.filter((img) => img !== '/campus/paris-road-rain.jpg'), ...data.urls],
           }));
         }
-        showToast('✓ ছবি সফলভাবে আপলোড হয়েছে!');
+        showToast('✓ ছবি সফলভাবে অপ্টিমাইজ ও আপলোড হয়েছে!');
       } else {
         alert(data.error || 'আপলোড ব্যর্থ হয়েছে');
       }
@@ -389,7 +465,7 @@ export default function AdminPage() {
       return;
     }
 
-    const currentPass = password.trim() || (typeof window !== 'undefined' ? sessionStorage.getItem('ru_admin_pass') || '' : '');
+    const currentPass = getActivePass();
     try {
       const res = await fetch('/api/store', {
         method: 'POST',
@@ -400,7 +476,19 @@ export default function AdminPage() {
           payload: { product: editProduct, sendChromePush: sendProdPush },
         }),
       });
-      const data = await res.json();
+      const text = await res.text();
+      let data: any = {};
+      try {
+        data = JSON.parse(text);
+      } catch {
+        if (res.status === 413) {
+          alert('পণ্যের তথ্যের আকার অতিরিক্ত বড় (৪.৫ MB পার করেছে)। ছবির সাইজ ছোট করুন।');
+          return;
+        }
+        alert(`সার্ভার ত্রুটি (${res.status}): ${text.slice(0, 100)}`);
+        return;
+      }
+
       if (data.ok && data.products) {
         setProducts(data.products);
         setShowProductModal(false);

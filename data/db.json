@@ -25,13 +25,41 @@
   },
   "products": [
     {
+      "id": "prod-1794154030298",
+      "nameBn": "tt",
+      "category": "হুডি ও শীতকালীন পোশাক",
+      "productType": "food_weight",
+      "price": 100,
+      "images": [
+        "/uploads/ru-1794154065708-z3z4s.jpg"
+      ],
+      "shortSummary": "",
+      "detailSections": [
+        {
+          "id": "sec-1",
+          "title": "বিবরণ ও ফেব্রিক কোয়ালিটি",
+          "content": ""
+        }
+      ],
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL"
+      ],
+      "weightOptions": [],
+      "inStock": true,
+      "featured": false,
+      "createdAt": "2026-11-08T16:07:10.298Z"
+    },
+    {
       "id": "prod-hoodie-1",
       "nameBn": "প্রিমিয়াম আরইউ ক্রেস্ট হুডি (নেভি ব্লু)",
       "category": "হুডি ও শীতকালীন পোশাক",
       "productType": "apparel",
       "price": 850,
       "images": [
-        "/mockups/hoodie-front.jpg",
         "/campus/paris-road-rain.jpg"
       ],
       "shortSummary": "৩২০ জিএসএম ফ্লিস কটন, বুকে রাবি ক্রেস্ট এমব্রয়ডারি করা প্রিমিয়াম শীতকালীন হুডি।",
@@ -256,7 +284,7 @@
       "subtotal": 850,
       "deliveryCharge": 0,
       "totalAmount": 850,
-      "status": "Pending",
+      "status": "Confirmed",
       "createdAt": "2026-11-08T11:06:18.936Z"
     }
   ],
@@ -461,6 +489,14 @@
     }
   ],
   "notifications": [
+    {
+      "id": "notif-1794154084034",
+      "title": "🛍️ নতুন পণ্য: tt",
+      "message": "মাত্র ৳100 টাকায় প্রি-অর্ডার করুন!",
+      "link": "/shop",
+      "sendChromePush": true,
+      "createdAt": "2026-11-08T16:08:04.034Z"
+    },
     {
       "id": "notif-1",
       "title": "🍯 খাঁটি খেজুরের গুড় ও উইন্টার হুডি স্টকে এসেছে!",
