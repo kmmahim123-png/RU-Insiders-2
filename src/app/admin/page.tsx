@@ -72,6 +72,18 @@ export default function AdminPage() {
     setTimeout(() => setToastMessage(''), 3000);
   };
 
+  const safeParseApiResponse = async (res: Response) => {
+    const text = await res.text();
+    try {
+      return JSON.parse(text);
+    } catch {
+      if (res.status === 413) {
+        throw new Error('অনুরোধের সাইজ অনেক বড় (৪.৫ MB লিমিট পার করেছে)। ছবির রেজোলিউশন বা সাইজ ছোট করুন।');
+      }
+      throw new Error(`সার্ভার ত্রুটি (${res.status}): ${text.slice(0, 100)}`);
+    }
+  };
+
   // 1. Password Verification (Single Input Auto Role Detection)
   const handleLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -85,7 +97,7 @@ export default function AdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'VERIFY_PASSWORD', password: password.trim() }),
       });
-      const data = await res.json();
+      const data = await safeParseApiResponse(res);
       if (data.ok) {
         setRole(data.role);
         setRoleTitle(data.roleTitle);
@@ -315,7 +327,7 @@ export default function AdminPage() {
           payload: { articleId: id },
         }),
       });
-      const data = await res.json();
+      const data = await safeParseApiResponse(res);
       if (data.ok && data.articles) {
         setArticles(data.articles);
         showToast('✓ নিউজ মুছে ফেলা হয়েছে');
@@ -514,7 +526,7 @@ export default function AdminPage() {
           payload: { productId: id },
         }),
       });
-      const data = await res.json();
+      const data = await safeParseApiResponse(res);
       if (data.ok && data.products) {
         setProducts(data.products);
         showToast('✓ পণ্য মুছে ফেলা হয়েছে');
@@ -539,7 +551,7 @@ export default function AdminPage() {
           payload: { orderId, status: newStatus },
         }),
       });
-      const data = await res.json();
+      const data = await safeParseApiResponse(res);
       if (data.ok && data.orders) {
         setOrders(data.orders);
         showToast(`✓ অর্ডার স্ট্যাটাস "${newStatus}" আপডেট হয়েছে`);
@@ -623,7 +635,7 @@ export default function AdminPage() {
           payload: { spot: editMapSpot },
         }),
       });
-      const data = await res.json();
+      const data = await safeParseApiResponse(res);
       if (data.ok && data.mapSpots) {
         setMapSpots(data.mapSpots);
         showToast('✓ ম্যাপ স্পট তথ্য ও ছবি সফলভাবে সংরক্ষিত হয়েছে!');
@@ -650,7 +662,7 @@ export default function AdminPage() {
           payload: { appId, status: newStatus },
         }),
       });
-      const data = await res.json();
+      const data = await safeParseApiResponse(res);
       if (data.ok && data.applications) {
         setClubApplications(data.applications);
         showToast(`✓ আবেদন স্ট্যাটাস "${newStatus}" করা হয়েছে`);
@@ -675,7 +687,7 @@ export default function AdminPage() {
           payload: { articleId, status },
         }),
       });
-      const data = await res.json();
+      const data = await safeParseApiResponse(res);
       if (data.ok && data.articles) {
         setArticles(data.articles);
         showToast(`✓ লেখা স্ট্যাটাস আপডেট হয়েছে`);
@@ -700,7 +712,7 @@ export default function AdminPage() {
           payload: { alumniId, approved },
         }),
       });
-      const data = await res.json();
+      const data = await safeParseApiResponse(res);
       if (data.ok && data.alumni) {
         setAlumni(data.alumni);
         showToast('✓ অ্যালামনাই অনুমোদন স্ট্যাটাস আপডেট হয়েছে');
@@ -725,7 +737,7 @@ export default function AdminPage() {
           payload: { alumniId },
         }),
       });
-      const data = await res.json();
+      const data = await safeParseApiResponse(res);
       if (data.ok && data.alumni) {
         setAlumni(data.alumni);
         showToast('✓ অ্যালামনাই প্রোফাইল মুছে ফেলা হয়েছে');
@@ -761,7 +773,7 @@ export default function AdminPage() {
           payload: { settings, clubs },
         }),
       });
-      const data = await res.json();
+      const data = await safeParseApiResponse(res);
       if (data.ok) {
         showToast('✓ সেটিংস ও পাসওয়ার্ড সফলভাবে আপডেট হয়েছে!');
       } else {
@@ -798,7 +810,7 @@ export default function AdminPage() {
           },
         }),
       });
-      const data = await res.json();
+      const data = await safeParseApiResponse(res);
       if (data.ok) {
         showToast('✓ নোটিফিকেশন ব্রডকাস্ট পাঠানো হয়েছে!');
         setBroadcastTitle('');
@@ -830,7 +842,7 @@ export default function AdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'CHECK_SUPABASE' }),
       });
-      const data = await res.json();
+      const data = await safeParseApiResponse(res);
       if (data.ok && data.status) {
         setSupabaseStatus(data.status);
       }
@@ -853,7 +865,7 @@ export default function AdminPage() {
           password: currentPass,
         }),
       });
-      const data = await res.json();
+      const data = await safeParseApiResponse(res);
       if (data.ok) {
         showToast('✓ সফলভাবে Supabase ক্লাউড ডেটাবেজে সম্পূর্ণ তথ্য সিঙ্ক হয়েছে!');
         handleCheckSupabase();
