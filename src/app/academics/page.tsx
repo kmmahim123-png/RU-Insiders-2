@@ -23,6 +23,7 @@ import {
   Mail,
   Linkedin,
 } from 'lucide-react';
+import CardTilt from '@/components/CardTilt';
 
 export default function AcademicsPage() {
   const [search, setSearch] = useState('');
@@ -264,7 +265,7 @@ export default function AcademicsPage() {
           const overview = custom?.overviewBn ?? dept.overviewBn;
 
           return (
-            <div
+            <CardTilt
               key={dept.id}
               onClick={() => {
                 setActiveGalleryIdx(0);
@@ -325,7 +326,7 @@ export default function AcademicsPage() {
                   <ChevronRight className="w-4 h-4" />
                 </span>
               </div>
-            </div>
+            </CardTilt>
           );
         })}
       </div>

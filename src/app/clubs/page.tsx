@@ -22,6 +22,7 @@ import {
   Award,
   Globe,
 } from 'lucide-react';
+import CardTilt from '@/components/CardTilt';
 
 export default function ClubsPage() {
   const [clubsList, setClubsList] = useState<RuClub[]>(RU_CLUBS);
@@ -173,7 +174,7 @@ export default function ClubsPage() {
         {clubsList.map((club) => {
           const images = getClubImages(club);
           return (
-            <div
+            <CardTilt
               key={club.id}
               onClick={() => {
                 setActiveGalleryIdx(0);
@@ -268,7 +269,7 @@ export default function ClubsPage() {
                   <span>আবেদন করুন</span>
                 </button>
               </div>
-            </div>
+            </CardTilt>
           );
         })}
       </div>

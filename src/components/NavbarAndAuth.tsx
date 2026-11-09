@@ -18,7 +18,9 @@ import {
   ShieldCheck,
   ArrowRight,
   Lock,
+  Search,
 } from 'lucide-react';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export interface UserSession {
   name: string;
@@ -415,6 +417,22 @@ export default function NavbarAndAuth() {
               <span className="hidden sm:inline">WhatsApp</span>
             </a>
 
+            {/* Spotlight Search Shortcut (Ctrl+K) */}
+            <button
+              onClick={() => window.dispatchEvent(new Event('ru_open_spotlight'))}
+              className="h-11 px-3 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 flex items-center gap-2 text-xs font-bold transition shrink-0 cursor-pointer shadow-xs"
+              title="স্পটলাইট সার্চ (Ctrl + K)"
+            >
+              <Search className="w-4 h-4 text-emerald-600" />
+              <span className="hidden md:inline text-slate-500 font-medium">অনুসন্ধান...</span>
+              <kbd className="hidden lg:inline px-1.5 py-0.5 text-[10px] bg-slate-100 border border-slate-200 rounded text-slate-500 font-bold">
+                ⌘K
+              </kbd>
+            </button>
+
+            {/* Day / Night Theme Toggle */}
+            <ThemeToggle />
+
             {/* Admin Portal Shortcut */}
             <Link
               href="/admin"
@@ -424,19 +442,21 @@ export default function NavbarAndAuth() {
               <ShieldCheck className="w-4 h-4" />
             </Link>
 
-            {/* Shopping Bag Button */}
-            <Link
-              href="/cart"
-              className="w-11 h-11 rounded-xl border border-slate-200 flex items-center justify-center text-slate-800 hover:bg-slate-100 relative shrink-0"
-              aria-label="Shopping Cart"
+            {/* Shopping Bag Button with Slide-Over Drawer */}
+            <button
+              id="ru-cart-icon-badge"
+              onClick={() => window.dispatchEvent(new Event('ru_open_cart'))}
+              className="w-11 h-11 rounded-xl border border-slate-200 flex items-center justify-center text-slate-800 hover:bg-slate-100 relative shrink-0 transition-transform cursor-pointer shadow-xs"
+              aria-label="Shopping Cart Drawer"
+              title="শপিং কার্ট ড্রয়ার"
             >
               <ShoppingBag className="w-5 h-5" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center animate-bounce">
+                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center animate-bounce shadow-xs">
                   {cartCount}
                 </span>
               )}
-            </Link>
+            </button>
 
             {/* Mobile Hamburger Menu Toggle */}
             <button

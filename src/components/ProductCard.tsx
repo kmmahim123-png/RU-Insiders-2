@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Product } from '@/types';
 import { ShoppingBag, Check, Eye } from 'lucide-react';
+import CardTilt from '@/components/CardTilt';
+import { triggerFlyToCart } from '@/components/CartDrawer';
 
 interface ProductCardProps {
   product: Product;
@@ -50,13 +52,20 @@ export default function ProductCard({ product }: ProductCardProps) {
       localStorage.setItem('ru_cart_items', JSON.stringify(cart));
       window.dispatchEvent(new Event('ru_cart_updated'));
 
+      // Flying particle animation to cart icon
+      triggerFlyToCart(
+        product.images[0] || '/mockups/hoodie-front.jpg',
+        e.clientX || window.innerWidth / 2,
+        e.clientY || window.innerHeight / 2
+      );
+
       setAdded(true);
       setTimeout(() => setAdded(false), 1600);
     } catch {}
   };
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group">
+    <CardTilt className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group">
       {/* Product Image Container */}
       <Link href={`/shop/${product.id}`} className="relative aspect-[4/3] bg-slate-100 overflow-hidden block">
         <img
@@ -137,6 +146,6 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
         </div>
       </div>
-    </div>
+    </CardTilt>
   );
 }

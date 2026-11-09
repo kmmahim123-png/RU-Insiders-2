@@ -18,8 +18,10 @@ import {
   Compass,
 } from 'lucide-react';
 import { Product, InsideRuArticle } from '@/types';
-import StoryHighlights from '@/components/StoryHighlights';
+import CampusStories from '@/components/CampusStories';
 import ProductCard from '@/components/ProductCard';
+import SeasonalParticles from '@/components/SeasonalParticles';
+import CampusAudioPlayer from '@/components/CampusAudioPlayer';
 
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -48,6 +50,9 @@ export default function HomePage() {
             backgroundImage: `linear-gradient(to right, rgba(2, 44, 34, 0.96) 0%, rgba(6, 78, 59, 0.88) 60%, rgba(2, 44, 34, 0.94) 100%), url('/campus/paris-road-rain.jpg')`,
           }}
         />
+
+        {/* Paris Road Seasonal Ambient Particles (Leaves / Rain / Mist) */}
+        <SeasonalParticles defaultMode="leaves" className="absolute inset-0" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20 w-full space-y-6">
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-extrabold text-amber-300 shadow-sm">
@@ -115,9 +120,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 2. STORY HIGHLIGHTS SECTION */}
+      {/* 2. CAMPUS STORIES SECTION */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6">
-        <StoryHighlights products={products} />
+        <CampusStories />
+      </div>
+
+      {/* 2.5 CAMPUS AMBIENCE AUDIO BAR */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-6">
+        <CampusAudioPlayer
+          initialScene="paris_road"
+          title="প্যারিস রোডের শান্ত নিসর্গ ও পাখির গান"
+        />
       </div>
 
       {/* 3. 3-STAGE INTERACTIVE MAP TEASER (রাবি ক্যাম্পাস ও রাজশাহী কতটুকু ঘুরলেন) */}

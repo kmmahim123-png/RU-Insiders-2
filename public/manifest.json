@@ -1,0 +1,24 @@
+{
+  "name": "RU Insiders | রাজশাহী বিশ্ববিদ্যালয় ক্যাম্পাস ও শপ পোর্টাল",
+  "short_name": "RU Insiders",
+  "description": "রাবি অফিসিয়াল উইন্টার হুডি, টি-শার্ট, খাঁটি খেজুরের গুড়, ৩-ধাপের ভেক্টর ওয়াটার ম্যাপ, নিউজ ও ক্যাম্পাস পোর্টাল।",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0c2419",
+  "theme_color": "#0c2419",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

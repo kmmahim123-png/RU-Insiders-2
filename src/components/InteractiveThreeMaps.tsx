@@ -26,6 +26,8 @@ import { RU_CAMPUS_PLACES, RU_CAMPUS_VIEWBOX, RuPlaceSvgData } from '@/lib/ruCam
 import { RAJSHAHI_PDF_REGIONS, RAJSHAHI_PDF_MAP_VIEWBOX, RajshahiPdfRegionData } from '@/lib/rajshahiPdfRegions';
 import { RAJSHAHI_DISTRICT_SVGS, RAJSHAHI_VIEWBOX, DistrictSvgData } from '@/lib/rajshahiDistrictsSvg';
 import { DIVISION_DISTRICT_META, DIVISION_SPOTS, DivisionSpotItem } from '@/lib/divisionSpotsData';
+import { fireConfetti, celebrate100Percent } from '@/lib/confetti';
+import CampusAudioPlayer from '@/components/CampusAudioPlayer';
 
 export default function InteractiveThreeMaps() {
   // Current active stage: 'division' (default as requested) | 'rajshahi_district' | 'ru_campus'
@@ -86,35 +88,64 @@ export default function InteractiveThreeMaps() {
     } catch {}
   }, []);
 
-  // Toggle visited handlers
+  // Toggle visited handlers with Confetti & Splash celebration
   const toggleDivSpot = (id: string) => {
-    const next = visitedDivSpotIds.includes(id)
-      ? visitedDivSpotIds.filter((x) => x !== id)
-      : [...visitedDivSpotIds, id];
+    const isAdding = !visitedDivSpotIds.includes(id);
+    const next = isAdding
+      ? [...visitedDivSpotIds, id]
+      : visitedDivSpotIds.filter((x) => x !== id);
     setVisitedDivSpotIds(next);
     try {
       localStorage.setItem('ru_visited_tourist_spots_v1', JSON.stringify(next));
     } catch {}
+
+    if (isAdding) {
+      const currentDistrictSpots = DIVISION_SPOTS.filter((s) => s.districtId === selectedDistrictId);
+      const districtVisited = currentDistrictSpots.filter((s) => next.includes(s.id)).length;
+      if (currentDistrictSpots.length > 0 && districtVisited === currentDistrictSpots.length) {
+        celebrate100Percent();
+      } else {
+        fireConfetti({ particleCount: 30, spread: 45, origin: { x: 0.5, y: 0.7 } });
+      }
+    }
   };
 
   const togglePdfRegion = (id: string) => {
-    const next = visitedPdfIds.includes(id)
-      ? visitedPdfIds.filter((x) => x !== id)
-      : [...visitedPdfIds, id];
+    const isAdding = !visitedPdfIds.includes(id);
+    const next = isAdding
+      ? [...visitedPdfIds, id]
+      : visitedPdfIds.filter((x) => x !== id);
     setVisitedPdfIds(next);
     try {
       localStorage.setItem('ru_visited_pdf_regions_v1', JSON.stringify(next));
     } catch {}
+
+    if (isAdding) {
+      if (next.length === RAJSHAHI_PDF_REGIONS.length) {
+        celebrate100Percent();
+      } else {
+        fireConfetti({ particleCount: 30, spread: 45, origin: { x: 0.5, y: 0.7 } });
+      }
+    }
   };
 
   const toggleRuSpot = (id: string) => {
-    const next = visitedRuIds.includes(id)
-      ? visitedRuIds.filter((x) => x !== id)
-      : [...visitedRuIds, id];
+    const isAdding = !visitedRuIds.includes(id);
+    const next = isAdding
+      ? [...visitedRuIds, id]
+      : visitedRuIds.filter((x) => x !== id);
     setVisitedRuIds(next);
     try {
       localStorage.setItem('ru_visited_campus_places_v1', JSON.stringify(next));
     } catch {}
+
+    if (isAdding) {
+      if (next.length === RU_CAMPUS_PLACES.length) {
+        celebrate100Percent();
+      } else {
+        fireConfetti({ particleCount: 30, spread: 45, origin: { x: 0.5, y: 0.7 } });
+      }
+    }
   };
 
   // Division Statistics
@@ -1845,6 +1876,20 @@ export default function InteractiveThreeMaps() {
                   ))}
                 </div>
               )}
+
+              {/* Live Campus Nature Ambience Audio Player */}
+              <div className="pt-2">
+                <CampusAudioPlayer
+                  initialScene={
+                    detailModalSpot.id.includes('padma')
+                      ? 'padma_river'
+                      : detailModalSpot.id.includes('minar')
+                      ? 'shaheed_minar'
+                      : 'paris_road'
+                  }
+                  title={`${detailModalSpot.nameBn} - লাইভ প্রাকৃতিক পরিবেশ ও শব্দ`}
+                />
+              </div>
             </div>
 
             {/* Modal Footer */}
