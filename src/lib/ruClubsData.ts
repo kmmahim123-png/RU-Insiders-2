@@ -11,6 +11,7 @@ export interface RuClub {
   mottoBn: string;
   logoUrl: string;
   coverImageUrl: string;
+  images?: string[]; // কার্যক্রম ও উৎসবের ছবি
   memberCount: string;
   roomLocationBn: string;
   presidentOrSecretaryBn: string;

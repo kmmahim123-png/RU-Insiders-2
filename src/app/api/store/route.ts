@@ -8,17 +8,37 @@ export async function GET() {
   const db = await readDb();
   // Never leak passwords to public client
   const safeClubs = db.clubs.map(({ password, ...rest }) => rest);
+
+  // Compute active breaking news strictly from published breaking articles + clean settings announcements
+  const publishedBreakingArticles = db.articles.filter(
+    (a) => a.status === 'Published' && (a.category === 'ব্রেকিং নিউজ' || a.category === '🔥 ব্রেকিং নিউজ' || a.isBreaking)
+  );
+  const articleHeadlines = publishedBreakingArticles.map((a) => `🔥 ${a.title}`);
+
+  // Clean settings announcements to ignore any unpublished article titles
+  const cleanCustomAnnouncements = (db.settings.breakingNews || []).filter((headline) => {
+    // If this announcement matches an unpublished/draft article, exclude it!
+    const matchingArticle = db.articles.find((a) => headline.includes(a.title));
+    if (matchingArticle && matchingArticle.status !== 'Published') {
+      return false;
+    }
+    return true;
+  });
+
+  const activeBreakingNews = Array.from(new Set([...articleHeadlines, ...cleanCustomAnnouncements]));
+
   return NextResponse.json(
     {
       settings: {
         whatsappNumber: db.settings.whatsappNumber,
         deliveryCharges: db.settings.deliveryCharges,
         categories: db.settings.categories,
-        breakingNews: db.settings.breakingNews,
+        breakingNews: activeBreakingNews,
       },
       products: db.products,
       mapSpots: db.mapSpots,
       clubs: safeClubs,
+      departments: db.departments || {},
       articles: db.articles.filter((a) => a.status === 'Published'),
       alumni: db.alumni.filter((al) => al.approved),
       notifications: db.notifications,
@@ -66,6 +86,7 @@ export async function POST(req: NextRequest) {
           role: 'CLUB_ADMIN',
           clubId: matchedClub.id,
           roleTitle: `${matchedClub.nameBn} — ক্লাব পোর্টাল`,
+          clubInfo: matchedClub,
           applications: db.clubApplications.filter((app) => app.clubId === matchedClub.id),
         });
       }
@@ -294,8 +315,63 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, applications: filtered });
     }
 
+    // Club Information & Activity Photos Update (Super Admin OR Matching Club Admin)
+    if (action === 'SAVE_CLUB_INFO' && (isSuper || matchedClub)) {
+      const clubData = payload.club;
+      const targetClubId = isSuper ? clubData.id : matchedClub!.id;
+      const updatedDb = await writeDb((state) => {
+        let found = false;
+        const clubs = state.clubs.map((c) => {
+          if (c.id === targetClubId || c.id === `club-${targetClubId}` || `club-${c.id}` === targetClubId) {
+            found = true;
+            return {
+              ...c,
+              nameBn: clubData.nameBn || c.nameBn,
+              descriptionBn: clubData.descriptionBn !== undefined ? clubData.descriptionBn : c.descriptionBn,
+              mottoBn: clubData.mottoBn !== undefined ? clubData.mottoBn : c.mottoBn,
+              roomLocationBn: clubData.roomLocationBn !== undefined ? clubData.roomLocationBn : c.roomLocationBn,
+              contactEmail: clubData.contactEmail !== undefined ? clubData.contactEmail : c.contactEmail,
+              facebookUrl: clubData.facebookUrl !== undefined ? clubData.facebookUrl : c.facebookUrl,
+              images: clubData.images || c.images || [],
+              whatTheyDo: clubData.whatTheyDo || c.whatTheyDo,
+            };
+          }
+          return c;
+        });
+        if (!found && isSuper && clubData.id) {
+          clubs.push({
+            id: clubData.id,
+            shortName: clubData.shortName || clubData.id.toUpperCase(),
+            nameBn: clubData.nameBn || clubData.id,
+            categoryBn: clubData.categoryBn || 'ক্লাব ও সংগঠন',
+            descriptionBn: clubData.descriptionBn || '',
+            mottoBn: clubData.mottoBn || '',
+            roomLocationBn: clubData.roomLocationBn || '',
+            contactEmail: clubData.contactEmail || '',
+            facebookUrl: clubData.facebookUrl || '',
+            images: clubData.images || [],
+            whatTheyDo: clubData.whatTheyDo || [],
+            password: `${clubData.id}-2026`,
+          });
+        }
+        return { ...state, clubs };
+      });
+      const safeClubs = updatedDb.clubs.map(({ password, ...rest }) => rest);
+      return NextResponse.json({ ok: true, clubs: safeClubs });
+    }
+
     // Super Admin Exclusive Controls
     if (isSuper) {
+      if (action === 'SAVE_DEPARTMENT_INFO') {
+        const deptData = payload.department;
+        const updatedDb = await writeDb((state) => {
+          const departments = { ...(state.departments || {}) };
+          departments[deptData.departmentId] = deptData;
+          return { ...state, departments };
+        });
+        return NextResponse.json({ ok: true, departments: updatedDb.departments });
+      }
+
       if (action === 'SAVE_MAP_SPOT') {
         const spot = payload.spot;
         const updatedDb = await writeDb((state) => ({
@@ -323,16 +399,18 @@ export async function POST(req: NextRequest) {
             ? state.articles.map((a) => (a.id === article.id ? article : a))
             : [article, ...state.articles];
 
-          // If article is breaking news, sync with settings breakingNews
-          let breakingNews = [...(state.settings.breakingNews || [])];
-          if (article.category === 'ব্রেকিং নিউজ' || article.isBreaking) {
+          // Clean out previous headline for this article title
+          let breakingNews = (state.settings.breakingNews || []).filter(
+            (b) => !b.includes(article.title)
+          );
+
+          // ONLY add to breakingNews if it is Published!
+          if (article.status === 'Published' && (article.category === 'ব্রেকিং নিউজ' || article.isBreaking)) {
             const headline = `🔥 ${article.title}`;
-            if (!breakingNews.some((b) => b.includes(article.title))) {
-              breakingNews = [headline, ...breakingNews];
-            }
+            breakingNews = [headline, ...breakingNews];
           }
 
-          const notifications = sendPush
+          const notifications = sendPush && article.status === 'Published'
             ? [
                 {
                   id: `notif-${Date.now()}`,
@@ -357,21 +435,39 @@ export async function POST(req: NextRequest) {
       }
 
       if (action === 'APPROVE_ARTICLE') {
-        const updatedDb = await writeDb((state) => ({
-          ...state,
-          articles: state.articles.map((a) =>
-            a.id === payload.articleId ? { ...a, status: payload.status || 'Published' } : a
-          ),
-        }));
-        return NextResponse.json({ ok: true, articles: updatedDb.articles });
+        const updatedDb = await writeDb((state) => {
+          const target = state.articles.find((a) => a.id === payload.articleId);
+          const newStatus = payload.status || 'Published';
+          const articles = state.articles.map((a) =>
+            a.id === payload.articleId ? { ...a, status: newStatus } : a
+          );
+
+          let breakingNews = [...(state.settings.breakingNews || [])];
+          if (target) {
+            // Remove old headline first
+            breakingNews = breakingNews.filter((b) => !b.includes(target.title));
+            // Only add if newStatus is Published and is breaking
+            if (newStatus === 'Published' && (target.category === 'ব্রেকিং নিউজ' || target.isBreaking)) {
+              breakingNews = [`🔥 ${target.title}`, ...breakingNews];
+            }
+          }
+
+          return { ...state, articles, settings: { ...state.settings, breakingNews } };
+        });
+        return NextResponse.json({ ok: true, articles: updatedDb.articles, settings: updatedDb.settings });
       }
 
       if (action === 'DELETE_ARTICLE') {
-        const updatedDb = await writeDb((state) => ({
-          ...state,
-          articles: state.articles.filter((a) => a.id !== payload.articleId),
-        }));
-        return NextResponse.json({ ok: true, articles: updatedDb.articles });
+        const updatedDb = await writeDb((state) => {
+          const target = state.articles.find((a) => a.id === payload.articleId);
+          const articles = state.articles.filter((a) => a.id !== payload.articleId);
+          let breakingNews = [...(state.settings.breakingNews || [])];
+          if (target) {
+            breakingNews = breakingNews.filter((b) => !b.includes(target.title));
+          }
+          return { ...state, articles, settings: { ...state.settings, breakingNews } };
+        });
+        return NextResponse.json({ ok: true, articles: updatedDb.articles, settings: updatedDb.settings });
       }
 
       if (action === 'APPROVE_ALUMNI') {

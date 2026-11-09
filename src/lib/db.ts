@@ -11,6 +11,7 @@ import {
   AlumniProfile,
   NotificationItem,
   SiteSettings,
+  CustomDepartmentData,
 } from '@/types';
 
 // Path resolution supporting both local development and Vercel serverless runtime
@@ -30,6 +31,7 @@ export interface DatabaseSchema {
   alumni: AlumniProfile[];
   notifications: NotificationItem[];
   subscribers: { contact: string; createdAt: string }[];
+  departments?: Record<string, CustomDepartmentData>;
 }
 
 const INITIAL_DB: DatabaseSchema = {
@@ -365,6 +367,7 @@ const INITIAL_DB: DatabaseSchema = {
     },
   ],
   subscribers: [],
+  departments: {},
 };
 
 // Atomic Queue to prevent concurrent file write race conditions

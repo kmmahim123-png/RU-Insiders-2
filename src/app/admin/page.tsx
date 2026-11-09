@@ -29,6 +29,9 @@ import {
   Camera,
   Database,
   Copy,
+  Building,
+  Check,
+  X,
 } from 'lucide-react';
 import {
   Product,
@@ -41,10 +44,13 @@ import {
   MapSpotCustomData,
   DetailBlock,
   ProductVariant,
+  CustomDepartmentData,
 } from '@/types';
 import { RU_CAMPUS_PLACES } from '@/lib/ruCampusSvg';
 import { RAJSHAHI_PDF_REGIONS } from '@/lib/rajshahiPdfRegions';
 import { DIVISION_DISTRICT_META } from '@/lib/divisionSpotsData';
+import { RU_DEPARTMENTS, RU_FACULTIES, RuDepartment } from '@/lib/ruAcademicData';
+import { RU_CLUBS, RuClub } from '@/lib/ruClubsData';
 
 export default function AdminPage() {
   const [password, setPassword] = useState('');
@@ -55,15 +61,44 @@ export default function AdminPage() {
   const [loggingIn, setLoggingIn] = useState(false);
 
   // Super Admin / Shared state
-  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'map' | 'articles' | 'alumni' | 'clubs' | 'settings'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'map' | 'articles' | 'departments' | 'alumni' | 'clubs' | 'settings'>('products');
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [mapSpots, setMapSpots] = useState<Record<string, MapSpotCustomData>>({});
   const [clubs, setClubs] = useState<ClubInfo[]>([]);
+  const [departments, setDepartments] = useState<Record<string, CustomDepartmentData>>({});
   const [clubApplications, setClubApplications] = useState<ClubApplication[]>([]);
   const [articles, setArticles] = useState<InsideRuArticle[]>([]);
   const [alumni, setAlumni] = useState<AlumniProfile[]>([]);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
+
+  // Department Management State
+  const [selectedDeptId, setSelectedDeptId] = useState<string>('dept-cse');
+  const [editDept, setEditDept] = useState<CustomDepartmentData>({
+    departmentId: 'dept-cse',
+    nameBn: 'কম্পিউটার সায়েন্স অ্যান্ড ইঞ্জিনিয়ারিং (CSE)',
+    overviewBn: '',
+    locationBuildingBn: '',
+    seatCount: 50,
+    degreeOfferedBn: 'বি.এস-সি. ইঞ্জিনিয়ারিং (CSE), এম.এস-সি. ইঞ্জিনিয়ারিং',
+    images: [],
+  });
+
+  // Club Management State
+  const [selectedClubToEditId, setSelectedClubToEditId] = useState<string>('rucs');
+  const [editClub, setEditClub] = useState<ClubInfo>({
+    id: 'rucs',
+    shortName: 'RUCS',
+    nameBn: 'রাবি ক্যারিয়ার ক্লাব (RUCS)',
+    categoryBn: 'ক্যারিয়ার ও দক্ষতা',
+    descriptionBn: '',
+    mottoBn: 'Build Skills • Excel Career • Lead Future',
+    roomLocationBn: 'কক্ষ নং-২০৪, TSCC',
+    contactEmail: 'careerclub.ru@gmail.com',
+    facebookUrl: 'https://facebook.com',
+    images: [],
+    password: 'rucs-2026',
+  });
 
   // Notification / Toast
   const [toastMessage, setToastMessage] = useState('');
@@ -77,8 +112,8 @@ export default function AdminPage() {
     try {
       return JSON.parse(text);
     } catch {
-      if (res.status === 413) {
-        throw new Error('অনুরোধের সাইজ অনেক বড় (৪.৫ MB লিমিট পার করেছে)। ছবির রেজোলিউশন বা সাইজ ছোট করুন।');
+      if (res.status === 413 || text.toLowerCase().includes('request entity too large') || text.toLowerCase().includes('payload too large')) {
+        throw new Error('অনুরোধের সাইজ অতিরিক্ত বড় (৪.৫ MB লিমিট পার করেছে)। ছবির সাইজ বা সংখ্যা কমিয়ে চেষ্টা করুন।');
       }
       throw new Error(`সার্ভার ত্রুটি (${res.status}): ${text.slice(0, 100)}`);
     }
@@ -109,11 +144,29 @@ export default function AdminPage() {
           setOrders(db.orders || []);
           setMapSpots(db.mapSpots || {});
           setClubs(db.clubs || []);
+          setDepartments(db.departments || {});
           setClubApplications(db.clubApplications || []);
           setArticles(db.articles || []);
           setAlumni(db.alumni || []);
           setSettings(db.settings || null);
           setActiveTab('products');
+          if (RU_DEPARTMENTS.length > 0) {
+            const firstD = RU_DEPARTMENTS[0];
+            const customD = db.departments?.[firstD.id];
+            setEditDept({
+              departmentId: firstD.id,
+              nameBn: customD?.nameBn || firstD.nameBn,
+              overviewBn: customD?.overviewBn !== undefined ? customD.overviewBn : firstD.overviewBn,
+              locationBuildingBn: customD?.locationBuildingBn !== undefined ? customD.locationBuildingBn : firstD.locationBuildingBn,
+              seatCount: customD?.seatCount !== undefined ? customD.seatCount : firstD.seatCount,
+              degreeOfferedBn: customD?.degreeOfferedBn !== undefined ? customD.degreeOfferedBn : firstD.degreeOfferedBn,
+              images: customD?.images?.length ? customD.images : (firstD.images || ['/campus/ru-admin.jpg', '/campus/paris-road-rain.jpg']),
+            });
+          }
+          if (db.clubs?.length > 0) {
+            setEditClub(db.clubs[0]);
+            setSelectedClubToEditId(db.clubs[0].id);
+          }
         } else if (data.role === 'PRODUCT_MANAGER') {
           setProducts(data.products || []);
           setOrders(data.orders || []);
@@ -121,6 +174,10 @@ export default function AdminPage() {
         } else if (data.role === 'CLUB_ADMIN') {
           setClubId(data.clubId);
           setClubApplications(data.applications || []);
+          if (data.clubInfo) {
+            setEditClub(data.clubInfo);
+            setSelectedClubToEditId(data.clubId);
+          }
         }
       } else {
         setLoginError(data.error || 'পাসওয়ার্ড সঠিক নয়!');
@@ -154,10 +211,28 @@ export default function AdminPage() {
               setOrders(db.orders || []);
               setMapSpots(db.mapSpots || {});
               setClubs(db.clubs || []);
+              setDepartments(db.departments || {});
               setClubApplications(db.clubApplications || []);
               setArticles(db.articles || []);
               setAlumni(db.alumni || []);
               setSettings(db.settings || null);
+              if (RU_DEPARTMENTS.length > 0) {
+                const firstD = RU_DEPARTMENTS[0];
+                const customD = db.departments?.[firstD.id];
+                setEditDept({
+                  departmentId: firstD.id,
+                  nameBn: customD?.nameBn || firstD.nameBn,
+                  overviewBn: customD?.overviewBn !== undefined ? customD.overviewBn : firstD.overviewBn,
+                  locationBuildingBn: customD?.locationBuildingBn !== undefined ? customD.locationBuildingBn : firstD.locationBuildingBn,
+                  seatCount: customD?.seatCount !== undefined ? customD.seatCount : firstD.seatCount,
+                  degreeOfferedBn: customD?.degreeOfferedBn !== undefined ? customD.degreeOfferedBn : firstD.degreeOfferedBn,
+                  images: customD?.images?.length ? customD.images : (firstD.images || ['/campus/ru-admin.jpg', '/campus/paris-road-rain.jpg']),
+                });
+              }
+              if (db.clubs?.length > 0) {
+                setEditClub(db.clubs[0]);
+                setSelectedClubToEditId(db.clubs[0].id);
+              }
             } else if (data.role === 'PRODUCT_MANAGER') {
               setProducts(data.products || []);
               setOrders(data.orders || []);
@@ -165,6 +240,10 @@ export default function AdminPage() {
             } else if (data.role === 'CLUB_ADMIN') {
               setClubId(data.clubId);
               setClubApplications(data.applications || []);
+              if (data.clubInfo) {
+                setEditClub(data.clubInfo);
+                setSelectedClubToEditId(data.clubId);
+              }
             }
           }
         })
@@ -438,7 +517,10 @@ export default function AdminPage() {
     });
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: 'product' | 'map' | 'article') => {
+  const handleFileUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    target: 'product' | 'map' | 'article' | 'department' | 'club'
+  ) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
@@ -470,6 +552,16 @@ export default function AdminPage() {
           setEditArticle((prev) => ({
             ...prev,
             images: [...prev.images.filter((img) => img !== '/campus/paris-road-rain.jpg'), ...data.urls],
+          }));
+        } else if (target === 'department') {
+          setEditDept((prev) => ({
+            ...prev,
+            images: [...(prev.images || []), ...data.urls],
+          }));
+        } else if (target === 'club') {
+          setEditClub((prev) => ({
+            ...prev,
+            images: [...(prev.images || []), ...data.urls],
           }));
         }
         showToast('✓ ছবি সফলভাবে অপ্টিমাইজ ও আপলোড হয়েছে!');
@@ -651,7 +743,7 @@ export default function AdminPage() {
   };
 
   // ============================================================================
-  // CLUB APPLICATION APPROVAL / REJECTION
+  // CLUB APPLICATION APPROVAL / REJECTION & CLUB INFO MANAGER
   // ============================================================================
   const handleUpdateClubApp = async (appId: string, newStatus: 'Approved' | 'Rejected') => {
     const currentPass = getActivePass();
@@ -674,6 +766,93 @@ export default function AdminPage() {
       }
     } catch (err: any) {
       alert('সার্ভার যোগাযোগে ত্রুটি: ' + err.message);
+    }
+  };
+
+  const handleSelectClub = (cId: string) => {
+    setSelectedClubToEditId(cId);
+    const found = clubs.find((c) => c.id === cId || c.id === cId.replace('club-', '') || `club-${c.id}` === cId);
+    const base = RU_CLUBS.find((c) => c.id === cId || c.id === `club-${cId}` || c.id.replace('club-', '') === cId);
+    setEditClub({
+      id: cId,
+      shortName: found?.shortName || base?.shortName || cId.toUpperCase(),
+      nameBn: found?.nameBn || base?.nameBn || '',
+      categoryBn: found?.categoryBn || base?.categoryBn || 'ক্লাব ও সাংস্কৃতিক সংগঠন',
+      descriptionBn: found?.descriptionBn !== undefined ? found.descriptionBn : base?.descriptionBn || '',
+      mottoBn: found?.mottoBn !== undefined ? found.mottoBn : base?.mottoBn || '',
+      roomLocationBn: found?.roomLocationBn !== undefined ? found.roomLocationBn : base?.roomLocationBn || '',
+      contactEmail: found?.contactEmail !== undefined ? found.contactEmail : base?.contactEmail || '',
+      facebookUrl: found?.facebookUrl !== undefined ? found.facebookUrl : base?.facebookUrl || '',
+      images: found?.images?.length ? found.images : (base?.images || [base?.coverImageUrl || '/campus/ru-spot.jpg']),
+      password: found?.password || `${cId}-2026`,
+    });
+  };
+
+  const handleSaveClub = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const currentPass = getActivePass();
+    try {
+      const res = await fetch('/api/store', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'SAVE_CLUB_INFO',
+          password: currentPass,
+          payload: { club: editClub },
+        }),
+      });
+      const data = await safeParseApiResponse(res);
+      if (data.ok && data.clubs) {
+        setClubs(data.clubs);
+        showToast('✓ ক্লাবের তথ্য ও কার্যক্রমের ছবি সফলভাবে সংরক্ষিত হয়েছে!');
+      } else {
+        alert(data.error || 'সংরক্ষণ ব্যর্থ হয়েছে');
+      }
+    } catch (err: any) {
+      alert('সার্ভার সমস্যা: ' + err.message);
+    }
+  };
+
+  // ============================================================================
+  // FACULTY & DEPARTMENT MANAGER
+  // ============================================================================
+  const handleSelectDept = (deptId: string) => {
+    setSelectedDeptId(deptId);
+    const base = RU_DEPARTMENTS.find((d) => d.id === deptId);
+    const custom = departments[deptId];
+    setEditDept({
+      departmentId: deptId,
+      nameBn: custom?.nameBn || base?.nameBn || '',
+      overviewBn: custom?.overviewBn !== undefined ? custom.overviewBn : base?.overviewBn || '',
+      locationBuildingBn: custom?.locationBuildingBn !== undefined ? custom.locationBuildingBn : base?.locationBuildingBn || '',
+      seatCount: custom?.seatCount !== undefined ? custom.seatCount : base?.seatCount || 50,
+      degreeOfferedBn: custom?.degreeOfferedBn !== undefined ? custom.degreeOfferedBn : base?.degreeOfferedBn || '',
+      images: custom?.images?.length ? custom.images : (base?.images || ['/campus/ru-admin.jpg', '/campus/paris-road-rain.jpg']),
+    });
+  };
+
+  const handleSaveDepartment = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const currentPass = getActivePass();
+    try {
+      const res = await fetch('/api/store', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'SAVE_DEPARTMENT_INFO',
+          password: currentPass,
+          payload: { department: editDept },
+        }),
+      });
+      const data = await safeParseApiResponse(res);
+      if (data.ok && data.departments) {
+        setDepartments(data.departments);
+        showToast('✓ অনুষদ ও বিভাগের তথ্য এবং ছবি সফলভাবে সংরক্ষিত হয়েছে!');
+      } else {
+        alert(data.error || 'অনুষদের তথ্য সংরক্ষণ করা যায়নি');
+      }
+    } catch (err: any) {
+      alert('সার্ভার সমস্যা: ' + err.message);
     }
   };
 
@@ -1022,10 +1201,154 @@ export default function AdminPage() {
       </div>
 
       {/* ============================================================================ */}
-      {/* ROLE: CLUB ADMIN (Only Membership Applications + 1-Click CSV Export) */}
+      {/* ROLE: CLUB ADMIN (Club Profile & Photo Gallery + Membership Applications) */}
       {/* ============================================================================ */}
       {role === 'CLUB_ADMIN' && (
         <div className="space-y-6">
+          {/* Club Info & Photo Gallery Editing Card */}
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+              <div>
+                <span className="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-extrabold text-[10px] tracking-wider uppercase inline-block mb-1">
+                  ক্লাব প্রোফাইল ও অ্যাক্টিভিটি গ্যালারি
+                </span>
+                <h2 className="text-xl font-black text-slate-900">
+                  {editClub.nameBn || roleTitle || 'ক্লাব তথ্য ও কার্যক্রম'}
+                </h2>
+                <p className="text-xs text-slate-500">
+                  ক্লাবের পরিচিতি, রুমের অবস্থান, ফেসবুক পেজ লিংক ও কার্যক্রমের আকর্ষণীয় ছবি যুক্ত করুন।
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => handleSaveClub()}
+                className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs flex items-center gap-2 shadow-sm transition"
+              >
+                <Check className="w-4 h-4" /> ক্লাবের তথ্য ও ছবি সংরক্ষণ করুন
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700">ক্লাবের নাম (বাংলা)</label>
+                <input
+                  type="text"
+                  value={editClub.nameBn}
+                  onChange={(e) => setEditClub({ ...editClub, nameBn: e.target.value })}
+                  className="w-full text-xs sm:text-sm border border-slate-200 rounded-xl p-2.5 font-bold"
+                  placeholder="যেমন: রাবি ক্যারিয়ার ক্লাব (RUCS)"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700">স্লোগান / মটো (Motto)</label>
+                <input
+                  type="text"
+                  value={editClub.mottoBn || ''}
+                  onChange={(e) => setEditClub({ ...editClub, mottoBn: e.target.value })}
+                  className="w-full text-xs sm:text-sm border border-slate-200 rounded-xl p-2.5"
+                  placeholder="যেমন: Build Skills • Excel Career • Lead Future"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700">রুম বা অফিসের অবস্থান</label>
+                <input
+                  type="text"
+                  value={editClub.roomLocationBn || ''}
+                  onChange={(e) => setEditClub({ ...editClub, roomLocationBn: e.target.value })}
+                  className="w-full text-xs sm:text-sm border border-slate-200 rounded-xl p-2.5"
+                  placeholder="যেমন: কক্ষ নং-২০৪, শহীদ সুখরঞ্জন সমাদ্দার ছাত্র-শিক্ষক সাংস্কৃতিক কেন্দ্র (TSCC)"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700">অফিশিয়াল ইমেইল বা যোগাযোগ</label>
+                <input
+                  type="email"
+                  value={editClub.contactEmail || ''}
+                  onChange={(e) => setEditClub({ ...editClub, contactEmail: e.target.value })}
+                  className="w-full text-xs sm:text-sm border border-slate-200 rounded-xl p-2.5 font-mono"
+                  placeholder="careerclub.ru@gmail.com"
+                />
+              </div>
+
+              <div className="md:col-span-2 space-y-1">
+                <label className="text-xs font-bold text-slate-700">ফেসবুক পেজ বা গ্রুপ লিংক</label>
+                <input
+                  type="url"
+                  value={editClub.facebookUrl || ''}
+                  onChange={(e) => setEditClub({ ...editClub, facebookUrl: e.target.value })}
+                  className="w-full text-xs sm:text-sm border border-slate-200 rounded-xl p-2.5 font-mono"
+                  placeholder="https://facebook.com/groups/..."
+                />
+              </div>
+
+              <div className="md:col-span-2 space-y-1">
+                <label className="text-xs font-bold text-slate-700">ক্লাবের পরিচিতি ও বিস্তারিত বিবরণ</label>
+                <textarea
+                  rows={4}
+                  value={editClub.descriptionBn || ''}
+                  onChange={(e) => setEditClub({ ...editClub, descriptionBn: e.target.value })}
+                  className="w-full text-xs sm:text-sm border border-slate-200 rounded-xl p-2.5"
+                  placeholder="ক্লাবের লক্ষ্য, নিয়মিত কার্যক্রম এবং অর্জনসমূহ সম্পর্কে লিখুন..."
+                />
+              </div>
+            </div>
+
+            {/* Club Photos Section */}
+            <div className="pt-3 border-t border-slate-100 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xs font-black text-slate-900">
+                    কার্যক্রম ও উৎসবের ছবিসমূহ ({editClub.images?.length || 0}টি)
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    সেমিনার, ওয়ার্কশপ, বার্ষিক উৎসব বা অ্যাওয়ার্ড প্রদানের ছবি আপলোড করুন। ছবি স্বয়ংক্রিয়ভাবে কম্প্রেস হয়ে দ্রুত লোড হবে।
+                  </p>
+                </div>
+                <label className="cursor-pointer px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition">
+                  <Camera className="w-3.5 h-3.5" />
+                  <span>+ নতুন ছবি যোগ করুন</span>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    disabled={uploadingImage}
+                    onChange={(e) => handleFileUpload(e, 'club')}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                {editClub.images && editClub.images.length > 0 ? (
+                  editClub.images.map((img, idx) => (
+                    <div key={idx} className="relative group w-24 h-24 rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
+                      <img src={img} alt="Club" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditClub((prev) => ({
+                            ...prev,
+                            images: prev.images?.filter((_, i) => i !== idx),
+                          }));
+                        }}
+                        className="absolute top-1 right-1 p-1 bg-red-600/90 hover:bg-red-700 text-white rounded-full opacity-90 group-hover:opacity-100 transition shadow"
+                        title="ছবি মুছুন"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-slate-400 py-3 italic">এখনও কোনো ছবি আপলোড করা হয়নি। উপরের বাটন দিয়ে ছবি যোগ করুন।</p>
+                )}
+              </div>
+            </div>
+          </div>
+
           <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100">
               <div>
@@ -1193,6 +1516,23 @@ export default function AdminPage() {
                 </button>
 
                 <button
+                  onClick={() => {
+                    setActiveTab('departments');
+                    if (!editDept.nameBn && RU_DEPARTMENTS[0]) {
+                      handleSelectDept(RU_DEPARTMENTS[0].id);
+                    }
+                  }}
+                  className={`py-2 px-4 rounded-xl text-xs font-extrabold shrink-0 transition flex items-center gap-1.5 ${
+                    activeTab === 'departments'
+                      ? 'bg-blue-700 text-white shadow-sm'
+                      : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <Building className="w-4 h-4" />
+                  <span>🎓 অনুষদ ও বিভাগ</span>
+                </button>
+
+                <button
                   onClick={() => setActiveTab('alumni')}
                   className={`py-2 px-4 rounded-xl text-xs font-extrabold shrink-0 transition flex items-center gap-1.5 ${
                     activeTab === 'alumni'
@@ -1205,7 +1545,12 @@ export default function AdminPage() {
                 </button>
 
                 <button
-                  onClick={() => setActiveTab('clubs')}
+                  onClick={() => {
+                    setActiveTab('clubs');
+                    if (!editClub.nameBn && RU_CLUBS[0]) {
+                      handleSelectClub(RU_CLUBS[0].id);
+                    }
+                  }}
                   className={`py-2 px-4 rounded-xl text-xs font-extrabold shrink-0 transition flex items-center gap-1.5 ${
                     activeTab === 'clubs'
                       ? 'bg-blue-700 text-white shadow-sm'
@@ -1213,7 +1558,7 @@ export default function AdminPage() {
                   }`}
                 >
                   <Trophy className="w-4 h-4" />
-                  <span>ক্লাব আবেদন ({clubApplications.length})</span>
+                  <span>🏆 ক্লাব ও আবেদন ({clubApplications.length})</span>
                 </button>
 
                 <button
@@ -1819,6 +2164,168 @@ export default function AdminPage() {
           )}
 
           {/* ============================================================================ */}
+          {/* TAB: DEPARTMENT & FACULTY MANAGER (Super Admin) */}
+          {/* ============================================================================ */}
+          {role === 'SUPER_ADMIN' && activeTab === 'departments' && (
+            <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+                <div>
+                  <span className="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-extrabold text-[10px] tracking-wider uppercase inline-block mb-1">
+                    অনুষদ ও বিভাগ কনফিগারেশন
+                  </span>
+                  <h2 className="text-xl font-black text-slate-900">
+                    রাজশাহী বিশ্ববিদ্যালয়ের অনুষদ ও বিভাগসমূহ ({RU_DEPARTMENTS.length}টি)
+                  </h2>
+                  <p className="text-xs text-slate-500">
+                    যেকোনো অনুষদ বা বিভাগ নির্বাচন করে তার বিবরণ, আসন সংখ্যা, ভবন অবস্থান ও ছবিসমূহ এডিট ও আপডেট করুন।
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleSaveDepartment()}
+                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs flex items-center gap-2 shadow-sm transition"
+                >
+                  <Check className="w-4 h-4" /> অনুষদের তথ্য ও ছবি সংরক্ষণ করুন
+                </button>
+              </div>
+
+              {/* Department Dropdown Selector */}
+              <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-200/80 space-y-2">
+                <label className="text-xs font-black text-slate-800 flex items-center gap-2">
+                  <Building className="w-4 h-4 text-blue-600" />
+                  <span>অনুষদ ও বিভাগ নির্বাচন করুন:</span>
+                </label>
+                <select
+                  value={selectedDeptId}
+                  onChange={(e) => handleSelectDept(e.target.value)}
+                  className="w-full text-xs sm:text-sm font-bold bg-white border border-slate-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {RU_FACULTIES.map((fac) => {
+                    const deptsInFac = RU_DEPARTMENTS.filter((d) => d.facultyBn === fac.nameBn);
+                    return (
+                      <optgroup key={fac.id} label={`🏛️ ${fac.nameBn}`}>
+                        {deptsInFac.map((dept) => (
+                          <option key={dept.id} value={dept.id}>
+                            {dept.nameBn} {departments[dept.id] ? '✓ (কাস্টমাইজড)' : ''}
+                          </option>
+                        ))}
+                      </optgroup>
+                    );
+                  })}
+                </select>
+              </div>
+
+              {/* Form Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="md:col-span-2 space-y-1">
+                  <label className="text-xs font-bold text-slate-700">বিভাগের নাম (বাংলা)</label>
+                  <input
+                    type="text"
+                    value={editDept.nameBn}
+                    onChange={(e) => setEditDept({ ...editDept, nameBn: e.target.value })}
+                    className="w-full text-xs sm:text-sm border border-slate-200 rounded-xl p-2.5 font-bold"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700">আসন সংখ্যা (Seat Count)</label>
+                  <input
+                    type="number"
+                    value={editDept.seatCount || 50}
+                    onChange={(e) => setEditDept({ ...editDept, seatCount: Number(e.target.value) })}
+                    className="w-full text-xs sm:text-sm border border-slate-200 rounded-xl p-2.5 font-black"
+                  />
+                </div>
+
+                <div className="md:col-span-2 space-y-1">
+                  <label className="text-xs font-bold text-slate-700">ভবন ও অবস্থান (Location & Building)</label>
+                  <input
+                    type="text"
+                    value={editDept.locationBuildingBn || ''}
+                    onChange={(e) => setEditDept({ ...editDept, locationBuildingBn: e.target.value })}
+                    className="w-full text-xs sm:text-sm border border-slate-200 rounded-xl p-2.5"
+                    placeholder="যেমন: প্রকৌশল অনুষদ ভবন (চতুর্থ তলা)"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700">প্রদত্ত ডিগ্রি (Degree)</label>
+                  <input
+                    type="text"
+                    value={editDept.degreeOfferedBn || ''}
+                    onChange={(e) => setEditDept({ ...editDept, degreeOfferedBn: e.target.value })}
+                    className="w-full text-xs sm:text-sm border border-slate-200 rounded-xl p-2.5"
+                    placeholder="যেমন: বি.এস-সি. ইঞ্জিনিয়ারিং (CSE)"
+                  />
+                </div>
+
+                <div className="md:col-span-3 space-y-1">
+                  <label className="text-xs font-bold text-slate-700">অনুষদ বা বিভাগের একাডেমিক পরিচিতি ও সংক্ষিপ্ত বিবরণ</label>
+                  <textarea
+                    rows={4}
+                    value={editDept.overviewBn || ''}
+                    onChange={(e) => setEditDept({ ...editDept, overviewBn: e.target.value })}
+                    className="w-full text-xs sm:text-sm border border-slate-200 rounded-xl p-2.5 leading-relaxed"
+                    placeholder="বিভাগের ল্যাব সুবিধা, সেমিনার লাইব্রেরি, পাঠ্যক্রম ও অর্জনসমূহ সম্পর্কে লিখুন..."
+                  />
+                </div>
+              </div>
+
+              {/* Department Photo Gallery Section */}
+              <div className="pt-3 border-t border-slate-100 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xs font-black text-slate-900">
+                      অনুষদ ও ক্লাসরুমের ছবিসমূহ ({editDept.images?.length || 0}টি)
+                    </h3>
+                    <p className="text-[11px] text-slate-500">
+                      ভবনের সামনের ছবি, কম্পিউটার/সায়েন্স ল্যাব বা ক্লাসরুমের ছবি আপলোড করুন। ওয়েবসাইট কার্ডে এবং পপআপে এগুলো গ্যালারি হিসেবে প্রদর্শিত হবে।
+                    </p>
+                  </div>
+                  <label className="cursor-pointer px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition">
+                    <Camera className="w-3.5 h-3.5" />
+                    <span>+ ছবি যোগ করুন</span>
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      disabled={uploadingImage}
+                      onChange={(e) => handleFileUpload(e, 'department')}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  {editDept.images && editDept.images.length > 0 ? (
+                    editDept.images.map((img, idx) => (
+                      <div key={idx} className="relative group w-24 h-24 rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
+                        <img src={img} alt="Dept" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditDept((prev) => ({
+                              ...prev,
+                              images: prev.images?.filter((_, i) => i !== idx),
+                            }));
+                          }}
+                          className="absolute top-1 right-1 p-1 bg-red-600/90 hover:bg-red-700 text-white rounded-full opacity-90 group-hover:opacity-100 transition shadow"
+                          title="ছবি মুছুন"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-slate-400 py-3 italic">এখনও কোনো ছবি আপলোড করা হয়নি। উপরের বাটন দিয়ে ছবি যোগ করুন।</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ============================================================================ */}
           {/* TAB 5: ALUMNI DIRECTORY APPROVAL */}
           {/* ============================================================================ */}
           {role === 'SUPER_ADMIN' && activeTab === 'alumni' && (
@@ -1864,10 +2371,147 @@ export default function AdminPage() {
           )}
 
           {/* ============================================================================ */}
-          {/* TAB 6: ALL CLUB APPLICATIONS (Super Admin View) */}
+          {/* TAB 6: ALL CLUBS & APPLICATIONS (Super Admin View) */}
           {/* ============================================================================ */}
           {role === 'SUPER_ADMIN' && activeTab === 'clubs' && (
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
+            <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-6">
+              {/* Super Admin Club Management Section */}
+              <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200/80 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-700 bg-blue-100/70 px-2 py-0.5 rounded-md inline-block">
+                      ক্লাব তথ্য ও গ্যালারি এডিটর
+                    </span>
+                    <h3 className="text-sm font-black text-slate-900">
+                      ক্লাব নির্বাচন করে তথ্য ও ছবি আপডেট করুন:
+                    </h3>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSaveClub()}
+                    className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1.5 self-start sm:self-auto shadow-sm"
+                  >
+                    <Check className="w-3.5 h-3.5" /> নির্বাচিত ক্লাবের তথ্য সংরক্ষণ করুন
+                  </button>
+                </div>
+
+                <select
+                  value={selectedClubToEditId}
+                  onChange={(e) => handleSelectClub(e.target.value)}
+                  className="w-full text-xs sm:text-sm font-bold bg-white border border-slate-200 rounded-xl p-2.5"
+                >
+                  {RU_CLUBS.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      🏆 {c.nameBn} ({c.shortName})
+                    </option>
+                  ))}
+                </select>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-600">স্লোগান / Motto</label>
+                    <input
+                      type="text"
+                      value={editClub.mottoBn || ''}
+                      onChange={(e) => setEditClub({ ...editClub, mottoBn: e.target.value })}
+                      className="w-full text-xs border border-slate-200 rounded-xl p-2 bg-white"
+                      placeholder="স্লোগান লিখুন"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-600">রুম বা অফিসের অবস্থান</label>
+                    <input
+                      type="text"
+                      value={editClub.roomLocationBn || ''}
+                      onChange={(e) => setEditClub({ ...editClub, roomLocationBn: e.target.value })}
+                      className="w-full text-xs border border-slate-200 rounded-xl p-2 bg-white"
+                      placeholder="যেমন: কক্ষ নং-২০৪, TSCC"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-600">অফিশিয়াল ইমেইল</label>
+                    <input
+                      type="email"
+                      value={editClub.contactEmail || ''}
+                      onChange={(e) => setEditClub({ ...editClub, contactEmail: e.target.value })}
+                      className="w-full text-xs border border-slate-200 rounded-xl p-2 bg-white font-mono"
+                      placeholder="club@gmail.com"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-600">ফেসবুক লিংক</label>
+                    <input
+                      type="url"
+                      value={editClub.facebookUrl || ''}
+                      onChange={(e) => setEditClub({ ...editClub, facebookUrl: e.target.value })}
+                      className="w-full text-xs border border-slate-200 rounded-xl p-2 bg-white font-mono"
+                      placeholder="https://facebook.com/..."
+                    />
+                  </div>
+
+                  <div className="md:col-span-2 space-y-1">
+                    <label className="text-[11px] font-bold text-slate-600">ক্লাবের পরিচিতি ও বর্ণনা</label>
+                    <textarea
+                      rows={3}
+                      value={editClub.descriptionBn || ''}
+                      onChange={(e) => setEditClub({ ...editClub, descriptionBn: e.target.value })}
+                      className="w-full text-xs border border-slate-200 rounded-xl p-2 bg-white"
+                    />
+                  </div>
+                </div>
+
+                {/* Club Photos */}
+                <div className="pt-2 border-t border-slate-200/60 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-bold text-slate-700">
+                      কার্যক্রম ও ইভেন্টের ছবিসমূহ ({editClub.images?.length || 0}টি):
+                    </label>
+                    <label className="cursor-pointer px-3 py-1 rounded-lg bg-slate-900 text-white font-bold text-[11px] flex items-center gap-1">
+                      <Camera className="w-3 h-3" />
+                      <span>+ ছবি আপলোড</span>
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        disabled={uploadingImage}
+                        onChange={(e) => handleFileUpload(e, 'club')}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {editClub.images && editClub.images.length > 0 ? (
+                      editClub.images.map((img, idx) => (
+                        <div key={idx} className="relative group w-20 h-20 rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                          <img src={img} alt="Club" className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditClub((prev) => ({
+                                ...prev,
+                                images: prev.images?.filter((_, i) => i !== idx),
+                              }));
+                            }}
+                            className="absolute top-1 right-1 p-0.5 bg-red-600 text-white rounded-full opacity-80 group-hover:opacity-100"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))
+                    ) : (
+                      <span className="text-[11px] text-slate-400 italic">কোনো ছবি নেই</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Club Applications Table */}
+              <div className="pt-4 border-t border-slate-100 space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <h2 className="text-lg font-black text-slate-900">
                   সকল ক্লাবের মেম্বারশিপ আবেদন ({clubApplications.length}টি)
@@ -1934,7 +2578,8 @@ export default function AdminPage() {
                 </table>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
           {/* ============================================================================ */}
           {/* TAB 7: SETTINGS & PASSWORD MANAGER (Super Admin) */}

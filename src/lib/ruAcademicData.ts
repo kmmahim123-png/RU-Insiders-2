@@ -44,6 +44,7 @@ export interface RuDepartment {
     descriptionBn: string;
   };
   sampleAlumni: RuAlumnus[];
+  images?: string[]; // অনুষদ ভবন, ক্লাসরুম ও ল্যাবরেটরির ছবি
 }
 
 export interface RuFaculty {

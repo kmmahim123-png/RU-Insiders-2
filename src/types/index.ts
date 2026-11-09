@@ -63,7 +63,24 @@ export interface ClubInfo {
   nameBn: string;
   categoryBn: string;
   descriptionBn: string;
+  mottoBn?: string;
+  roomLocationBn?: string;
+  contactEmail?: string;
+  facebookUrl?: string;
+  images?: string[]; // কার্যক্রমের ছবি
+  whatTheyDo?: string[];
   password: string; // প্রতিটি ক্লাবের আলাদা পাসওয়ার্ড
+}
+
+export interface CustomDepartmentData {
+  departmentId: string;
+  nameBn?: string;
+  overviewBn?: string;
+  locationBuildingBn?: string;
+  seatCount?: number;
+  degreeOfferedBn?: string;
+  images: string[]; // অনুষদ ও ভবনের একাধিক ছবি
+  detailSections?: DetailBlock[];
 }
 
 export interface ClubApplication {
