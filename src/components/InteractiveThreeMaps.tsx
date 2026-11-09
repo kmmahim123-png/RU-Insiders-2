@@ -863,22 +863,31 @@ export default function InteractiveThreeMaps() {
                         />
                         <circle cx={dist.pin.x} cy={dist.pin.y} r="1.1" fill="#ffffff" />
 
-                        {/* 7. Bold District Text Label with Checkmark */}
-                        <text
-                          x={dist.pin.x}
-                          y={dist.pin.y - 4.5}
-                          textAnchor="middle"
-                          fill={isSelected ? '#fde047' : stats.pct > 0 ? '#ffffff' : '#cbd5e1'}
-                          stroke="#0f172a"
-                          strokeWidth="2.5"
-                          paintOrder="stroke fill"
-                          fontSize="8.5"
-                          fontWeight="bold"
-                          fontFamily="sans-serif"
-                          className="pointer-events-none select-none"
-                        >
-                          {dist.nameBn} {stats.pct > 0 ? '✓' : ''}
-                        </text>
+                        {/* 7. Bold District Text Label with Crisp Contrast Pill */}
+                        <g className="pointer-events-none select-none">
+                          <rect
+                            x={dist.pin.x - (dist.nameBn.length * 3.4 + 4)}
+                            y={dist.pin.y - 12.5}
+                            width={dist.nameBn.length * 6.8 + 8}
+                            height="9.5"
+                            rx="3"
+                            fill="#0f172a"
+                            fillOpacity="0.92"
+                            stroke={isSelected ? '#facc15' : stats.pct > 0 ? '#34d399' : '#ffffff'}
+                            strokeWidth="0.8"
+                          />
+                          <text
+                            x={dist.pin.x}
+                            y={dist.pin.y - 5.5}
+                            textAnchor="middle"
+                            fill={isSelected ? '#fde047' : '#ffffff'}
+                            fontSize="6.8"
+                            fontWeight="bold"
+                            fontFamily="sans-serif"
+                          >
+                            {dist.nameBn} {stats.pct > 0 ? '✓' : ''}
+                          </text>
+                        </g>
                       </g>
                     );
                   })}
@@ -1200,21 +1209,31 @@ export default function InteractiveThreeMaps() {
                           fill={isSelected ? '#facc15' : isVisited ? '#34d399' : '#38bdf8'}
                         />
 
-                        {/* Region Name Label */}
-                        <text
-                          x={region.center.x}
-                          y={region.center.y + 42}
-                          textAnchor="middle"
-                          fill={isSelected ? '#fde047' : '#ffffff'}
-                          stroke="#0f172a"
-                          strokeWidth="8"
-                          paintOrder="stroke fill"
-                          fontSize="26"
-                          fontWeight="bold"
-                          fontFamily="sans-serif"
-                        >
-                          {region.nameBn} {isVisited ? '✓' : ''}
-                        </text>
+                        {/* Region Name Label with High-Contrast Badge */}
+                        <g className="pointer-events-none select-none">
+                          <rect
+                            x={region.center.x - (region.nameBn.length * 9 + 16)}
+                            y={region.center.y + 18}
+                            width={region.nameBn.length * 18 + 32}
+                            height="34"
+                            rx="10"
+                            fill="#0f172a"
+                            fillOpacity="0.92"
+                            stroke={isSelected ? '#facc15' : isVisited ? '#34d399' : '#ffffff'}
+                            strokeWidth="2.5"
+                          />
+                          <text
+                            x={region.center.x}
+                            y={region.center.y + 42}
+                            textAnchor="middle"
+                            fill={isSelected ? '#fde047' : '#ffffff'}
+                            fontSize="22"
+                            fontWeight="bold"
+                            fontFamily="sans-serif"
+                          >
+                            {region.nameBn} {isVisited ? '✓' : ''}
+                          </text>
+                        </g>
                       </g>
                     );
                   })}
@@ -1562,27 +1581,29 @@ export default function InteractiveThreeMaps() {
                         onMouseLeave={() => setHoveredRuId(null)}
                         className="cursor-pointer transition-transform duration-200"
                       >
-                        {/* Base Dark Slate Layer */}
+                        {/* Base Architectural Sandstone Layer */}
                         <path
                           d={place.d}
-                          fill="#1e293b"
-                          stroke={isSelected ? '#fbbf24' : isVisited ? '#34d399' : '#ffffff'}
-                          strokeWidth={isSelected ? 4 : 2}
+                          fill={isVisited ? '#059669' : isSelected ? '#ede4d4' : '#e2dcce'}
+                          stroke={isSelected ? '#fbbf24' : isVisited ? '#10b981' : '#ffffff'}
+                          strokeWidth={isSelected ? 3.5 : 2}
                           strokeLinejoin="round"
                         />
                         {/* Liquid Green Water Fill Layer */}
-                        <path
-                          d={place.d}
-                          fill="#059669"
-                          clipPath={`url(#ru-water-clip-${place.id})`}
-                        />
+                        {isVisited && (
+                          <path
+                            d={place.d}
+                            fill="#059669"
+                            clipPath={`url(#ru-water-clip-${place.id})`}
+                          />
+                        )}
                         {/* Active Glowing Outline */}
                         {isSelected && (
                           <path
                             d={place.d}
                             fill="none"
                             stroke="#fbbf24"
-                            strokeWidth={6}
+                            strokeWidth={5}
                             filter="url(#ru-place-glow)"
                             className="animate-pulse"
                           />
@@ -1626,18 +1647,18 @@ export default function InteractiveThreeMaps() {
                           </g>
                         )}
 
-                        {/* Crisp Centered Place Name Label */}
+                        {/* Crisp High-Contrast Place Name Label */}
                         {place.id !== 'stadium' && (
                           <text
                             x={place.center.x}
                             y={place.center.y + 4}
                             textAnchor="middle"
-                            fill={isSelected ? '#fde047' : '#ffffff'}
-                            stroke="#0f172a"
-                            strokeWidth="4"
+                            fill={isVisited ? '#ffffff' : isSelected ? '#1e3a8a' : '#1e293b'}
+                            stroke={isVisited ? '#064e3b' : '#ffffff'}
+                            strokeWidth={isVisited ? '2' : '1.8'}
                             paintOrder="stroke fill"
                             fontSize={
-                              place.shortBn.length > 18 ? '8.5' : place.shortBn.length > 12 ? '9.5' : '10.5'
+                              place.shortBn.length > 18 ? '9' : place.shortBn.length > 12 ? '10' : '11'
                             }
                             fontWeight="bold"
                             fontFamily="sans-serif"
