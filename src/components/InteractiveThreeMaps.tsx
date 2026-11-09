@@ -171,70 +171,20 @@ export default function InteractiveThreeMaps() {
     let list = RU_CAMPUS_PLACES;
     if (ruCategory !== 'all') {
       if (ruCategory === 'academic') {
-        list = list.filter((p) =>
-          [
-            'agri_faculty',
-            'fine_arts',
-            'science_complex',
-            'first_science',
-            'second_science',
-            'fourth_science',
-            'central_library',
-            'varendra_research',
-          ].includes(p.id)
-        );
+        list = list.filter((p) => p.cat === 'academic');
       } else if (ruCategory === 'halls') {
-        list = list.filter((p) =>
-          [
-            'rokeya_hall',
-            'mannujan_hall',
-            'taposhi_rabeya',
-            'begum_khaleda',
-            'rahamatunnesa_hall',
-            'zia_hall',
-            'habibur_hall',
-            'motihar_hall',
-            'madar_bux_hall',
-            'sohrawardi_hall',
-            'bangabandhu_hall',
-            'shamsuzzoha_hall',
-            'sher_e_bangla_hall',
-          ].includes(p.id)
-        );
+        list = list.filter((p) => p.cat === 'female_halls' || p.cat === 'male_halls');
       } else if (ruCategory === 'landmarks') {
-        list = list.filter((p) =>
-          [
-            'paris_road',
-            'shaheed_minar',
-            'tukitaki_chottor',
-            'shabash_bd',
-            'tscc',
-            'botanical_garden',
-            'moti_lake_north',
-            'moti_lake_south',
-          ].includes(p.id)
-        );
-      } else if (ruCategory === 'admin_gates') {
-        list = list.filter((p) =>
-          [
-            'admin_building',
-            'juberi_bhavan',
-            'main_gate',
-            'kazla_gate',
-            'binodpur_gate',
-            'charukola_gate',
-            'ruet_junction',
-            'ru_stadium',
-            'badminton_gym',
-            'ru_central_mosque',
-          ].includes(p.id)
-        );
+        list = list.filter((p) => p.cat === 'landmarks');
       }
     }
     if (ruSearchQuery.trim()) {
       const q = ruSearchQuery.toLowerCase().trim();
       list = list.filter(
-        (p) => p.nameBn.toLowerCase().includes(q) || p.nameEn.toLowerCase().includes(q)
+        (p) =>
+          p.nameBn.toLowerCase().includes(q) ||
+          p.nameEn.toLowerCase().includes(q) ||
+          p.shortBn.toLowerCase().includes(q)
       );
     }
     return list;
@@ -1405,8 +1355,7 @@ export default function InteractiveThreeMaps() {
                 { id: 'all', label: 'সব স্থান', count: 42 },
                 { id: 'academic', label: 'একাডেমিক ভবন', count: 11 },
                 { id: 'halls', label: 'আবাসিক হল', count: 18 },
-                { id: 'landmarks', label: 'ল্যান্ডমার্ক ও চত্বর', count: 8 },
-                { id: 'admin_gates', label: 'প্রশাসনিক ও গেট', count: 5 },
+                { id: 'landmarks', label: 'ল্যান্ডমার্ক ও গেট', count: 13 },
               ].map((cat) => (
                 <button
                   key={cat.id}
@@ -1526,15 +1475,47 @@ export default function InteractiveThreeMaps() {
                     strokeOpacity="0.75"
                   />
 
-                  {/* Zoha Roundabout */}
+                  {/* Zoha Roundabout Circle */}
                   <circle cx="480" cy="475" r="14" fill="#15803d" stroke="#ffffff" strokeWidth="2.5" />
                   <circle cx="480" cy="475" r="6" fill="#fef08a" />
 
                   {/* Railway track */}
                   <line x1="55" y1="118" x2="1158" y2="118" stroke="#57534e" strokeWidth="4" strokeOpacity="0.8" />
                   <line x1="55" y1="118" x2="1158" y2="118" stroke="#f7f5ee" strokeWidth="2.2" strokeDasharray="8 8" />
+                  <text x="765" y="108" textAnchor="middle" fill="#57534e" fontSize="10.5" fontWeight="bold" fontFamily="sans-serif">
+                    🚂 রাজশাহী - ঢাকা রেলপথ
+                  </text>
 
-                  {/* 3. 42 Campus Places */}
+                  {/* Highway Label */}
+                  <text
+                    x="665"
+                    y="592"
+                    textAnchor="middle"
+                    fill="#ffffff"
+                    fontSize="10.5"
+                    fontWeight="bold"
+                    transform="rotate(-7.8, 665, 592)"
+                    fontFamily="sans-serif"
+                  >
+                    রাজশাহী - নাটোর মহাসড়ক (মেইন গেট, কাজলা গেট ও বিনোদপুর গেট)
+                  </text>
+
+                  {/* Paris Road Label */}
+                  <text x="368" y="479" textAnchor="middle" fontSize="9.5" fontWeight="bold" fill="#fef08a" fontFamily="sans-serif">
+                    🚗 🛺 প্যারিস রোড →
+                  </text>
+
+                  {/* North Compass Indicator */}
+                  <g transform="translate(68, 615)" className="pointer-events-none select-none">
+                    <circle cx="0" cy="0" r="22" fill="#ffffff" fillOpacity="0.92" stroke="#d6d0c4" strokeWidth="1.5" />
+                    <polygon points="0,-17 4,-4 0,-7 -4,-4" fill="#15803d" />
+                    <polygon points="0,17 4,4 0,7 -4,4" fill="#a8a29e" />
+                    <text x="0" y="-25" textAnchor="middle" fontSize="9.5" fontWeight="bold" fill="#0f172a" fontFamily="sans-serif">
+                      উত্তর (N)
+                    </text>
+                  </g>
+
+                  {/* 3. 42 Architectural Campus Places */}
                   {filteredRuPlaces.map((place) => {
                     const isSelected = selectedRuId === place.id;
                     const isVisited = visitedRuIds.includes(place.id);
@@ -1551,7 +1532,7 @@ export default function InteractiveThreeMaps() {
                         <path
                           d={place.d}
                           fill="#1e293b"
-                          stroke={isSelected ? '#f59e0b' : isVisited ? '#34d399' : '#ffffff'}
+                          stroke={isSelected ? '#fbbf24' : isVisited ? '#34d399' : '#ffffff'}
                           strokeWidth={isSelected ? 4 : 2}
                           strokeLinejoin="round"
                         />
@@ -1572,37 +1553,65 @@ export default function InteractiveThreeMaps() {
                             className="animate-pulse"
                           />
                         )}
-                        <circle
-                          cx={place.center.x}
-                          cy={place.center.y}
-                          r="12"
-                          fill={isVisited ? '#059669' : '#1e293b'}
-                          stroke="#ffffff"
-                          strokeWidth="2"
-                        />
-                        <text
-                          x={place.center.x}
-                          y={place.center.y + 4}
-                          textAnchor="middle"
-                          fill="#ffffff"
-                          fontSize="9.5"
-                          fontWeight="bold"
-                        >
-                          {place.rankNo}
-                        </text>
-                        <text
-                          x={place.center.x}
-                          y={place.center.y + 22}
-                          textAnchor="middle"
-                          fill="#1e293b"
-                          fontSize="10"
-                          fontWeight="bold"
-                          stroke="#ffffff"
-                          strokeWidth="2.5"
-                          paintOrder="stroke fill"
-                        >
-                          {place.shortBn} {isVisited ? '✓' : ''}
-                        </text>
+
+                        {/* Sheikh Kamal Stadium Oval Inner Pitch Track */}
+                        {place.id === 'stadium' && (
+                          <g className="pointer-events-none select-none">
+                            <ellipse
+                              cx={place.center.x}
+                              cy={place.center.y}
+                              rx="46"
+                              ry="56"
+                              fill={isVisited ? '#047857' : '#86efac'}
+                              fillOpacity={isVisited ? 0.95 : 0.85}
+                              stroke="#ffffff"
+                              strokeWidth="2.5"
+                            />
+                            <text
+                              x={place.center.x}
+                              y={place.center.y - 6}
+                              textAnchor="middle"
+                              fill="#064e3b"
+                              fontSize="10"
+                              fontWeight="bold"
+                              fontFamily="sans-serif"
+                            >
+                              শেখ কামাল
+                            </text>
+                            <text
+                              x={place.center.x}
+                              y={place.center.y + 10}
+                              textAnchor="middle"
+                              fill="#064e3b"
+                              fontSize="9"
+                              fontWeight="bold"
+                              fontFamily="sans-serif"
+                            >
+                              স্টেডিয়াম
+                            </text>
+                          </g>
+                        )}
+
+                        {/* Crisp Centered Place Name Label */}
+                        {place.id !== 'stadium' && (
+                          <text
+                            x={place.center.x}
+                            y={place.center.y + 4}
+                            textAnchor="middle"
+                            fill={isSelected ? '#fde047' : '#ffffff'}
+                            stroke="#0f172a"
+                            strokeWidth="4"
+                            paintOrder="stroke fill"
+                            fontSize={
+                              place.shortBn.length > 18 ? '8.5' : place.shortBn.length > 12 ? '9.5' : '10.5'
+                            }
+                            fontWeight="bold"
+                            fontFamily="sans-serif"
+                            className="pointer-events-none select-none"
+                          >
+                            {place.shortBn} {isVisited ? '✓' : ''}
+                          </text>
+                        )}
                       </g>
                     );
                   })}
