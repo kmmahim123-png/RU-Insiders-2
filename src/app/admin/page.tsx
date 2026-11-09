@@ -142,8 +142,9 @@ export default function AdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'VERIFY_PASSWORD', password: saved }),
       })
-        .then((r) => r.json())
+        .then((r) => (r.ok ? r.json() : null))
         .then((data) => {
+          if (!data) return;
           if (data.ok) {
             setRole(data.role);
             setRoleTitle(data.roleTitle);
@@ -289,18 +290,7 @@ export default function AdminPage() {
           payload: { article: editArticle, sendChromePush: sendArticlePush },
         }),
       });
-      const text = await res.text();
-      let data: any = {};
-      try {
-        data = JSON.parse(text);
-      } catch {
-        if (res.status === 413) {
-          alert('নিউজের তথ্যের আকার অতিরিক্ত বড় (৪.৫ MB পার করেছে)। ছবির সাইজ ছোট করুন।');
-          return;
-        }
-        alert(`সার্ভার ত্রুটি (${res.status}): ${text.slice(0, 100)}`);
-        return;
-      }
+      const data = await safeParseApiResponse(res);
       if (data.ok && data.articles) {
         setArticles(data.articles);
         if (data.settings) setSettings(data.settings);
@@ -365,7 +355,7 @@ export default function AdminPage() {
     setShowProductModal(true);
   };
 
-  const compressImageFile = async (file: File, maxWidth = 960, quality = 0.72): Promise<File> => {
+  const compressImageFile = async (file: File, maxWidth = 800, quality = 0.65): Promise<File> => {
     if (!file.type.startsWith('image/') || file.type.includes('svg') || file.type.includes('gif')) {
       return file;
     }
@@ -376,9 +366,15 @@ export default function AdminPage() {
         img.onload = () => {
           let width = img.width;
           let height = img.height;
-          if (width > maxWidth) {
-            height = Math.round((height * maxWidth) / width);
-            width = maxWidth;
+          // Scale down proportionally for both dimensions
+          if (width > maxWidth || height > maxWidth) {
+            if (width > height) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            } else {
+              width = Math.round((width * maxWidth) / height);
+              height = maxWidth;
+            }
           }
           const canvas = document.createElement('canvas');
           canvas.width = width;
@@ -388,12 +384,41 @@ export default function AdminPage() {
             resolve(file);
             return;
           }
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
           ctx.drawImage(img, 0, 0, width, height);
+
           canvas.toBlob(
             (blob) => {
               if (!blob) {
                 resolve(file);
                 return;
+              }
+              // If blob is still > 120KB, compress further to 600px
+              if (blob.size > 120 * 1024) {
+                const c2 = document.createElement('canvas');
+                const scale = Math.min(600 / width, 1);
+                c2.width = Math.round(width * scale);
+                c2.height = Math.round(height * scale);
+                const ctx2 = c2.getContext('2d');
+                if (ctx2) {
+                  ctx2.imageSmoothingEnabled = true;
+                  ctx2.imageSmoothingQuality = 'medium';
+                  ctx2.drawImage(img, 0, 0, c2.width, c2.height);
+                  c2.toBlob(
+                    (b2) => {
+                      if (!b2) return resolve(file);
+                      const f2 = new File([b2], file.name.replace(/\.[^.]+$/, '.webp'), {
+                        type: 'image/webp',
+                        lastModified: Date.now(),
+                      });
+                      resolve(f2);
+                    },
+                    'image/webp',
+                    0.55
+                  );
+                  return;
+                }
               }
               const compressedFile = new File([blob], file.name.replace(/\.[^.]+$/, '.webp'), {
                 type: 'image/webp',
@@ -419,7 +444,7 @@ export default function AdminPage() {
 
     setUploadingImage(true);
     try {
-      showToast('ছবি অপ্টিমাইজ ও আপলোড হচ্ছে...');
+      showToast('ছবি দ্রুত অপ্টিমাইজ ও আপলোড হচ্ছে...');
       const compressedFiles = await Promise.all(
         Array.from(files).map((f) => compressImageFile(f))
       );
@@ -428,18 +453,7 @@ export default function AdminPage() {
       compressedFiles.forEach((file) => formData.append('files', file));
 
       const res = await fetch('/api/upload', { method: 'POST', body: formData });
-      const text = await res.text();
-      let data: any = {};
-      try {
-        data = JSON.parse(text);
-      } catch {
-        if (res.status === 413) {
-          alert('ছবির সাইজ অনেক বড় (৪.৫ MB লিমিট পার করেছে)। কম রেজ্যুলেশনের ছবি নির্বাচন করুন।');
-          return;
-        }
-        alert(`সার্ভার আপলোড ত্রুটি (${res.status}): ${text.slice(0, 100)}`);
-        return;
-      }
+      const data = await safeParseApiResponse(res);
 
       if (data.ok && data.urls?.length) {
         if (target === 'product') {
@@ -488,18 +502,7 @@ export default function AdminPage() {
           payload: { product: editProduct, sendChromePush: sendProdPush },
         }),
       });
-      const text = await res.text();
-      let data: any = {};
-      try {
-        data = JSON.parse(text);
-      } catch {
-        if (res.status === 413) {
-          alert('পণ্যের তথ্যের আকার অতিরিক্ত বড় (৪.৫ MB পার করেছে)। ছবির সাইজ ছোট করুন।');
-          return;
-        }
-        alert(`সার্ভার ত্রুটি (${res.status}): ${text.slice(0, 100)}`);
-        return;
-      }
+      const data = await safeParseApiResponse(res);
 
       if (data.ok && data.products) {
         setProducts(data.products);
