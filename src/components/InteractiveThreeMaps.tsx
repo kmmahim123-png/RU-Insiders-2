@@ -240,6 +240,14 @@ export default function InteractiveThreeMaps() {
     return list;
   }, [ruCategory, ruSearchQuery]);
 
+  const selectedPdfRegion = useMemo(() => {
+    return RAJSHAHI_PDF_REGIONS.find((r) => r.id === selectedPdfId) || RAJSHAHI_PDF_REGIONS[0];
+  }, [selectedPdfId]);
+
+  const selectedRuPlace = useMemo(() => {
+    return RU_CAMPUS_PLACES.find((p) => p.id === selectedRuId) || RU_CAMPUS_PLACES[0];
+  }, [selectedRuId]);
+
   // Open Spot Detail Modal
   const openSpotDetailModal = (spot: {
     id: string;
@@ -258,7 +266,7 @@ export default function InteractiveThreeMaps() {
     setActiveModalImgIdx(0);
   };
 
-  // Certificate Canvas Rendering
+  // Certificate Canvas Rendering (with Live Embedded Vector Map)
   useEffect(() => {
     if (!showCertModal) return;
     const canvas = certCanvasRef.current;
@@ -269,7 +277,7 @@ export default function InteractiveThreeMaps() {
     canvas.width = 1200;
     canvas.height = 800;
 
-    // Background Gradient
+    // Background Gradient (Deep Forest Emerald & Slate)
     const grad = ctx.createLinearGradient(0, 0, 1200, 800);
     grad.addColorStop(0, '#031710');
     grad.addColorStop(0.5, '#062d1f');
@@ -280,50 +288,75 @@ export default function InteractiveThreeMaps() {
     // Decorative Borders
     ctx.strokeStyle = '#facc15';
     ctx.lineWidth = 4;
-    ctx.strokeRect(25, 25, 1150, 750);
+    ctx.strokeRect(20, 20, 1160, 760);
 
     ctx.strokeStyle = '#10b981';
     ctx.lineWidth = 1.5;
-    ctx.strokeRect(35, 35, 1130, 730);
+    ctx.strokeRect(28, 28, 1144, 744);
 
-    // Header Citation
-    ctx.textAlign = 'center';
+    // Corner Ornaments
+    const drawCorner = (x: number, y: number, rot: number) => {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rot);
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(30, 0);
+      ctx.lineTo(30, 8);
+      ctx.lineTo(8, 8);
+      ctx.lineTo(8, 30);
+      ctx.lineTo(0, 30);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.restore();
+    };
+    drawCorner(32, 32, 0);
+    drawCorner(1168, 32, Math.PI / 2);
+    drawCorner(1168, 768, Math.PI);
+    drawCorner(32, 768, -Math.PI / 2);
+
+    // =========================================================================
+    // LEFT COLUMN: OFFICIAL CITATION & EXPLORER CREDENTIALS (x: 50 to 650)
+    // =========================================================================
+    ctx.textAlign = 'left';
     ctx.fillStyle = '#facc15';
-    ctx.font = 'bold 22px sans-serif';
-    ctx.fillText('🏛️ RU INSIDERS • OFFICIAL TOURISM & HERITAGE CITATION', 600, 95);
+    ctx.font = 'bold 16px sans-serif';
+    ctx.fillText('🏛️ RU INSIDERS • OFFICIAL TOURISM & HERITAGE CITATION', 60, 85);
 
     ctx.fillStyle = '#ffffff';
-    ctx.font = '900 44px sans-serif';
+    ctx.font = '900 34px sans-serif';
     ctx.fillText(
       stage === 'ru_campus'
         ? 'রাজশাহী বিশ্ববিদ্যালয় ভ্রমণ সনদ'
         : stage === 'rajshahi_district'
         ? 'রাজশাহী জেলা ঐতিহ্য ভ্রমণ সনদ'
         : 'রাজশাহী বিভাগ পর্যটন সনদ',
-      600,
-      160
+      60,
+      135
     );
 
     ctx.fillStyle = '#94a3b8';
-    ctx.font = '600 16px sans-serif';
-    ctx.fillText('OFFICIAL HERITAGE & EXPLORATION CERTIFICATE OF COMPLETION', 600, 195);
+    ctx.font = '600 13px sans-serif';
+    ctx.fillText('OFFICIAL HERITAGE & EXPLORATION CERTIFICATE OF COMPLETION', 60, 165);
 
-    // Citation Body
+    // Citation Body Header
     ctx.fillStyle = '#6ee7b7';
-    ctx.font = 'bold 20px sans-serif';
-    ctx.fillText('এই গৌরবময় সনদপত্রটি সসম্মানে প্রদান করা হলো:', 600, 260);
+    ctx.font = 'bold 16px sans-serif';
+    ctx.fillText('এই গৌরবময় সনদপত্রটি সসম্মানে প্রদান করা হলো:', 60, 220);
 
     // Explorer Name
     ctx.fillStyle = '#38bdf8';
-    ctx.font = '900 48px sans-serif';
-    ctx.fillText(explorerName.trim() || 'রাজশাহী অভিযাত্রী', 600, 325);
+    ctx.font = '900 38px sans-serif';
+    ctx.fillText(explorerName.trim() || 'রাজশাহী অভিযাত্রী', 60, 275);
 
     // Golden underline
     ctx.strokeStyle = '#facc15';
     ctx.lineWidth = 2.5;
     ctx.beginPath();
-    ctx.moveTo(350, 345);
-    ctx.lineTo(850, 345);
+    ctx.moveTo(60, 292);
+    ctx.lineTo(540, 292);
     ctx.stroke();
 
     // Achievement text
@@ -343,48 +376,220 @@ export default function InteractiveThreeMaps() {
         : totalDivSpots;
 
     ctx.fillStyle = '#e2e8f0';
-    ctx.font = '500 20px sans-serif';
-    ctx.fillText(
-      stage === 'ru_campus'
-        ? `যিনি রাজশাহী বিশ্ববিদ্যালয়ের মতিহার ক্যাম্পাসের ৪২টি স্পটের মধ্যে ${activeCount}টি স্থান সফলভাবে ভ্রমণ করেছেন।`
-        : stage === 'rajshahi_district'
-        ? `যিনি রাজশাহী জেলার ২২টি সুনির্দিষ্ট ঐতিহ্যবাহী অঞ্চলের মধ্যে ${activeCount}টি অঞ্চল সফলভাবে ঘুরেছেন।`
-        : `যিনি রাজশাহী বিভাগের ৮টি জেলার ৯৫টি সরকারি দর্শনীয় স্থানের মধ্যে ${activeCount}টি স্থান ভ্রমণ সম্পন্ন করেছেন।`,
-      600,
-      410
-    );
+    ctx.font = '500 16px sans-serif';
+    if (stage === 'ru_campus') {
+      ctx.fillText('যিনি রাজশাহী বিশ্ববিদ্যালয়ের মতিহার ক্যাম্পাসের ৪২টি স্পটের মধ্যে', 60, 335);
+      ctx.fillText(`${activeCount}টি ঐতিহাসিক স্থান সফলভাবে পরিদর্শন সম্পন্ন করেছেন।`, 60, 362);
+    } else if (stage === 'rajshahi_district') {
+      ctx.fillText('যিনি রাজশাহী জেলার ২২টি সুনির্দিষ্ট ঐতিহ্যবাহী অঞ্চলের মধ্যে', 60, 335);
+      ctx.fillText(`${activeCount}টি অঞ্চল সফলভাবে ঘুরে ঐতিহ্য অন্বেষণ সম্পন্ন করেছেন।`, 60, 362);
+    } else {
+      ctx.fillText('যিনি রাজশাহী বিভাগের ৮টি জেলার ৯৫টি সরকারি দর্শনীয় স্থানের মধ্যে', 60, 335);
+      ctx.fillText(`${activeCount}টি স্থান সফলভাবে ভ্রমণ সম্পন্ন করে এই কৃতিত্ব অর্জন করেছেন।`, 60, 362);
+    }
 
-    // Stats Badges Box
-    ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
-    ctx.roundRect(300, 460, 600, 110, 20);
+    // Stats Badges Box (Left column)
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
+    ctx.roundRect(60, 405, 580, 105, 18);
     ctx.fill();
     ctx.strokeStyle = '#10b981';
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
     ctx.fillStyle = '#facc15';
-    ctx.font = '900 36px sans-serif';
-    ctx.fillText(`${activePercent}% সম্পন্ন`, 600, 515);
+    ctx.font = '900 32px sans-serif';
+    ctx.fillText(`${activePercent}% সম্পন্ন`, 85, 452);
 
     ctx.fillStyle = '#94a3b8';
-    ctx.font = 'bold 15px sans-serif';
-    ctx.fillText(`মোট অর্জিত মাইলফলক: ${activeCount} / ${activeTotal} স্থান`, 600, 545);
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillText(`মোট অর্জিত মাইলফলক: ${activeCount} / ${activeTotal} স্থান`, 85, 485);
 
-    // Footer & Signature
-    ctx.textAlign = 'left';
+    // Official Verification Seal & Signatures
     ctx.fillStyle = '#94a3b8';
-    ctx.font = '500 14px sans-serif';
-    ctx.fillText(`ইস্যু তারিখ: ${new Date().toLocaleDateString('bn-BD')}`, 80, 710);
-    ctx.fillText('ভেরিফিকেশন আইডি: RU-INSIDERS-EXPLORER-2026', 80, 735);
-
-    ctx.textAlign = 'right';
+    ctx.font = '500 13px sans-serif';
+    ctx.fillText(`ইস্যু তারিখ: ${new Date().toLocaleDateString('bn-BD')}`, 60, 680);
+    ctx.fillText('ভেরিফিকেশন কোড: RU-INSD-EXPLORER-2026', 60, 705);
     ctx.fillStyle = '#10b981';
-    ctx.font = 'bold 18px sans-serif';
-    ctx.fillText('RU Insiders পর্যটন ও হেরিটেজ কাউন্সিল', 1120, 710);
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '13px sans-serif';
-    ctx.fillText('রাজশাহী বিশ্ববিদ্যালয় অফিশিয়াল ইনিশিয়েটিভ', 1120, 735);
-  }, [showCertModal, stage, explorerName, ruPercent, pdfPercent, divPercent]);
+    ctx.font = 'bold 16px sans-serif';
+    ctx.fillText('RU Insiders গভর্নিং বডি ও পর্যটন কাউন্সিল', 60, 735);
+
+    // =========================================================================
+    // RIGHT COLUMN: EMBEDDED LIVE VECTOR WATER MAP (x: 670 to 1140, y: 65 to 735)
+    // =========================================================================
+    const boxX = 670;
+    const boxY = 65;
+    const boxW = 470;
+    const boxH = 675;
+
+    // Map Card Frame (Light Cream #f2eee3 matching website)
+    ctx.fillStyle = '#f2eee3';
+    ctx.roundRect(boxX, boxY, boxW, boxH, 24);
+    ctx.fill();
+    ctx.strokeStyle = '#facc15';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Map Header Badge
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#0f172a';
+    ctx.font = '900 18px sans-serif';
+    ctx.fillText('🗺️ অর্জিত ভ্রমণ মানচিত্র (LIVE MAP)', boxX + boxW / 2, boxY + 40);
+
+    ctx.fillStyle = '#047857';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.fillText('সবুজ: আপনার ঘোরা স্থান • স্লেট: অবশিষ্ট অঞ্চল', boxX + boxW / 2, boxY + 62);
+
+    // Divider line inside map box
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(boxX + 25, boxY + 75);
+    ctx.lineTo(boxX + boxW - 25, boxY + 75);
+    ctx.stroke();
+
+    // Draw Live Map based on active stage
+    const mapCenterX = boxX + boxW / 2;
+    const mapCenterY = boxY + 345;
+
+    if (stage === 'division') {
+      // 8 Districts Vector Map
+      const scale = 1.9;
+      const origCenterX = 117.5;
+      const origCenterY = 295;
+
+      ctx.save();
+      ctx.translate(mapCenterX, mapCenterY);
+      ctx.scale(scale, scale);
+      ctx.translate(-origCenterX, -origCenterY);
+
+      RAJSHAHI_DISTRICT_SVGS.forEach((dist) => {
+        const stats = districtStats[dist.id] || { pct: 0 };
+        const p = new Path2D(dist.d);
+        if (stats.pct > 0) {
+          ctx.fillStyle = '#059669';
+        } else {
+          ctx.fillStyle = '#1e293b';
+        }
+        ctx.fill(p);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.2 / scale;
+        ctx.stroke(p);
+
+        // Center pin dot
+        if (dist.pin) {
+          ctx.fillStyle = stats.pct > 0 ? '#fde047' : '#ffffff';
+          ctx.beginPath();
+          ctx.arc(dist.pin.x, dist.pin.y, 4 / scale, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+      ctx.restore();
+    } else if (stage === 'rajshahi_district') {
+      // 22 Regions Vector Map
+      const scale = 0.22;
+      const origCenterX = 960;
+      const origCenterY = 960;
+
+      ctx.save();
+      ctx.translate(mapCenterX, mapCenterY);
+      ctx.scale(scale, scale);
+      ctx.translate(-origCenterX, -origCenterY);
+
+      RAJSHAHI_PDF_REGIONS.forEach((region) => {
+        const isVisited = visitedPdfIds.includes(region.id);
+        const p = new Path2D(region.d);
+        ctx.fillStyle = isVisited ? '#059669' : '#1e293b';
+        ctx.fill(p);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 4;
+        ctx.stroke(p);
+
+        ctx.fillStyle = isVisited ? '#fde047' : '#ffffff';
+        ctx.beginPath();
+        ctx.arc(region.center.x, region.center.y, 16, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.restore();
+    } else {
+      // RU Campus 42 Places Map
+      const scale = 0.35;
+      const origCenterX = 600;
+      const origCenterY = 375;
+
+      ctx.save();
+      ctx.translate(mapCenterX, mapCenterY);
+      ctx.scale(scale, scale);
+      ctx.translate(-origCenterX, -origCenterY);
+
+      // Campus roads
+      ctx.strokeStyle = '#15803d';
+      ctx.lineWidth = 8;
+      ctx.beginPath();
+      ctx.moveTo(254, 475);
+      ctx.lineTo(895, 475);
+      ctx.moveTo(254, 645);
+      ctx.lineTo(254, 122);
+      ctx.moveTo(450, 475);
+      ctx.lineTo(450, 24);
+      ctx.stroke();
+
+      // Railway
+      ctx.strokeStyle = '#57534e';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(55, 118);
+      ctx.lineTo(1158, 118);
+      ctx.stroke();
+
+      RU_CAMPUS_PLACES.forEach((place) => {
+        const isVisited = visitedRuIds.includes(place.id);
+        const p = new Path2D(place.d);
+        ctx.fillStyle = isVisited ? '#059669' : '#1e293b';
+        ctx.fill(p);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.stroke(p);
+      });
+      ctx.restore();
+    }
+
+    // Map Legend at bottom of card
+    const legendY = boxY + boxH - 45;
+
+    // Green square
+    ctx.fillStyle = '#059669';
+    ctx.fillRect(boxX + 50, legendY - 12, 16, 16);
+    ctx.strokeStyle = '#0f172a';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(boxX + 50, legendY - 12, 16, 16);
+
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('ঘুরেছেন (সবুজ জলস্তর)', boxX + 75, legendY);
+
+    // Dark slate square
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(boxX + 250, legendY - 12, 16, 16);
+    ctx.strokeRect(boxX + 250, legendY - 12, 16, 16);
+
+    ctx.fillStyle = '#0f172a';
+    ctx.fillText('বাকি অঞ্চল (স্লেট)', boxX + 275, legendY);
+  }, [
+    showCertModal,
+    stage,
+    explorerName,
+    ruPercent,
+    pdfPercent,
+    divPercent,
+    ruVisitedCount,
+    pdfVisitedCount,
+    divVisitedCount,
+    visitedRuIds,
+    visitedPdfIds,
+    visitedDivSpotIds,
+    districtStats,
+  ]);
 
   // Download Certificate PNG
   const downloadCertificate = () => {
@@ -864,38 +1069,92 @@ export default function InteractiveThreeMaps() {
       {/* ============================================================================ */}
       {stage === 'rajshahi_district' && (
         <div className="relative z-10 space-y-3">
-          {/* Quick Filter & Search Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="text-xs font-black text-emerald-200 font-bengali flex items-center gap-1.5">
-              <Building className="h-4 w-4 text-amber-400" />
-              <span>রাজশাহী জেলার ২২টি অঞ্চল থেকে নির্বাচন করুন:</span>
-            </span>
+          {/* 22-Region Quick Selector Pills Bar */}
+          <div className="space-y-1.5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="text-xs font-black text-emerald-200 font-bengali uppercase tracking-wide flex items-center gap-1.5">
+                <Building className="h-4 w-4 text-amber-400" />
+                <span>রাজশাহী জেলার ২২টি অঞ্চল থেকে নির্বাচন করুন:</span>
+              </span>
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-emerald-300" />
+                <input
+                  type="text"
+                  value={pdfSearchQuery}
+                  onChange={(e) => setPdfSearchQuery(e.target.value)}
+                  placeholder="অঞ্চল খুঁজুন (রুয়েট, রাবি, মেডিকেল...)"
+                  className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-black/30 border border-emerald-500/30 text-xs text-white placeholder-emerald-300/60 focus:outline-none focus:ring-1 focus:ring-amber-400 font-bengali"
+                />
+              </div>
+            </div>
 
-            <div className="relative w-full sm:w-72">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-emerald-300" />
-              <input
-                type="text"
-                value={pdfSearchQuery}
-                onChange={(e) => setPdfSearchQuery(e.target.value)}
-                placeholder="অঞ্চল খুঁজুন (রুয়েট, রাবি, মেডিকেল, টি-বাঁধ...)"
-                className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-black/30 border border-emerald-500/30 text-xs text-white placeholder-emerald-300/60 focus:outline-none focus:ring-1 focus:ring-amber-400 font-bengali"
-              />
+            <div className="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-thin">
+              {RAJSHAHI_PDF_REGIONS.map((region) => {
+                const isSelected = selectedPdfId === region.id;
+                const isVisited = visitedPdfIds.includes(region.id);
+                return (
+                  <button
+                    key={region.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedPdfId(region.id);
+                      if (region.id === 'pdf_ru') {
+                        setStage('ru_campus');
+                      }
+                    }}
+                    className={`px-3 py-1.5 rounded-xl text-left transition-all border whitespace-nowrap flex items-center gap-2 shrink-0 cursor-pointer ${
+                      isSelected
+                        ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-md ring-2 ring-white scale-[1.02] font-black'
+                        : isVisited
+                        ? 'bg-emerald-900/90 text-white border-emerald-500 hover:bg-emerald-800'
+                        : 'bg-emerald-950/70 hover:bg-emerald-900 text-white border-emerald-800/80'
+                    }`}
+                  >
+                    <span className="text-xs font-bengali">
+                      {region.rankNo}. {region.nameBn}
+                    </span>
+                    {isVisited && (
+                      <span className="text-[10px] font-bold text-emerald-300 bg-emerald-950/80 px-1.5 py-0.2 rounded-full">
+                        ✓ সম্পন্ন
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           {/* 2-Column Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
-            {/* Left Column: 22-Region SVG Map */}
+            {/* Left Column: 22-Region Interactive Vector Water Map */}
             <div className="lg:col-span-6 flex flex-col items-center justify-center">
               <div className="relative w-full aspect-[1770/1660] min-h-[380px] sm:min-h-[500px] bg-[#f2eee3] rounded-[28px] p-2 sm:p-4 border-2 border-emerald-900/15 shadow-inner flex items-center justify-center overflow-hidden group">
                 <svg viewBox={RAJSHAHI_PDF_MAP_VIEWBOX} className="w-full h-full object-contain select-none">
                   <defs>
                     <filter id="active-pdf-glow" x="-20%" y="-20%" width="140%" height="140%">
                       <feDropShadow dx="0" dy="0" stdDeviation="16" floodColor="#facc15" floodOpacity="0.95" />
+                      <feDropShadow dx="0" dy="0" stdDeviation="28" floodColor="#10b981" floodOpacity="0.8" />
                     </filter>
+
+                    {RAJSHAHI_PDF_REGIONS.map((region) => {
+                      const isVisited = visitedPdfIds.includes(region.id);
+                      const fillH = isVisited ? region.bbox.h : 0;
+                      const fillY = region.bbox.maxY - fillH;
+                      return (
+                        <clipPath key={`pdf-clip-${region.id}`} id={`pdf-water-clip-${region.id}`}>
+                          <rect
+                            x={region.bbox.minX - 5}
+                            y={fillY}
+                            width={region.bbox.w + 10}
+                            height={fillH + 10}
+                            className="transition-all duration-700 ease-out"
+                          />
+                        </clipPath>
+                      );
+                    })}
                   </defs>
 
-                  {/* Render 22 Regions */}
+                  {/* Render 22 Regions with Base, Water Fill and Glow */}
                   {RAJSHAHI_PDF_REGIONS.map((region) => {
                     const isSelected = selectedPdfId === region.id;
                     const isVisited = visitedPdfIds.includes(region.id);
@@ -913,32 +1172,60 @@ export default function InteractiveThreeMaps() {
                         onMouseLeave={() => setHoveredPdfId(null)}
                         className="cursor-pointer transition-transform duration-200"
                       >
+                        {/* Base Dark Slate Layer */}
                         <path
                           d={region.d}
-                          fill={isVisited ? '#059669' : isSelected ? '#1e293b' : '#334155'}
+                          fill={isSelected ? '#1e293b' : '#334155'}
                           stroke={isSelected ? '#facc15' : isVisited ? '#34d399' : '#ffffff'}
                           strokeWidth={isSelected ? 10 : 3}
                           strokeLinejoin="round"
                         />
+
+                        {/* Liquid Water Fill Layer */}
+                        <path
+                          d={region.d}
+                          fill="#059669"
+                          clipPath={`url(#pdf-water-clip-${region.id})`}
+                        />
+
+                        {/* Pulsing Gold Glowing Outline for Active Region */}
                         {isSelected && (
                           <path
                             d={region.d}
                             fill="none"
                             stroke="#fbbf24"
-                            strokeWidth={12}
+                            strokeWidth={14}
                             filter="url(#active-pdf-glow)"
                             className="animate-pulse"
                           />
                         )}
+
+                        {/* Center Target Pin */}
+                        <circle
+                          cx={region.center.x}
+                          cy={region.center.y}
+                          r="18"
+                          fill="#0f172a"
+                          stroke="#ffffff"
+                          strokeWidth="4"
+                        />
+                        <circle
+                          cx={region.center.x}
+                          cy={region.center.y}
+                          r="9"
+                          fill={isSelected ? '#facc15' : isVisited ? '#34d399' : '#38bdf8'}
+                        />
+
+                        {/* Region Name Label */}
                         <text
                           x={region.center.x}
-                          y={region.center.y}
+                          y={region.center.y + 42}
                           textAnchor="middle"
                           fill={isSelected ? '#fde047' : '#ffffff'}
                           stroke="#0f172a"
                           strokeWidth="8"
                           paintOrder="stroke fill"
-                          fontSize="28"
+                          fontSize="26"
                           fontWeight="bold"
                           fontFamily="sans-serif"
                         >
@@ -969,12 +1256,12 @@ export default function InteractiveThreeMaps() {
               </div>
             </div>
 
-            {/* Right Column: 22 Regions List */}
+            {/* Right Column: 22 Regions Spot Cards */}
             <div className="lg:col-span-6 bg-[#0c2419] p-4 sm:p-5 rounded-3xl border border-emerald-700/60 text-white space-y-4 shadow-xl">
               <div className="flex items-center justify-between pb-2 border-b border-emerald-800/80">
                 <div className="flex items-center gap-1.5 text-xs text-emerald-200 font-bold font-bengali">
                   <Building className="h-4 w-4 text-amber-400" />
-                  <span>রাজশাহী জেলা ও মহানগর ঐতিহ্যবাহী অঞ্চলসমূহ</span>
+                  <span>বর্তমানে নির্বাচিত: {selectedPdfRegion?.nameBn || 'রাজশাহী জেলা'}</span>
                 </div>
                 <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black font-bengali">
                   {totalPdfRegions}টি অঞ্চল
@@ -1003,7 +1290,7 @@ export default function InteractiveThreeMaps() {
                 </div>
               </div>
 
-              {/* Scrollable Regions */}
+              {/* Scrollable Regions Cards with Photo, Toggle & Google Maps Direction */}
               <div className="space-y-3 max-h-[560px] overflow-y-auto pr-1 scrollbar-thin">
                 {filteredPdfRegions.map((region) => {
                   const isVisited = visitedPdfIds.includes(region.id);
@@ -1012,7 +1299,7 @@ export default function InteractiveThreeMaps() {
                     <div
                       key={region.id}
                       onClick={() => setSelectedPdfId(region.id)}
-                      className={`p-3 sm:p-3.5 rounded-2xl bg-white text-slate-900 border transition-all duration-200 flex items-center justify-between group shadow-sm hover:shadow-md cursor-pointer ${
+                      className={`p-3 sm:p-3.5 rounded-2xl bg-white text-slate-900 border transition-all duration-200 flex flex-col sm:flex-row gap-3.5 items-start sm:items-center justify-between group shadow-sm hover:shadow-md cursor-pointer ${
                         isSelected
                           ? 'border-amber-400 ring-2 ring-amber-400 bg-amber-50/40 shadow-md'
                           : isVisited
@@ -1020,35 +1307,76 @@ export default function InteractiveThreeMaps() {
                           : 'border-slate-200/90 hover:border-emerald-400/80'
                       }`}
                     >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="px-2.5 py-1 rounded-lg bg-amber-400 text-slate-950 font-black text-xs shrink-0 shadow">
+                      {/* Thumbnail Image */}
+                      <div className="relative w-full sm:w-28 h-28 sm:h-24 rounded-xl overflow-hidden bg-slate-900 shrink-0 shadow-inner">
+                        <img
+                          src={region.imageUrl}
+                          alt={region.nameBn}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 font-black text-[10px] shadow">
                           {region.rankNo}
                         </div>
-                        <div className="min-w-0">
-                          <h4 className="text-xs sm:text-sm font-black text-slate-900 font-bengali truncate">
-                            {region.nameBn}
-                          </h4>
-                          <p className="text-[11px] text-slate-500 font-bengali truncate">
-                            {region.descriptionBn}
-                          </p>
-                        </div>
+                        {isVisited && (
+                          <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow">
+                            <Check className="w-3.5 h-3.5" />
+                          </div>
+                        )}
                       </div>
 
-                      <div className="flex items-center gap-2 shrink-0">
+                      {/* Info */}
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <div className="flex items-center gap-1.5 text-[11px] text-amber-700 font-bold font-bengali">
+                          <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
+                          <span className="truncate">রাজশাহী জেলা ও মহানগর ঐতিহ্য</span>
+                        </div>
+                        <h4 className="text-sm font-black text-slate-900 font-bengali group-hover:text-emerald-700 transition leading-snug">
+                          {region.nameBn}
+                        </h4>
+                        <p className="text-[11px] text-slate-600 font-bengali line-clamp-2 leading-relaxed">
+                          {region.descriptionBn}
+                        </p>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex sm:flex-col items-center gap-2 w-full sm:w-auto shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             togglePdfRegion(region.id);
                           }}
-                          className={`py-1.5 px-3 rounded-xl text-xs font-bold font-bengali flex items-center gap-1 transition shadow-sm cursor-pointer ${
+                          className={`w-full sm:w-28 py-1.5 px-3 rounded-xl text-xs font-bold font-bengali flex items-center justify-center gap-1.5 transition shadow-sm cursor-pointer ${
                             isVisited
                               ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                              : 'bg-slate-100 text-slate-700 hover:bg-emerald-600 hover:text-white'
+                              : 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-600 hover:text-white'
                           }`}
                         >
                           <Check className="w-3.5 h-3.5" />
-                          <span>{isVisited ? 'ঘুরেছি' : 'টিক দিন'}</span>
+                          <span>{isVisited ? 'ঘোরা সম্পন্ন' : 'ঘোরা সম্পন্ন'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openSpotDetailModal({
+                              id: region.id,
+                              rankNo: region.rankNo,
+                              nameBn: region.nameBn,
+                              districtBn: 'রাজশাহী জেলা ও মহানগর',
+                              locationBn: region.nameBn + ', রাজশাহী',
+                              descriptionBn: region.descriptionBn,
+                              imageUrl: region.imageUrl,
+                              tags: ['রাজশাহী জেলা', region.nameBn],
+                              isVisited,
+                              onToggleVisit: () => togglePdfRegion(region.id),
+                            });
+                          }}
+                          className="w-full sm:w-28 py-1.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold font-bengali flex items-center justify-center gap-1.5 transition shadow-sm cursor-pointer"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>বিস্তারিত ও ছবি</span>
                         </button>
                       </div>
                     </div>
@@ -1119,8 +1447,26 @@ export default function InteractiveThreeMaps() {
                 >
                   <defs>
                     <filter id="ru-place-glow" x="-20%" y="-20%" width="140%" height="140%">
-                      <feDropShadow dx="0" dy="0" stdDeviation="6" floodColor="#facc15" floodOpacity="0.95" />
+                      <feDropShadow dx="0" dy="0" stdDeviation="5" floodColor="#facc15" floodOpacity="0.95" />
+                      <feDropShadow dx="0" dy="0" stdDeviation="10" floodColor="#10b981" floodOpacity="0.8" />
                     </filter>
+
+                    {RU_CAMPUS_PLACES.map((place) => {
+                      const isVisited = visitedRuIds.includes(place.id);
+                      const fillH = isVisited ? place.bbox.h : 0;
+                      const fillY = place.bbox.maxY - fillH;
+                      return (
+                        <clipPath key={`ru-clip-${place.id}`} id={`ru-water-clip-${place.id}`}>
+                          <rect
+                            x={place.bbox.minX - 2}
+                            y={fillY}
+                            width={place.bbox.w + 4}
+                            height={fillH + 4}
+                            className="transition-all duration-700 ease-out"
+                          />
+                        </clipPath>
+                      );
+                    })}
                   </defs>
 
                   {/* 1. Base Turf & Railway Base */}
@@ -1201,19 +1547,27 @@ export default function InteractiveThreeMaps() {
                         onMouseLeave={() => setHoveredRuId(null)}
                         className="cursor-pointer transition-transform duration-200"
                       >
+                        {/* Base Dark Slate Layer */}
                         <path
                           d={place.d}
-                          fill={isVisited ? '#059669' : isSelected ? '#facc15' : '#1e293b'}
+                          fill="#1e293b"
                           stroke={isSelected ? '#f59e0b' : isVisited ? '#34d399' : '#ffffff'}
                           strokeWidth={isSelected ? 4 : 2}
                           strokeLinejoin="round"
                         />
+                        {/* Liquid Green Water Fill Layer */}
+                        <path
+                          d={place.d}
+                          fill="#059669"
+                          clipPath={`url(#ru-water-clip-${place.id})`}
+                        />
+                        {/* Active Glowing Outline */}
                         {isSelected && (
                           <path
                             d={place.d}
                             fill="none"
                             stroke="#fbbf24"
-                            strokeWidth={5}
+                            strokeWidth={6}
                             filter="url(#ru-place-glow)"
                             className="animate-pulse"
                           />
@@ -1279,7 +1633,7 @@ export default function InteractiveThreeMaps() {
               <div className="flex items-center justify-between pb-2 border-b border-emerald-800/80">
                 <div className="flex items-center gap-1.5 text-xs text-emerald-200 font-bold font-bengali">
                   <GraduationCap className="h-4 w-4 text-amber-400" />
-                  <span>রাজশাহী বিশ্ববিদ্যালয় ক্যাম্পাস স্পটসমূহ</span>
+                  <span>বর্তমানে নির্বাচিত: {selectedRuPlace?.nameBn || 'প্যারিস রোড'}</span>
                 </div>
                 <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black font-bengali">
                   {totalRuPlaces}টি স্থান
@@ -1355,6 +1709,10 @@ export default function InteractiveThreeMaps() {
                       </div>
 
                       <div className="flex-1 min-w-0 space-y-1">
+                        <div className="flex items-center gap-1.5 text-[11px] text-amber-700 font-bold font-bengali">
+                          <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
+                          <span className="truncate">মতিহার ক্যাম্পাস, রাজশাহী</span>
+                        </div>
                         <h4 className="text-sm font-black text-slate-900 font-bengali group-hover:text-emerald-700 transition leading-snug">
                           {place.nameBn}
                         </h4>
@@ -1373,11 +1731,11 @@ export default function InteractiveThreeMaps() {
                           className={`w-full sm:w-28 py-1.5 px-3 rounded-xl text-xs font-bold font-bengali flex items-center justify-center gap-1.5 transition shadow-sm cursor-pointer ${
                             isVisited
                               ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                              : 'bg-slate-100 text-slate-700 hover:bg-emerald-600 hover:text-white'
+                              : 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-600 hover:text-white'
                           }`}
                         >
                           <Check className="w-3.5 h-3.5" />
-                          <span>{isVisited ? 'ঘোরা সম্পন্ন' : 'আমি ঘুরেছি'}</span>
+                          <span>{isVisited ? 'ঘোরা সম্পন্ন' : 'ঘোরা সম্পন্ন'}</span>
                         </button>
 
                         <button
