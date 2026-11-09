@@ -587,22 +587,23 @@ export default function InteractiveThreeMaps() {
       {/* ============================================================================ */}
       {/* 1. TOP HEADER & STAGE SWITCHER BAR (WITH % BADGES & CERTIFICATE BUTTON) */}
       {/* ============================================================================ */}
-      <div className="relative z-10 flex flex-wrap items-center justify-between gap-2.5 bg-gradient-to-r from-emerald-950 via-emerald-900 to-teal-950 p-2 sm:p-3 rounded-2xl text-white shadow-xl border border-emerald-700/60">
-        <div className="flex flex-wrap items-center gap-2 text-xs font-bengali">
+      <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-gradient-to-r from-emerald-950 via-emerald-900 to-teal-950 p-2 sm:p-3 rounded-2xl text-white shadow-xl border border-emerald-700/60">
+        <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-bengali overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
           {/* Stage 1: Division */}
           <button
             type="button"
             onClick={() => setStage('division')}
-            className={`px-3 sm:px-4 py-2 rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow ${
+            className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow shrink-0 whitespace-nowrap ${
               stage === 'division'
                 ? 'bg-amber-400 text-slate-950 ring-2 ring-white font-black scale-[1.02]'
                 : 'bg-emerald-950/80 hover:bg-emerald-800 text-emerald-100 border border-emerald-700/60'
             }`}
           >
-            <Compass className="h-4 w-4 shrink-0 text-amber-500" />
-            <span className="font-bold">১. রাজশাহী বিভাগ কতটুকু ঘুরলেন</span>
+            <Compass className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 text-amber-500" />
+            <span className="font-bold hidden sm:inline">১. রাজশাহী বিভাগ কতটুকু ঘুরলেন</span>
+            <span className="font-bold sm:hidden">১. বিভাগ</span>
             <span
-              className={`px-2 py-0.5 rounded-md text-[11px] font-mono font-black ${
+              className={`px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-mono font-black ${
                 stage === 'division' ? 'bg-slate-950 text-amber-300' : 'bg-emerald-800 text-white'
               }`}
             >
@@ -610,7 +611,7 @@ export default function InteractiveThreeMaps() {
             </span>
           </button>
 
-          <ChevronRight className="h-4 w-4 text-emerald-400/80 hidden sm:inline" />
+          <ChevronRight className="h-3.5 w-3.5 text-emerald-400/80 hidden sm:inline shrink-0" />
 
           {/* Stage 2: Rajshahi District */}
           <button
@@ -619,16 +620,17 @@ export default function InteractiveThreeMaps() {
               setSelectedDistrictId('rajshahi');
               setStage('rajshahi_district');
             }}
-            className={`px-3 sm:px-4 py-2 rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow ${
+            className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow shrink-0 whitespace-nowrap ${
               stage === 'rajshahi_district'
                 ? 'bg-amber-400 text-slate-950 ring-2 ring-white font-black scale-[1.02]'
                 : 'bg-emerald-950/80 hover:bg-emerald-800 text-emerald-100 border border-emerald-700/60'
             }`}
           >
-            <Building className="h-4 w-4 shrink-0" />
-            <span className="font-bold">২. রাজশাহী জেলা কতটুকু ঘুরলেন</span>
+            <Building className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+            <span className="font-bold hidden sm:inline">২. রাজশাহী জেলা কতটুকু ঘুরলেন</span>
+            <span className="font-bold sm:hidden">২. জেলা</span>
             <span
-              className={`px-2 py-0.5 rounded-md text-[11px] font-mono font-black ${
+              className={`px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-mono font-black ${
                 stage === 'rajshahi_district'
                   ? 'bg-slate-950 text-amber-300'
                   : 'bg-emerald-800 text-white'
@@ -638,22 +640,23 @@ export default function InteractiveThreeMaps() {
             </span>
           </button>
 
-          <ChevronRight className="h-4 w-4 text-emerald-400/80 hidden sm:inline" />
+          <ChevronRight className="h-3.5 w-3.5 text-emerald-400/80 hidden sm:inline shrink-0" />
 
           {/* Stage 3: RU Campus */}
           <button
             type="button"
             onClick={() => setStage('ru_campus')}
-            className={`px-3 sm:px-4 py-2 rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow ${
+            className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow shrink-0 whitespace-nowrap ${
               stage === 'ru_campus'
                 ? 'bg-amber-400 text-slate-950 ring-2 ring-white font-black scale-[1.02]'
                 : 'bg-emerald-950/80 hover:bg-emerald-800 text-emerald-100 border border-emerald-700/60'
             }`}
           >
-            <GraduationCap className="h-4 w-4 text-amber-400 shrink-0" />
-            <span className="font-bold">৩. রাজশাহী বিশ্ববিদ্যালয় কতটুকু ঘুরলেন</span>
+            <GraduationCap className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-400 shrink-0" />
+            <span className="font-bold hidden sm:inline">৩. রাজশাহী বিশ্ববিদ্যালয় কতটুকু ঘুরলেন</span>
+            <span className="font-bold sm:hidden">৩. রাবি ক্যাম্পাস</span>
             <span
-              className={`px-2 py-0.5 rounded-md text-[11px] font-mono font-black ${
+              className={`px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-mono font-black ${
                 stage === 'ru_campus' ? 'bg-slate-950 text-amber-300' : 'bg-emerald-800 text-white'
               }`}
             >
@@ -666,7 +669,7 @@ export default function InteractiveThreeMaps() {
         <button
           type="button"
           onClick={() => setShowCertModal(true)}
-          className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center gap-1.5 shadow transition cursor-pointer"
+          className="self-end sm:self-auto px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center gap-1.5 shadow transition cursor-pointer shrink-0"
         >
           <Trophy className="h-4 w-4 text-amber-300" />
           <span>ভ্রমণ সনদ ও শেয়ার</span>
@@ -735,7 +738,7 @@ export default function InteractiveThreeMaps() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
             {/* Left Column: Interactive Vector Water Map */}
             <div className="lg:col-span-6 flex flex-col items-center justify-center">
-              <div className="relative w-full aspect-[245/220] min-h-[380px] sm:min-h-[500px] bg-[#f2eee3] rounded-[28px] p-2 sm:p-4 border-2 border-emerald-900/15 shadow-inner flex items-center justify-center overflow-hidden group">
+              <div className="relative w-full aspect-[245/220] min-h-[250px] sm:min-h-[480px] bg-[#f2eee3] rounded-[24px] sm:rounded-[28px] p-2 sm:p-4 border-2 border-emerald-900/15 shadow-inner flex items-center justify-center overflow-hidden group">
                 <svg viewBox={RAJSHAHI_VIEWBOX} className="w-full h-full object-contain select-none">
                   <defs>
                     <filter id="active-district-glow" x="-20%" y="-20%" width="140%" height="140%">
@@ -1109,7 +1112,7 @@ export default function InteractiveThreeMaps() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
             {/* Left Column: 22-Region Interactive Vector Water Map */}
             <div className="lg:col-span-6 flex flex-col items-center justify-center">
-              <div className="relative w-full aspect-[1770/1660] min-h-[380px] sm:min-h-[500px] bg-[#f2eee3] rounded-[28px] p-2 sm:p-4 border-2 border-emerald-900/15 shadow-inner flex items-center justify-center overflow-hidden group">
+              <div className="relative w-full aspect-[1770/1660] min-h-[250px] sm:min-h-[480px] bg-[#f2eee3] rounded-[24px] sm:rounded-[28px] p-2 sm:p-4 border-2 border-emerald-900/15 shadow-inner flex items-center justify-center overflow-hidden group">
                 <svg viewBox={RAJSHAHI_PDF_MAP_VIEWBOX} className="w-full h-full object-contain select-none">
                   <defs>
                     <filter id="active-pdf-glow" x="-20%" y="-20%" width="140%" height="140%">
@@ -1419,7 +1422,7 @@ export default function InteractiveThreeMaps() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
             {/* Left Column: Gemini Argon RU Campus Map */}
             <div className="lg:col-span-6 flex flex-col items-center justify-center">
-              <div className="relative w-full aspect-[16/10] min-h-[380px] sm:min-h-[500px] bg-[#f6f4ec] rounded-[28px] p-2 sm:p-4 border-2 border-emerald-900/15 shadow-inner flex items-center justify-center overflow-hidden group">
+              <div className="relative w-full aspect-[16/10] min-h-[250px] sm:min-h-[480px] bg-[#f6f4ec] rounded-[24px] sm:rounded-[28px] p-2 sm:p-4 border-2 border-emerald-900/15 shadow-inner flex items-center justify-center overflow-hidden group">
                 <svg
                   viewBox={RU_CAMPUS_VIEWBOX}
                   className="w-full h-full object-contain select-none transition-transform duration-200"

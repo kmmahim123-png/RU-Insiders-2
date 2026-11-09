@@ -124,7 +124,7 @@ export default function CartDrawer() {
       onClick={() => setIsOpen(false)}
     >
       <div
-        className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col transform transition-transform duration-300 ease-out animate-slideLeft"
+        className="w-full max-w-md bg-white h-[100dvh] max-h-[100dvh] shadow-2xl flex flex-col transform transition-transform duration-300 ease-out animate-slideLeft"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Header */}

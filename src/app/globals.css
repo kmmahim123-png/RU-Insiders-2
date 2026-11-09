@@ -10,7 +10,18 @@ body {
   color: #0f172a;
   font-family: 'Hind Siliguri', 'Plus Jakarta Sans', sans-serif;
   overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
   -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Prevent unwanted horizontal scrolls and clipping on mobile devices */
+@media (max-width: 640px) {
+  html, body {
+    position: relative;
+    overflow-x: hidden;
+  }
 }
 
 /* Custom scrollbars */

@@ -271,12 +271,12 @@ export default function NavbarAndAuth() {
           </nav>
 
           {/* Right Action Buttons */}
-          <div className="flex items-center gap-2">
-            {/* Notification Bell */}
-            <div className="relative">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* Notification Bell (Desktop & Tablet) */}
+            <div className="relative hidden sm:block">
               <button
                 onClick={() => setNotifOpen(!notifOpen)}
-                className="w-11 h-11 rounded-xl border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-100 relative transition"
+                className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-100 relative transition"
                 aria-label="Notifications"
               >
                 <Bell className="w-5 h-5" />
@@ -377,50 +377,52 @@ export default function NavbarAndAuth() {
               )}
             </div>
 
-            {/* Google Sign-In / Account status */}
-            {user ? (
-              <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5">
-                <div className="relative">
-                  <img src={user.avatar} alt={user.name} className="w-7 h-7 rounded-full object-cover" />
-                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border border-white" />
+            {/* Google Sign-In (Desktop & Tablet) */}
+            <div className="hidden sm:flex">
+              {user ? (
+                <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5">
+                  <div className="relative">
+                    <img src={user.avatar} alt={user.name} className="w-7 h-7 rounded-full object-cover" />
+                    <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border border-white" />
+                  </div>
+                  <span className="text-xs font-bold text-slate-800 max-w-[110px] truncate">
+                    {user.name}
+                  </span>
+                  <button
+                    onClick={handleLogout}
+                    title="লগআউট"
+                    className="text-slate-500 hover:text-red-600 p-1"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
                 </div>
-                <span className="hidden sm:inline text-xs font-bold text-slate-800 max-w-[110px] truncate">
-                  {user.name}
-                </span>
+              ) : (
                 <button
-                  onClick={handleLogout}
-                  title="লগআউট"
-                  className="text-slate-500 hover:text-red-600 p-1"
+                  onClick={() => setShowGoogleModal(true)}
+                  className="h-11 px-3 sm:px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-800 shadow-sm"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <span className="font-extrabold text-blue-600 text-base">G</span>
+                  <span>Google দিয়ে লগইন</span>
                 </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setShowGoogleModal(true)}
-                className="h-11 px-3 sm:px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-800 shadow-sm"
-              >
-                <span className="font-extrabold text-blue-600 text-base">G</span>
-                <span className="hidden sm:inline">Google দিয়ে লগইন</span>
-              </button>
-            )}
+              )}
+            </div>
 
-            {/* WhatsApp Direct Chat Button */}
+            {/* WhatsApp Direct Chat Button (Desktop & Tablet) */}
             <a
               href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('আসসালামু আলাইকুম! আমি RU Insiders থেকে সরাসরি যোগাযোগ করছি।')}`}
               target="_blank"
               rel="noreferrer"
-              className="h-11 px-3 sm:px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1.5 text-xs font-bold shadow-sm transition shrink-0"
+              className="hidden md:flex h-11 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white items-center gap-1.5 text-xs font-bold shadow-sm transition shrink-0"
               title="WhatsApp সরাসরি চ্যাট"
             >
               <MessageCircle className="w-4 h-4 fill-white" />
-              <span className="hidden sm:inline">WhatsApp</span>
+              <span>WhatsApp</span>
             </a>
 
-            {/* Spotlight Search Shortcut (Ctrl+K) */}
+            {/* Spotlight Search Shortcut (Visible on All Devices) */}
             <button
               onClick={() => window.dispatchEvent(new Event('ru_open_spotlight'))}
-              className="h-11 px-3 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 flex items-center gap-2 text-xs font-bold transition shrink-0 cursor-pointer shadow-xs"
+              className="w-10 h-10 sm:w-auto sm:h-11 px-2.5 sm:px-3 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 flex items-center justify-center sm:justify-start gap-2 text-xs font-bold transition shrink-0 cursor-pointer shadow-xs"
               title="স্পটলাইট সার্চ (Ctrl + K)"
             >
               <Search className="w-4 h-4 text-emerald-600" />
@@ -430,13 +432,15 @@ export default function NavbarAndAuth() {
               </kbd>
             </button>
 
-            {/* Day / Night Theme Toggle */}
-            <ThemeToggle />
+            {/* Day / Night Theme Toggle (Desktop & Tablet) */}
+            <div className="hidden sm:block">
+              <ThemeToggle />
+            </div>
 
-            {/* Admin Portal Shortcut */}
+            {/* Admin Portal Shortcut (Desktop & Tablet) */}
             <Link
               href="/admin"
-              className="h-11 px-2.5 rounded-xl border border-slate-200 text-slate-600 hover:text-amber-600 hover:bg-slate-50 flex items-center justify-center transition shrink-0"
+              className="hidden sm:flex w-10 h-10 sm:w-auto sm:h-11 px-2.5 rounded-xl border border-slate-200 text-slate-600 hover:text-amber-600 hover:bg-slate-50 items-center justify-center transition shrink-0"
               title="অ্যাডমিন ও ক্লাব পোর্টাল"
             >
               <ShieldCheck className="w-4 h-4" />
@@ -446,13 +450,13 @@ export default function NavbarAndAuth() {
             <button
               id="ru-cart-icon-badge"
               onClick={() => window.dispatchEvent(new Event('ru_open_cart'))}
-              className="w-11 h-11 rounded-xl border border-slate-200 flex items-center justify-center text-slate-800 hover:bg-slate-100 relative shrink-0 transition-transform cursor-pointer shadow-xs"
+              className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl border border-slate-200 flex items-center justify-center text-slate-800 hover:bg-slate-100 relative shrink-0 transition-transform cursor-pointer shadow-xs"
               aria-label="Shopping Cart Drawer"
               title="শপিং কার্ট ড্রয়ার"
             >
-              <ShoppingBag className="w-5 h-5" />
+              <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center animate-bounce shadow-xs">
+                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center animate-bounce shadow-xs">
                   {cartCount}
                 </span>
               )}
@@ -461,7 +465,7 @@ export default function NavbarAndAuth() {
             {/* Mobile Hamburger Menu Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden w-11 h-11 rounded-xl border border-slate-200 flex items-center justify-center text-slate-800 shrink-0"
+              className="lg:hidden w-10 h-10 sm:w-11 sm:h-11 rounded-xl border border-slate-200 flex items-center justify-center text-slate-800 shrink-0"
               aria-label="Toggle Navigation"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -493,26 +497,80 @@ export default function NavbarAndAuth() {
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-white border-b border-slate-200 px-4 py-3 space-y-1">
-            {[
-              { href: '/', label: '🏠 হোমপেজ' },
-              { href: '/shop', label: '🛍️ শপ (হুডি, খেজুরের গুড়, নাড়ু ও অন্যান্য)' },
-              { href: '/map', label: '🗺️ রাবি, রাজশাহী জেলা ও বিভাগ ম্যাপ' },
-              { href: '/inside-ru', label: '📰 নিউজ, সাহিত্য ও গবেষণা' },
-              { href: '/academics', label: '🎓 বিভাগ ও অ্যালামনাই ডিরেক্টরি' },
-              { href: '/clubs', label: '🏆 ক্লাবসমূহ ও মেম্বারশিপ' },
-              { href: '/track', label: '📦 অর্ডার ট্র্যাকিং' },
-              { href: '/admin', label: '🔐 অ্যাডমিন ও ক্লাব লগইন পোর্টাল' },
-            ].map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="block py-2.5 px-3 rounded-xl text-sm font-bold text-slate-800 hover:bg-slate-100"
+          <div className="lg:hidden bg-white border-b border-slate-200 px-4 py-3 space-y-2 animate-in slide-in-from-top-2 duration-150">
+            {/* Mobile User Profile or Login */}
+            <div className="pb-2 border-b border-slate-100 flex items-center justify-between">
+              {user ? (
+                <div className="flex items-center gap-2">
+                  <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full object-cover" />
+                  <div>
+                    <p className="text-xs font-bold text-slate-900">{user.name}</p>
+                    <p className="text-[10px] text-slate-500">{user.email}</p>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setShowGoogleModal(true);
+                  }}
+                  className="w-full py-2 px-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center gap-2"
+                >
+                  <span className="font-extrabold text-blue-600">G</span>
+                  <span>Google দিয়ে লগইন করুন</span>
+                </button>
+              )}
+
+              {user && (
+                <button
+                  onClick={handleLogout}
+                  className="text-xs text-red-600 font-bold px-2 py-1 rounded-lg hover:bg-red-50"
+                >
+                  লগআউট
+                </button>
+              )}
+            </div>
+
+            {/* Quick Actions (Theme & WhatsApp) */}
+            <div className="grid grid-cols-2 gap-2 pb-2 border-b border-slate-100">
+              <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700">
+                <span>থিম পরিবর্তন</span>
+                <ThemeToggle />
+              </div>
+
+              <a
+                href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('আসসালামু আলাইকুম! আমি RU Insiders থেকে সাহায্য চাই।')}`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-center gap-1.5 p-2 rounded-xl bg-emerald-600 text-white text-xs font-bold shadow-xs"
               >
-                {item.label}
-              </Link>
-            ))}
+                <MessageCircle className="w-4 h-4" />
+                <span>WhatsApp</span>
+              </a>
+            </div>
+
+            {/* Nav Links */}
+            <div className="space-y-1">
+              {[
+                { href: '/', label: '🏠 হোমপেজ' },
+                { href: '/shop', label: '🛍️ শপ (হুডি, খেজুরের গুড়, নাড়ু)' },
+                { href: '/map', label: '🗺️ ৩-ধাপের ওয়াটার ম্যাপ ও সনদ' },
+                { href: '/inside-ru', label: '📰 নিউজ, সাহিত্য ও গবেষণা' },
+                { href: '/academics', label: '🎓 বিভাগ ও অ্যালামনাই ডিরেক্টরি' },
+                { href: '/clubs', label: '🏆 ক্লাবসমূহ ও মেম্বারশিপ' },
+                { href: '/track', label: '📦 অর্ডার ট্র্যাকিং' },
+                { href: '/admin', label: '🔐 অ্যাডমিন ও ক্লাব লগইন পোর্টাল' },
+              ].map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block py-2 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-800 hover:bg-slate-100"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
           </div>
         )}
       </header>

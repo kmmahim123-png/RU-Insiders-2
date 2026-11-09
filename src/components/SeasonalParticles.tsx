@@ -188,7 +188,7 @@ export default function SeasonalParticles({
 
       {/* Mode Switcher Pill */}
       {showControls && (
-        <div className="absolute top-4 right-4 z-30 pointer-events-auto flex items-center gap-1 bg-black/40 backdrop-blur-md p-1 rounded-2xl border border-white/20 text-white text-[11px] font-bold shadow-lg">
+        <div className="absolute bottom-3 right-3 sm:top-4 sm:right-4 sm:bottom-auto z-30 pointer-events-auto flex items-center gap-1 bg-black/50 backdrop-blur-md p-1 rounded-2xl border border-white/20 text-white text-[11px] font-bold shadow-lg">
           <button
             onClick={() => setMode('leaves')}
             title="প্যারিস রোডের ঝরা পাতা"

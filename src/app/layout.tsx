@@ -25,7 +25,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="bn">
-      <body className="min-h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#071610] text-slate-900 dark:text-slate-100 pb-16 lg:pb-0 transition-colors duration-300">
+      <body className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900 pb-28 lg:pb-0 max-w-full overflow-x-hidden">
         <NavbarAndAuth />
         <main className="flex-1">{children}</main>
         <SpotlightCommand />

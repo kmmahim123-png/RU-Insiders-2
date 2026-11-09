@@ -190,7 +190,7 @@ export default function CampusStories() {
             <div
               className={`p-[3px] rounded-full bg-gradient-to-tr ${story.gradient} shadow-md transition-transform duration-300 group-hover:scale-105 group-active:scale-95`}
             >
-              <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 border-white bg-slate-100 relative">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 border-white bg-slate-100 relative">
                 <img
                   src={story.image}
                   alt={story.title}
@@ -220,7 +220,7 @@ export default function CampusStories() {
           onTouchEnd={() => setIsPaused(false)}
         >
           <div
-            className="relative w-full max-w-sm sm:max-w-md h-full sm:h-[84vh] sm:rounded-3xl overflow-hidden bg-slate-900 shadow-2xl flex flex-col justify-between"
+            className="relative w-full max-w-sm sm:max-w-md h-[100dvh] sm:h-[84vh] sm:rounded-3xl overflow-hidden bg-slate-900 shadow-2xl flex flex-col justify-between"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Background Story Image */}

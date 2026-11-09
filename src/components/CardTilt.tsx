@@ -25,6 +25,10 @@ export default function CardTilt({
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
+      // Disable 3D tilt on touch devices to ensure ultra-smooth 60fps native scrolling
+      if (typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0)) {
+        return;
+      }
       if (!cardRef.current) return;
       const rect = cardRef.current.getBoundingClientRect();
       const x = e.clientX - rect.left;

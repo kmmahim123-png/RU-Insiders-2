@@ -215,11 +215,11 @@ export default function SpotlightCommand() {
 
   return (
     <div
-      className="fixed inset-0 z-[9999] bg-slate-950/70 backdrop-blur-md flex items-start justify-center p-3 sm:p-6 pt-14 sm:pt-20 animate-fadeIn"
+      className="fixed inset-0 z-[9999] bg-slate-950/75 backdrop-blur-md flex items-start justify-center p-2 sm:p-6 pt-3 sm:pt-20 animate-fadeIn"
       onClick={() => setIsOpen(false)}
     >
       <div
-        className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[82vh] animate-scaleUp"
+        className="w-full max-w-2xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[88dvh] sm:max-h-[82vh] animate-scaleUp"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input Bar */}

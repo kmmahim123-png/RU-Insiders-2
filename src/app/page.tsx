@@ -60,20 +60,20 @@ export default function HomePage() {
             <span>মতিহারের গৌরব • রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল প্ল্যাটফর্ম</span>
           </div>
 
-          <div className="max-w-3xl space-y-4">
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.15]">
+          <div className="max-w-3xl space-y-3 sm:space-y-4">
+            <h1 className="text-2xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.2] sm:leading-[1.15]">
               রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল মার্চেন্ডাইজ স্টোর ও ক্যাম্পাস পোর্টাল
             </h1>
-            <p className="text-sm sm:text-lg text-emerald-100/90 leading-relaxed max-w-2xl font-medium">
+            <p className="text-xs sm:text-lg text-emerald-100/90 leading-relaxed max-w-2xl font-medium">
               প্রিমিয়াম উইন্টার হুডি, ড্রপ শোল্ডার, রাজশাহীর খাঁটি খেজুরের গুড় ও নাড়ু — মতিহার ক্যাম্পাসে ফ্রি হোম ডেলিভারি এবং সারা বাংলাদেশে ১০০% ক্যাশ অন ডেলিভারি।
             </p>
           </div>
 
           {/* Call to Actions */}
-          <div className="flex flex-wrap items-center gap-3 pt-2">
+          <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 sm:gap-3 pt-2">
             <Link
               href="/shop"
-              className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-sm shadow-xl flex items-center gap-2 transition"
+              className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs sm:text-sm shadow-xl flex items-center justify-center gap-2 transition"
             >
               <ShoppingBag className="w-4 h-4 text-slate-950" />
               <span>শপ কালেকশন দেখুন →</span>
@@ -81,7 +81,7 @@ export default function HomePage() {
 
             <Link
               href="/map"
-              className="px-6 py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-extrabold text-sm backdrop-blur-md flex items-center gap-2 transition"
+              className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-extrabold text-xs sm:text-sm backdrop-blur-md flex items-center justify-center gap-2 transition"
             >
               <Compass className="w-4 h-4 text-emerald-400" />
               <span>ইন্টারঅ্যাক্টিভ ম্যাপ (ভ্রমণ সনদ)</span>
@@ -91,7 +91,7 @@ export default function HomePage() {
               href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('আসসালামু আলাইকুম! আমি RU Insiders থেকে অর্ডার বা তথ্য জানতে চাই।')}`}
               target="_blank"
               rel="noreferrer"
-              className="px-5 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm flex items-center gap-2 transition shadow-sm"
+              className="px-5 py-3 sm:py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-sm"
             >
               <MessageCircle className="w-4 h-4" />
               <span>WhatsApp মেসেজ</span>
