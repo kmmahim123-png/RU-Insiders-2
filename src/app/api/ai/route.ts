@@ -60,7 +60,8 @@ async function runOpenRouterSlot(
   apiKey: string,
   model: string,
   systemPrompt: string,
-  history: ChatMessage[]
+  history: ChatMessage[],
+  options?: { skipTools?: boolean }
 ): Promise<{ reply: string; usedTools: string[]; createdOrderId?: string }> {
   const openAiTools = AI_MCP_TOOLS.map((t) => ({
     type: 'function',
@@ -79,22 +80,23 @@ async function runOpenRouterSlot(
     ...history.map((m) => ({ role: m.role, content: m.content })),
   ];
 
-  let useNativeTools = true;
+  let useNativeTools = !options?.skipTools;
 
   for (let turn = 0; turn < 4; turn++) {
     const reqBody: any = {
       model,
-      messages: useNativeTools
-        ? messages
-        : [
-            {
-              role: 'system',
-              content:
-                systemPrompt +
-                `\n\nযদি কোনো ডাটাবেজ টুল কল করার দরকার হয়, শুধু এই ফরম্যাটে আউটপুট দাও:\n[[TOOL:tool_name|{"arg":"value"}]]\nAvailable tools: ${AI_MCP_TOOLS.map((t) => `${t.name}(${Object.keys(t.parameters.properties || {}).join(',')})`).join(', ')}`,
-            },
-            ...messages.slice(1),
-          ],
+      messages:
+        useNativeTools || options?.skipTools
+          ? messages
+          : [
+              {
+                role: 'system',
+                content:
+                  systemPrompt +
+                  `\n\nযদি কোনো ডাটাবেজ টুল কল করার দরকার হয়, শুধু এই ফরম্যাটে আউটপুট দাও:\n[[TOOL:tool_name|{"arg":"value"}]]\nAvailable tools: ${AI_MCP_TOOLS.map((t) => `${t.name}(${Object.keys(t.parameters.properties || {}).join(',')})`).join(', ')}`,
+              },
+              ...messages.slice(1),
+            ],
       temperature: 0.4,
     };
     if (useNativeTools) {
@@ -116,11 +118,12 @@ async function runOpenRouterSlot(
 
     if (!res.ok) {
       const errText = await res.text();
-      // If a free model rejects native `tools`, automatically retry the same slot using text tool directive
+      const lowerErr = errText.toLowerCase();
+      // Retry without native tools for any OpenRouter model lacking tool-calling support (all models compatibility)
       if (
         useNativeTools &&
-        (res.status === 400 || res.status === 404) &&
-        (errText.toLowerCase().includes('tool') || errText.toLowerCase().includes('function'))
+        (res.status === 400 || res.status === 404 || res.status === 422) &&
+        !lowerErr.includes('not a valid model')
       ) {
         useNativeTools = false;
         continue;
@@ -348,9 +351,13 @@ export async function POST(req: NextRequest) {
             ? await runGeminiSlot(resolvedKey, resolvedModel, 'তুমি একটি টেস্ট অ্যাসিস্ট্যান্ট।', [
                 { role: 'user', content: testPrompt },
               ])
-            : await runOpenRouterSlot(resolvedKey, resolvedModel, 'তুমি একটি টেস্ট অ্যাসিস্ট্যান্ট।', [
-                { role: 'user', content: testPrompt },
-              ]);
+            : await runOpenRouterSlot(
+                resolvedKey,
+                resolvedModel,
+                'তুমি একটি টেস্ট অ্যাসিস্ট্যান্ট।',
+                [{ role: 'user', content: testPrompt }],
+                { skipTools: true }
+              );
         return NextResponse.json({
           ok: true,
           latencyMs: Date.now() - start,

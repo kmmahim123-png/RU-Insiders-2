@@ -179,30 +179,45 @@ export default function AdminAiStudioTab({
   const [loadingOrModels, setLoadingOrModels] = useState(false);
   const modelInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
-  const fetchOpenRouterFreeModels = async () => {
+  const fetchOpenRouterAllModels = async (notify = true) => {
     setLoadingOrModels(true);
     try {
       const res = await fetch('https://openrouter.ai/api/v1/models');
       const data = await res.json();
       const rows = Array.isArray(data?.data) ? data.data : [];
-      const freeList = rows
-        .filter((m: any) => typeof m?.id === 'string' && (m.id.endsWith(':free') || m.id === 'openrouter/free'))
-        .map((m: any) => ({
-          id: m.id as string,
-          label: `${m.name || m.id} (Free)`,
-        }));
+      const parsed = rows
+        .filter((m: any) => typeof m?.id === 'string')
+        .map((m: any) => {
+          const isFree = m.id === 'openrouter/free' || m.id.endsWith(':free');
+          return {
+            id: m.id as string,
+            label: `${isFree ? '[FREE] ' : ''}${m.name || m.id} (${m.id})`,
+            isFree,
+          };
+        })
+        .sort((a: any, b: any) => Number(b.isFree) - Number(a.isFree));
+
       const mergedMap = new Map<string, { id: string; label: string }>();
-      for (const item of [...OPENROUTER_FREE_MODELS, ...freeList]) {
-        if (!mergedMap.has(item.id)) mergedMap.set(item.id, item);
+      for (const item of [...OPENROUTER_FREE_MODELS, ...parsed]) {
+        if (!mergedMap.has(item.id)) mergedMap.set(item.id, { id: item.id, label: item.label });
       }
       setLiveOpenRouterModels(Array.from(mergedMap.values()));
-      showToast(`✓ OpenRouter থেকে ${mergedMap.size}টি ফ্রি মডেলের তালিকা লোড হয়েছে!`);
+      if (notify) {
+        showToast(`✓ OpenRouter-এর সব ${mergedMap.size}টি মডেল (Free + Paid) লোড হয়েছে!`);
+      }
     } catch {
-      showToast('OpenRouter লাইভ তালিকা লোড করা যায়নি — নিচে সরাসরি যেকোনো মডেলের নাম লিখে ব্যবহার করতে পারবেন।');
+      if (notify) {
+        showToast('OpenRouter লাইভ তালিকা লোড করা যায়নি — নিচে সরাসরি যেকোনো মডেলের নাম লিখে ব্যবহার করতে পারবেন।');
+      }
     } finally {
       setLoadingOrModels(false);
     }
   };
+
+  useEffect(() => {
+    fetchOpenRouterAllModels(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // New training doc draft
   const [newDocTitle, setNewDocTitle] = useState('');
@@ -376,12 +391,16 @@ export default function AdminAiStudioTab({
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={fetchOpenRouterFreeModels}
+              onClick={() => fetchOpenRouterAllModels(true)}
               disabled={loadingOrModels}
               className="text-[11px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-full flex items-center gap-1.5 transition disabled:opacity-60"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loadingOrModels ? 'animate-spin' : ''}`} />
-              <span>{loadingOrModels ? 'লোড হচ্ছে...' : 'OpenRouter লাইভ ফ্রি মডেল লোড করুন'}</span>
+              <span>
+                {loadingOrModels
+                  ? 'সব মডেল লোড হচ্ছে...'
+                  : `সব OpenRouter মডেল রিফ্রেশ (${liveOpenRouterModels.length})`}
+              </span>
             </button>
             <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
               ক্রম: {orderedSlotMeta.map((s, i) => `${i + 1}. ${s.slot}`).join(' → ')}
@@ -450,54 +469,74 @@ export default function AdminAiStudioTab({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {/* Custom Slot / Key Name Input */}
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-700">
-                      স্লট / প্রোভাইডারের নাম (ইচ্ছামতো লিখুন)
-                    </label>
+                {/* Step 1: API Key Input */}
+                <div className="space-y-1">
+                  <label className="text-xs font-extrabold text-slate-800">
+                    ১. {meta.slot === 'gemini' ? 'Gemini API Key দিন' : 'OpenRouter API Key দিন'} (সবসময় বদলানো যাবে)
+                  </label>
+                  <div className="flex items-center gap-1.5">
                     <input
-                      type="text"
-                      value={slotNameVal}
-                      onChange={(e) => setConfig({ ...config, [meta.nameField]: e.target.value })}
-                      placeholder={meta.defaultName}
-                      className="w-full text-xs font-bold text-slate-900 bg-white border border-slate-200 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      type={isRevealed ? 'text' : 'password'}
+                      value={keyVal}
+                      onChange={(e) => setConfig({ ...config, [meta.keyField]: e.target.value })}
+                      placeholder={meta.placeholderKey}
+                      className="flex-1 text-xs font-mono text-slate-900 bg-white border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
-                  </div>
-
-                  {/* API Key Input */}
-                  <div className="space-y-1 md:col-span-2">
-                    <label className="text-xs font-bold text-slate-700">
-                      API Key (যেকোনো সময় এডিট/বদল করতে পারবেন)
-                    </label>
-                    <div className="flex items-center gap-1.5">
-                      <input
-                        type={isRevealed ? 'text' : 'password'}
-                        value={keyVal}
-                        onChange={(e) => setConfig({ ...config, [meta.keyField]: e.target.value })}
-                        placeholder={meta.placeholderKey}
-                        className="flex-1 text-xs font-mono text-slate-900 bg-white border border-slate-200 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setRevealedKeys({ ...revealedKeys, [meta.slot]: !isRevealed })}
-                        className="p-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100"
-                        title={isRevealed ? 'লুকান' : 'দেখুন'}
-                      >
-                        {isRevealed ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setRevealedKeys({ ...revealedKeys, [meta.slot]: !isRevealed })}
+                      className="p-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100"
+                      title={isRevealed ? 'লুকান' : 'দেখুন'}
+                    >
+                      {isRevealed ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
                 </div>
 
-                {/* Model Selector (Top) + Manual Model Name Entry (Bottom) */}
+                {/* Step 2: Type Model Name Directly + Optional All-Models Picker */}
                 <div className="space-y-2.5 bg-slate-50/90 border border-slate-200 rounded-2xl p-3.5">
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
+                    <label className="text-xs font-extrabold text-indigo-950 flex items-center justify-between">
                       <span>
-                        ১. {meta.slot === 'gemini' ? 'Gemini মডেল' : 'OpenRouter মডেল'} তালিকা থেকে সিলেক্ট করুন:
+                        ২. তারপর মডেলের নাম লিখুন ({meta.slot === 'gemini' ? 'Gemini মডেল' : 'OpenRouter-এর যেকোনো মডেল — All Models'}):
                       </span>
                       <Cpu className="w-3.5 h-3.5 text-indigo-600" />
+                    </label>
+                    <div className="relative flex items-center">
+                      <input
+                        ref={(el) => {
+                          modelInputRefs.current[meta.slot] = el;
+                        }}
+                        type="text"
+                        list={meta.slot === 'gemini' ? 'gemini-models-list' : 'openrouter-models-list'}
+                        value={modelVal}
+                        onChange={(e) => setConfig({ ...config, [meta.modelField]: e.target.value })}
+                        placeholder={
+                          meta.slot === 'gemini'
+                            ? 'এখানে মডেলের নাম লিখুন (যেমন: gemini-2.5-flash)'
+                            : 'যেকোনো OpenRouter মডেলের নাম লিখুন (যেমন: openrouter/free, openai/gpt-4o, deepseek/deepseek-chat-v3-0324:free)'
+                        }
+                        className="w-full text-xs font-mono font-bold text-slate-900 border border-indigo-300 bg-white rounded-xl p-3 pr-9 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                      {modelVal && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setConfig({ ...config, [meta.modelField]: '' });
+                            setTimeout(() => modelInputRefs.current[meta.slot]?.focus(), 20);
+                          }}
+                          className="absolute right-2 p-1 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50"
+                          title="মুছে নিজের মডেল নাম লিখুন"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-600">
+                      অথবা {meta.slot === 'gemini' ? 'Gemini' : `সকল OpenRouter মডেল (${presets.length}টি)`} তালিকা থেকে বেছে নিন:
                     </label>
                     <select
                       value={presets.some((p) => p.id === modelVal) ? modelVal : '__custom__'}
@@ -512,55 +551,13 @@ export default function AdminAiStudioTab({
                       }}
                       className="w-full text-xs font-bold text-slate-900 border border-slate-200 rounded-xl p-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
+                      <option value="__custom__">✏️ উপরে নিজের মতো মডেলের নাম লিখুন...</option>
                       {presets.map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.label}
                         </option>
                       ))}
-                      <option value="__custom__">✏️ নিচে ম্যানুয়ালি মডেলের নাম লিখব (Custom Model Name)</option>
                     </select>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-indigo-900 flex items-center justify-between">
-                      <span>
-                        ২. নিচে ম্যানুয়ালি মডেলের নাম লিখুন (যেমন:{' '}
-                        <code className="font-mono bg-white px-1.5 py-0.5 rounded border border-slate-200 text-indigo-700">
-                          {meta.slot === 'gemini' ? 'gemini-2.5-flash' : 'openrouter/free'}
-                        </code>
-                        ):
-                      </span>
-                    </label>
-                    <div className="relative flex items-center">
-                      <input
-                        ref={(el) => {
-                          modelInputRefs.current[meta.slot] = el;
-                        }}
-                        type="text"
-                        list={meta.slot === 'gemini' ? 'gemini-models-list' : 'openrouter-models-list'}
-                        value={modelVal}
-                        onChange={(e) => setConfig({ ...config, [meta.modelField]: e.target.value })}
-                        placeholder={
-                          meta.slot === 'gemini'
-                            ? 'এখানে ম্যানুয়ালি Gemini মডেলের নাম লিখুন (যেমন: gemini-2.5-flash)'
-                            : 'এখানে ম্যানুয়ালি OpenRouter মডেলের নাম লিখুন (যেমন: deepseek/deepseek-chat-v3-0324:free)'
-                        }
-                        className="w-full text-xs font-mono font-bold text-slate-900 border border-indigo-300 bg-white rounded-xl p-2.5 pr-9 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      />
-                      {modelVal && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setConfig({ ...config, [meta.modelField]: '' });
-                            setTimeout(() => modelInputRefs.current[meta.slot]?.focus(), 20);
-                          }}
-                          className="absolute right-2 p-1 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50"
-                          title="মুছে নিজের মডেল নাম লিখুন"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
                   </div>
                 </div>
 
