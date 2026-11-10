@@ -25,6 +25,7 @@ import ProductCard from '@/components/ProductCard';
 import SeasonalParticles from '@/components/SeasonalParticles';
 import CampusAudioPlayer from '@/components/CampusAudioPlayer';
 import RuAiAssistant from '@/components/RuAiAssistant';
+import BloodBankSection from '@/components/BloodBankSection';
 
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -96,6 +97,14 @@ export default function HomePage() {
             >
               <Bot className="w-4 h-4 text-amber-300" />
               <span>AI দিয়ে জানুন ও অর্ডার করুন</span>
+            </a>
+
+            <a
+              href="#blood-bank-section"
+              className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-xl border border-rose-400/40"
+            >
+              <HeartPulse className="w-4 h-4 text-amber-200" />
+              <span>রক্তদান ও ডোনার খুঁজুন</span>
             </a>
 
             <a
@@ -302,6 +311,11 @@ export default function HomePage() {
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
+      </section>
+
+      {/* 5.5 LIVE HOMEPAGE BLOOD BANK SECTION (ডোনার খুঁজুন, কল দিন ও ফর্ম পূরণ করুন) */}
+      <section id="blood-bank-section" className="max-w-7xl mx-auto px-3 sm:px-6 scroll-mt-24">
+        <BloodBankSection isHomepage />
       </section>
 
       {/* 6. ACADEMICS, BLOOD BANK & CLUBS PROMO BAR */}

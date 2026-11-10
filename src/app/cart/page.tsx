@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Order, OrderItem } from '@/types';
 import { trackMetaEvent } from '@/lib/metaPixel';
+import { supabaseBrowser } from '@/lib/supabaseBrowser';
 
 export default function CartAndCheckoutPage() {
   const [cartItems, setCartItems] = useState<OrderItem[]>([]);
@@ -36,17 +37,30 @@ export default function CartAndCheckoutPage() {
   });
   const [whatsappNumber, setWhatsappNumber] = useState('8801700000000');
   const [defaultPixelId, setDefaultPixelId] = useState('');
+  const [loggedUser, setLoggedUser] = useState<{ name?: string; email?: string } | null>(null);
 
   useEffect(() => {
     let loadedItems: OrderItem[] = [];
+    const syncUser = () => {
+      try {
+        const savedUser = JSON.parse(localStorage.getItem('ru_user_session') || 'null');
+        if (savedUser?.email || savedUser?.name) {
+          setLoggedUser(savedUser);
+          setCustomerName((prev) => prev || savedUser.name || '');
+        } else {
+          setLoggedUser(null);
+        }
+      } catch {}
+    };
+
     try {
       const saved = JSON.parse(localStorage.getItem('ru_cart_items') || '[]');
       loadedItems = saved;
       setCartItems(saved);
-
-      const savedUser = JSON.parse(localStorage.getItem('ru_user_session') || 'null');
-      if (savedUser?.name) setCustomerName(savedUser.name);
+      syncUser();
     } catch {}
+
+    window.addEventListener('ru_auth_changed', syncUser);
 
     fetch('/api/store')
       .then((r) => r.json())
@@ -72,6 +86,7 @@ export default function CartAndCheckoutPage() {
         }
       })
       .catch(() => {});
+    return () => window.removeEventListener('ru_auth_changed', syncUser);
   }, []);
 
   const updateQuantity = (idx: number, delta: number) => {
@@ -124,6 +139,9 @@ export default function CartAndCheckoutPage() {
 
     setSubmitting(true);
     try {
+      const { data: sessionData } = await supabaseBrowser.auth.getSession().catch(() => ({ data: { session: null } }));
+      const accessToken = sessionData?.session?.access_token || '';
+
       const res = await fetch('/api/store', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -135,6 +153,8 @@ export default function CartAndCheckoutPage() {
             deliveryZone,
             addressDetails,
             items: cartItems,
+            accessToken,
+            customerEmail: loggedUser?.email || sessionData?.session?.user?.email || '',
           },
         }),
       });
@@ -492,6 +512,26 @@ export default function CartAndCheckoutPage() {
               পণ্য পৌঁছানোর পর ডেলিভারিম্যানকে টাকা বুঝিয়ে দিন
             </p>
           </div>
+
+          {loggedUser?.email ? (
+            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-[11px] font-bold text-emerald-900 flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>
+                <strong>{loggedUser.email}</strong> দিয়ে লগইন আছেন — এই অর্ডার আপনার Google অ্যাকাউন্টের কেনার হিস্ট্রিতে স্থায়ীভাবে সেভ থাকবে।
+              </span>
+            </div>
+          ) : (
+            <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-200 text-[11px] font-bold text-blue-900 flex flex-wrap items-center justify-between gap-2">
+              <span>Google দিয়ে লগইন করলে আপনার সব অর্ডারের হিস্ট্রি স্থায়ীভাবে অ্যাকাউন্টে থাকবে।</span>
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new Event('ru_open_google_signin'))}
+                className="px-2.5 py-1 rounded-lg bg-white border border-blue-300 text-blue-700 font-black hover:bg-blue-50 cursor-pointer"
+              >
+                Google লগইন
+              </button>
+            </div>
+          )}
 
           {errorMessage && (
             <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs font-bold text-red-700">

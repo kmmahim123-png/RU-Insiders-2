@@ -201,9 +201,13 @@ Single login input at `/admin` detects caller role dynamically against `db`:
    - Clients (`/admin`, `/merchant`, `/inside-ru`) run canvas image compression beforehand to stay well under Vercel's `4.5 MB` serverless payload limit.
 2. **Breaking News Rich Banner (`NavbarAndAuth.tsx` + `inside-ru` + `/admin`):**
    - Cycles every 4.5s using `db.settings.breakingNewsItems` (`BreakingNewsItem[]` with thumbnail `imageUrl`, headline `title`, target `link`, `articleId`), auto-synced when admin creates/approves Breaking News articles (`APPROVE_ARTICLE`, `SAVE_ARTICLE`, `SAVE_BREAKING_NEWS_ITEM`), dispatching `window` event `ru_breaking_updated`.
-3. **Blood Bank (`/blood` + `AdminBloodTab.tsx` + `src/lib/bloodUtils.ts`):**
-   - Enforces exact 90-day (`3 months`) eligibility gap between `lastDonationDate` and current date; tracks `isPublicPhone`, allows self-registration & donation date updates (`REGISTER_BLOOD_DONOR`, `UPDATE_BLOOD_DONATION`, `SAVE_BLOOD_DONOR`).
-4. **Academics & Faculty Directory (`/academics` + `/admin` Departments Tab):**
+3. **Blood Bank (`/#blood-bank-section`, `/blood`, `BloodBankSection.tsx`, `AdminBloodTab.tsx`, `bloodUtils.ts`):**
+   - Rendered directly on the Main Homepage (`/`) AND on `/blood` via shared `src/components/BloodBankSection.tsx`.
+   - Enforces exact 90-day (`3 months`) eligibility gap; collects `nameBn`, `bloodGroup`, `phone`, `hallBn` (আবাসনের স্থান), optional `departmentBn`, and conditional RU Roll verification (`isRuStudent` + `studentRoll`; roll is NOT required for unverified/non-RU donors). Direct `tel:` call & WhatsApp links available on every donor card, synced live to AI tools (`check_blood_donors`) & `buildLiveWebsiteSnapshot`.
+4. **Google Customer Purchase History (`Order.customerEmail` / `customerUid`, `MY_ORDERS`):**
+   - Orders placed from `/cart` OR AI Chat (`create_shop_order`) while signed in with Google attach verified Supabase Auth `email` & `uid` onto `Order`.
+   - `/track` auto-loads customer history using `POST /api/store` `{ action: 'MY_ORDERS', accessToken }` (verified via `supabase.auth.getUser(accessToken)`). Navbar shows 1-tap `আমার অর্ডার` badge for logged-in users.
+5. **Academics & Faculty Directory (`/academics` + `/admin` Departments Tab):**
    - Base catalog of 59 RU departments (`RU_DEPARTMENTS` in `src/lib/ruAcademicData.ts`) combined with editable custom fields & `teachers?: FacultyMember[]` in `db.departments[deptId]`, plus verified Alumni directory (`db.alumni`).
 5. **PWA Service Worker (`public/sw.js` + `PWAInstallBanner.tsx`):**
    - Handles app manifest & Chrome push/install flows cleanly.
@@ -231,7 +235,7 @@ Single login input at `/admin` detects caller role dynamically against `db`:
 
 ### Backend APIs (`src/app/api/`)
 - **`GET /api/store`**: Public store payload (`settings` sanitized + `aiStatus`, `products`, `merchants`, `mapSpots`, `clubs`, `departments`, `bloodDonors`, `articles`, `alumni`, `notifications`). Accepts `?merchantId=` & `?category=`.
-- **`POST /api/store`**: Central multiplexed JSON action handler (`VERIFY_PASSWORD`, `CREATE_ORDER`, `TRACK_ORDER`, `APPLY_CLUB`, `SUBMIT_ARTICLE`, `REGISTER_ALUMNI`, `REGISTER_BLOOD_DONOR`, `UPDATE_BLOOD_DONATION`, `SUBSCRIBE_NOTIFICATION`, `TOGGLE_LIKE`, `CHECK_SUPABASE`, `MERCHANT_REGISTER`, `MERCHANT_LOGIN`, `SAVE_PRODUCT`, `DELETE_PRODUCT`, `MERCHANT_UPDATE_PROFILE`, `UPDATE_ORDER_STATUS`, `UPDATE_CLUB_APP`, `SAVE_CLUB_INFO`, `SAVE_DEPARTMENT_INFO`, `SAVE_MAP_SPOT`, `UPDATE_SETTINGS`, `SAVE_ARTICLE`, `APPROVE_ARTICLE`, `DELETE_ARTICLE`, `SAVE_BREAKING_NEWS_ITEM`, `DELETE_BREAKING_NEWS_ITEM`, `ADMIN_APPROVE_MERCHANT`, `ADMIN_UPDATE_MERCHANT`, `ADMIN_DELETE_MERCHANT`, `APPROVE_ALUMNI`, `DELETE_ALUMNI`, `SAVE_BLOOD_DONOR`, `DELETE_BLOOD_DONOR`, `SAVE_AI_CONFIG`, `SEND_BROADCAST`, `SYNC_SUPABASE`).
+- **`POST /api/store`**: Central multiplexed JSON action handler (`VERIFY_PASSWORD`, `CREATE_ORDER`, `TRACK_ORDER`, `MY_ORDERS`, `APPLY_CLUB`, `SUBMIT_ARTICLE`, `REGISTER_ALUMNI`, `REGISTER_BLOOD_DONOR`, `UPDATE_BLOOD_DONATION`, `SUBSCRIBE_NOTIFICATION`, `TOGGLE_LIKE`, `CHECK_SUPABASE`, `MERCHANT_REGISTER`, `MERCHANT_LOGIN`, `SAVE_PRODUCT`, `DELETE_PRODUCT`, `MERCHANT_UPDATE_PROFILE`, `UPDATE_ORDER_STATUS`, `UPDATE_CLUB_APP`, `SAVE_CLUB_INFO`, `SAVE_DEPARTMENT_INFO`, `SAVE_MAP_SPOT`, `UPDATE_SETTINGS`, `SAVE_ARTICLE`, `APPROVE_ARTICLE`, `DELETE_ARTICLE`, `SAVE_BREAKING_NEWS_ITEM`, `DELETE_BREAKING_NEWS_ITEM`, `ADMIN_APPROVE_MERCHANT`, `ADMIN_UPDATE_MERCHANT`, `ADMIN_DELETE_MERCHANT`, `APPROVE_ALUMNI`, `DELETE_ALUMNI`, `SAVE_BLOOD_DONOR`, `DELETE_BLOOD_DONOR`, `SAVE_AI_CONFIG`, `SEND_BROADCAST`, `SYNC_SUPABASE`).
 - **`POST /api/ai`**: Visitor `CHAT` (with live website snapshot, optional `typesafe/jev-1.14` pre-router, 3-slot OpenRouter/Gemini failover, MCP tools) + Super Admin `TEST_SLOT` & `TEST_DECISION`.
 - **`GET | POST /api/mcp`**: Standard JSON-RPC 2.0 MCP HTTP server exposing all 7 tools & custom training resources.
 - **`POST /api/steadfast`**: `CREATE_ORDER` and `CHECK_STATUS` proxy to Steadfast Packzy API.

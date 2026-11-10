@@ -29,6 +29,7 @@ import { BreakingNewsItem } from '@/types';
 import { supabaseBrowser, SUPABASE_PUBLIC_URL, SUPABASE_PUBLIC_ANON_KEY } from '@/lib/supabaseBrowser';
 
 export interface UserSession {
+  uid?: string;
   name: string;
   email: string;
   avatar: string;
@@ -120,6 +121,7 @@ export default function NavbarAndAuth() {
       if (!session?.user) return;
       const meta = session.user.user_metadata || {};
       const realUser: UserSession = {
+        uid: session.user.id,
         name: meta.full_name || meta.name || (session.user.email || '').split('@')[0] || 'User',
         email: session.user.email || '',
         avatar: meta.avatar_url || meta.picture || '/logo.png',
@@ -277,6 +279,15 @@ export default function NavbarAndAuth() {
       setGoogleAuthLoading(false);
     }
   };
+
+  useEffect(() => {
+    const triggerGoogle = () => {
+      handleGoogleSignIn();
+    };
+    window.addEventListener('ru_open_google_signin', triggerGoogle);
+    return () => window.removeEventListener('ru_open_google_signin', triggerGoogle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -514,9 +525,16 @@ export default function NavbarAndAuth() {
                     />
                     <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border border-white" />
                   </div>
-                  <span className="text-xs font-bold text-slate-800 max-w-[110px] truncate">
+                  <span className="text-xs font-bold text-slate-800 max-w-[100px] truncate">
                     {user.name}
                   </span>
+                  <Link
+                    href="/track"
+                    className="px-2 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-[11px] font-extrabold shrink-0 transition"
+                    title="আমার অর্ডার ও কেনার হিস্ট্রি"
+                  >
+                    আমার অর্ডার
+                  </Link>
                   <button
                     onClick={handleLogout}
                     title="লগআউট"
@@ -695,12 +713,21 @@ export default function NavbarAndAuth() {
               )}
 
               {user && (
-                <button
-                  onClick={handleLogout}
-                  className="text-xs text-red-600 font-bold px-2 py-1 rounded-lg hover:bg-red-50"
-                >
-                  লগআউট
-                </button>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href="/track"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-xs bg-blue-50 border border-blue-200 text-blue-700 font-extrabold px-2.5 py-1 rounded-lg"
+                  >
+                    আমার অর্ডার
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="text-xs text-red-600 font-bold px-2 py-1 rounded-lg hover:bg-red-50"
+                  >
+                    লগআউট
+                  </button>
+                </div>
               )}
             </div>
 

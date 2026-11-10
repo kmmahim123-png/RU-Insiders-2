@@ -200,7 +200,9 @@ export async function executeAiTool(name: string, rawArgs: any = {}): Promise<an
           bloodGroup: d.bloodGroup,
           phone: d.isPublicPhone !== false ? d.phone : 'অ্যাডমিন মাধ্যমে যোগাযোগ করুন',
           departmentBn: d.departmentBn,
-          hallBn: d.hallBn || '',
+          hallBn: d.hallBn || 'উল্লেখ নেই',
+          studentRoll: d.studentRoll || null,
+          isVerified: Boolean(d.isVerified || (d.isRuStudent && d.studentRoll)),
           lastDonationDate: d.lastDonationDate || 'আগে দেননি / উল্লেখ নেই',
           daysSinceLastDonation: elig.daysSinceLastDonation,
           daysRemaining: elig.daysRemaining,
@@ -373,6 +375,8 @@ export async function executeAiTool(name: string, rawArgs: any = {}): Promise<an
         orderId: `RUI-${Math.floor(100000 + Math.random() * 900000)}`,
         customerName,
         phone,
+        ...(args._customerEmail ? { customerEmail: String(args._customerEmail).trim().toLowerCase() } : {}),
+        ...(args._customerUid ? { customerUid: String(args._customerUid).trim() } : {}),
         deliveryZone,
         addressDetails,
         items: validatedItems,
@@ -526,8 +530,9 @@ export function buildLiveWebsiteSnapshot(db: DatabaseSchema): string {
       groupCounts[d.bloodGroup].eligible += 1;
       if (eligibleDonorLines.length < 20) {
         const phoneText = d.isPublicPhone !== false ? d.phone : 'অ্যাডমিন মাধ্যমে';
+        const verifiedText = d.isVerified && d.studentRoll ? ` [ভেরিফাইড রোল: ${d.studentRoll}]` : '';
         eligibleDonorLines.push(
-          `- ${d.bloodGroup} | ${d.nameBn} (${d.departmentBn}${d.hallBn ? `, ${d.hallBn}` : ''}) | ফোন: ${phoneText} | ${elig.statusLabelBn}`
+          `- ${d.bloodGroup} | ${d.nameBn}${verifiedText} (আবাসন: ${d.hallBn || d.departmentBn}) | ফোন: ${phoneText} | ${elig.statusLabelBn}`
         );
       }
     }

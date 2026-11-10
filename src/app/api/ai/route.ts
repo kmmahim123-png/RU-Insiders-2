@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readDb, DatabaseSchema } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
 import { AI_MCP_TOOLS, executeAiTool, buildLiveWebsiteSnapshot } from '@/lib/aiTools';
 import { routeChatIntentWithJev, testJevDecisionEngine } from '@/lib/jevDecision';
 import { AiConfig, AiSlotKey } from '@/types';
@@ -69,7 +70,7 @@ async function runOpenRouterSlot(
   model: string,
   systemPrompt: string,
   history: ChatMessage[],
-  options?: { skipTools?: boolean }
+  options?: { skipTools?: boolean; customer?: { email?: string; uid?: string } | null }
 ): Promise<{ reply: string; usedTools: string[]; createdOrderId?: string }> {
   const openAiTools = AI_MCP_TOOLS.map((t) => ({
     type: 'function',
@@ -154,7 +155,11 @@ async function runOpenRouterSlot(
           fnArgs = tc?.function?.arguments ? JSON.parse(tc.function.arguments) : {};
         } catch {}
         usedTools.push(fnName);
-        const toolOut = await executeAiTool(fnName, fnArgs);
+        const enrichedArgs =
+          fnName === 'create_shop_order' && options?.customer
+            ? { ...fnArgs, _customerEmail: options.customer.email, _customerUid: options.customer.uid }
+            : fnArgs;
+        const toolOut = await executeAiTool(fnName, enrichedArgs);
         if (fnName === 'create_shop_order' && toolOut?.ok && toolOut?.orderId) {
           createdOrderId = toolOut.orderId;
         }
@@ -173,7 +178,11 @@ async function runOpenRouterSlot(
     const inlineTool = extractInlineToolCall(contentStr);
     if (inlineTool && turn < 3) {
       usedTools.push(inlineTool.name);
-      const toolOut = await executeAiTool(inlineTool.name, inlineTool.args);
+      const enrichedArgs =
+        inlineTool.name === 'create_shop_order' && options?.customer
+          ? { ...inlineTool.args, _customerEmail: options.customer.email, _customerUid: options.customer.uid }
+          : inlineTool.args;
+      const toolOut = await executeAiTool(inlineTool.name, enrichedArgs);
       if (inlineTool.name === 'create_shop_order' && toolOut?.ok && toolOut?.orderId) {
         createdOrderId = toolOut.orderId;
       }
@@ -195,7 +204,8 @@ async function runGeminiSlot(
   apiKey: string,
   model: string,
   systemPrompt: string,
-  history: ChatMessage[]
+  history: ChatMessage[],
+  customer?: { email?: string; uid?: string } | null
 ): Promise<{ reply: string; usedTools: string[]; createdOrderId?: string }> {
   const usedTools: string[] = [];
   let createdOrderId: string | undefined;
@@ -251,7 +261,11 @@ async function runGeminiSlot(
         const fnName = fcPart.functionCall.name;
         const fnArgs = fcPart.functionCall.args || {};
         usedTools.push(fnName);
-        const toolOut = await executeAiTool(fnName, fnArgs);
+        const enrichedArgs =
+          fnName === 'create_shop_order' && customer
+            ? { ...fnArgs, _customerEmail: customer.email, _customerUid: customer.uid }
+            : fnArgs;
+        const toolOut = await executeAiTool(fnName, enrichedArgs);
         if (fnName === 'create_shop_order' && toolOut?.ok && toolOut?.orderId) {
           createdOrderId = toolOut.orderId;
         }
@@ -320,7 +334,7 @@ function buildOrderedSlots(cfg: AiConfig | undefined): SlotExecutionMeta[] {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { action = 'CHAT', messages, password, slot, apiKey, model } = body;
+    const { action = 'CHAT', messages, password, slot, apiKey, model, customerAccessToken } = body;
     const db = await readDb();
     const aiCfg = db.settings.aiConfig;
 
@@ -423,6 +437,16 @@ export async function POST(req: NextRequest) {
       )}%, প্রি-ফেচ টুল: ${decisionRoute.prefetchedTool}) ===\n${JSON.stringify(decisionRoute.prefetchedData)}\n(এই সরাসরি ডেটা ব্যবহার করে ভিজিটরকে দ্রুত ও নির্ভুল বাংলায় উত্তর দাও।)`;
     }
 
+    let verifiedCustomer: { email?: string; uid?: string } | null = null;
+    if (customerAccessToken) {
+      try {
+        const { data: uData } = await supabase.auth.getUser(String(customerAccessToken));
+        if (uData?.user) {
+          verifiedCustomer = { email: uData.user.email || '', uid: uData.user.id };
+        }
+      } catch {}
+    }
+
     const failures: string[] = [];
     for (const s of orderedSlots) {
       const keyForSlot =
@@ -437,8 +461,10 @@ export async function POST(req: NextRequest) {
       try {
         const out =
           s.provider === 'gemini'
-            ? await runGeminiSlot(keyForSlot, s.model, systemPrompt, chatMessages)
-            : await runOpenRouterSlot(keyForSlot, s.model, systemPrompt, chatMessages);
+            ? await runGeminiSlot(keyForSlot, s.model, systemPrompt, chatMessages, verifiedCustomer)
+            : await runOpenRouterSlot(keyForSlot, s.model, systemPrompt, chatMessages, {
+                customer: verifiedCustomer,
+              });
 
         const combinedTools = decisionRoute?.prefetchedTool
           ? Array.from(new Set([decisionRoute.prefetchedTool, ...out.usedTools]))

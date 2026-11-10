@@ -34,6 +34,9 @@ const createEmptyDonor = (): Partial<BloodDonor> => ({
   phone: '',
   departmentBn: '',
   hallBn: '',
+  studentRoll: '',
+  isRuStudent: false,
+  isVerified: false,
   lastDonationDate: '',
   totalDonations: 0,
   isPublicPhone: true,
@@ -286,18 +289,32 @@ export default function AdminBloodTab({
             />
             <input
               type="text"
-              required
-              placeholder="বিভাগ / বর্ষ *"
+              placeholder="বিভাগ / পেশা"
               value={formDonor.departmentBn || ''}
               onChange={(e) => setFormDonor({ ...formDonor, departmentBn: e.target.value })}
               className="text-xs border border-slate-200 rounded-xl p-2.5"
             />
             <input
               type="text"
-              placeholder="হল / অবস্থান (যেমন: শের-ই-বাংলা হল)"
+              required
+              placeholder="আবাসনের স্থান / হল * (যেমন: শের-ই-বাংলা হল / বিনোদপুর)"
               value={formDonor.hallBn || ''}
               onChange={(e) => setFormDonor({ ...formDonor, hallBn: e.target.value })}
-              className="text-xs border border-slate-200 rounded-xl p-2.5"
+              className="text-xs border border-slate-200 rounded-xl p-2.5 font-bold"
+            />
+            <input
+              type="text"
+              placeholder="রাবি রোল / আইডি (যদি ভেরিফাইড শিক্ষার্থী হয়)"
+              value={formDonor.studentRoll || ''}
+              onChange={(e) =>
+                setFormDonor({
+                  ...formDonor,
+                  studentRoll: e.target.value,
+                  isRuStudent: Boolean(e.target.value.trim()),
+                  isVerified: Boolean(e.target.value.trim()),
+                })
+              }
+              className="text-xs border border-slate-200 rounded-xl p-2.5 font-mono"
             />
             <div>
               <label className="block text-[10px] font-bold text-slate-500 mb-0.5">
@@ -377,10 +394,17 @@ export default function AdminBloodTab({
                   {donor.bloodGroup}
                 </div>
                 <div>
-                  <h4 className="text-sm font-black text-slate-900">{donor.nameBn}</h4>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <h4 className="text-sm font-black text-slate-900">{donor.nameBn}</h4>
+                    {donor.isVerified && (
+                      <span className="text-[10px] font-black bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full">
+                        ✓ রোল ভেরিফাইড{donor.studentRoll ? `: ${donor.studentRoll}` : ''}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-slate-600 font-semibold">
-                    {donor.departmentBn}
-                    {donor.hallBn ? ` • ${donor.hallBn}` : ''}
+                    {donor.hallBn ? `আবাসন: ${donor.hallBn}` : ''}
+                    {donor.departmentBn ? `${donor.hallBn ? ' • ' : ''}${donor.departmentBn}` : ''}
                   </p>
                   <p className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-1">
                     <Phone className="w-3 h-3 text-rose-600" />

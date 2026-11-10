@@ -217,9 +217,21 @@ export async function POST(req: NextRequest) {
 
     // 2. Customer Order Creation with Server-Side Price Validation
     if (action === 'CREATE_ORDER') {
-      const { customerName, phone, deliveryZone, addressDetails, items } = payload;
+      const { customerName, phone, deliveryZone, addressDetails, items, accessToken, customerEmail } = payload;
       if (!customerName || !phone || !addressDetails || !items || items.length === 0) {
         return NextResponse.json({ ok: false, error: 'সব প্রয়োজনীয় তথ্য পূরণ করুন' }, { status: 400 });
+      }
+
+      let verifiedEmail = typeof customerEmail === 'string' ? customerEmail.trim().toLowerCase() : '';
+      let verifiedUid = '';
+      if (accessToken) {
+        try {
+          const { data: userData } = await supabase.auth.getUser(String(accessToken));
+          if (userData?.user) {
+            verifiedEmail = (userData.user.email || verifiedEmail).trim().toLowerCase();
+            verifiedUid = userData.user.id;
+          }
+        } catch {}
       }
 
       let calculatedSubtotal = 0;
@@ -257,6 +269,8 @@ export async function POST(req: NextRequest) {
         orderId: `RUI-${Math.floor(100000 + Math.random() * 900000)}`,
         customerName: customerName.trim(),
         phone: phone.trim(),
+        ...(verifiedEmail ? { customerEmail: verifiedEmail } : {}),
+        ...(verifiedUid ? { customerUid: verifiedUid } : {}),
         deliveryZone,
         addressDetails: addressDetails.trim(),
         items: validatedItems,
@@ -313,6 +327,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, orders: matched });
     }
 
+    // 3.5. Customer Google-Authenticated Purchase History
+    if (action === 'MY_ORDERS') {
+      const accessToken = String(payload?.accessToken || '').trim();
+      if (!accessToken) {
+        return NextResponse.json({ ok: false, error: 'Google অ্যাকাউন্ট দিয়ে লগইন করুন।' }, { status: 401 });
+      }
+      const { data: userData, error: authErr } = await supabase.auth.getUser(accessToken);
+      if (authErr || !userData?.user) {
+        return NextResponse.json({ ok: false, error: 'সেশন মেয়াদোত্তীর্ণ হয়েছে, পুনরায় Google দিয়ে লগইন করুন।' }, { status: 401 });
+      }
+      const email = (userData.user.email || '').trim().toLowerCase();
+      const uid = userData.user.id;
+      const matched = db.orders.filter(
+        (o) =>
+          (uid && o.customerUid === uid) ||
+          (email && o.customerEmail?.trim().toLowerCase() === email)
+      );
+      return NextResponse.json({ ok: true, email, orders: matched });
+    }
+
     // 4. Club Membership Application
     if (action === 'APPLY_CLUB') {
       const newApp = {
@@ -360,17 +394,42 @@ export async function POST(req: NextRequest) {
 
     // 6.5. Public Blood Donor Registration & Donation Date Update
     if (action === 'REGISTER_BLOOD_DONOR') {
-      const { nameBn, bloodGroup, phone, departmentBn, hallBn, lastDonationDate, totalDonations, note } = payload || {};
-      if (!nameBn || !bloodGroup || !phone) {
-        return NextResponse.json({ ok: false, error: 'নাম, রক্তের গ্রুপ ও মোবাইল নম্বর আবশ্যক।' }, { status: 400 });
+      const {
+        nameBn,
+        bloodGroup,
+        phone,
+        departmentBn,
+        hallBn,
+        isRuStudent,
+        studentRoll,
+        lastDonationDate,
+        totalDonations,
+        note,
+      } = payload || {};
+      if (!nameBn || !bloodGroup || !phone || !String(hallBn || '').trim()) {
+        return NextResponse.json(
+          { ok: false, error: 'নাম, রক্তের গ্রুপ, মোবাইল নম্বর এবং আবাসনের স্থান আবশ্যক।' },
+          { status: 400 }
+        );
+      }
+      const cleanRoll = String(studentRoll || '').trim();
+      const verifiedMode = Boolean(isRuStudent);
+      if (verifiedMode && !cleanRoll) {
+        return NextResponse.json(
+          { ok: false, error: 'ভেরিফাইড রাবি শিক্ষার্থী হিসেবে আপনার রোল / আইডি নম্বর লিখুন।' },
+          { status: 400 }
+        );
       }
       const newDonor = {
         id: `bd-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
         nameBn: String(nameBn).trim(),
         bloodGroup: String(bloodGroup).trim().toUpperCase() as any,
         phone: String(phone).trim(),
-        departmentBn: String(departmentBn || 'রাজশাহী বিশ্ববিদ্যালয়').trim(),
+        departmentBn: String(departmentBn || (verifiedMode ? 'রাজশাহী বিশ্ববিদ্যালয়' : 'সাধারণ রক্তদাতা')).trim(),
         hallBn: String(hallBn || '').trim(),
+        isRuStudent: verifiedMode,
+        studentRoll: verifiedMode ? cleanRoll : '',
+        isVerified: verifiedMode && Boolean(cleanRoll),
         lastDonationDate: String(lastDonationDate || '').trim(),
         totalDonations: Number(totalDonations || 0),
         isPublicPhone: true,

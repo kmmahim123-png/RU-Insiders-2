@@ -19,7 +19,7 @@ import {
 // Path resolution supporting both local development and Vercel serverless runtime
 const isVercel = process.env.VERCEL === '1' || process.env.AWS_LAMBDA_FUNCTION_NAME !== undefined;
 const DATA_DIR = isVercel ? path.join('/tmp', 'data') : path.join(process.cwd(), 'data');
-const DB_FILE = isVercel ? path.join('/tmp', 'data', 'db.json') : path.join(process.cwd(), 'data', 'db.json');
+const DB_FILE = isVercel ? path.join('/tmp', 'data', 'db.json') : path.join(process.cwd(), 'data', 'db.cache.json');
 const BUNDLED_DB_FILE = path.join(process.cwd(), 'data', 'db.json');
 
 export interface DatabaseSchema {

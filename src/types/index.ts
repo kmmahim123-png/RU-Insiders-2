@@ -65,6 +65,8 @@ export interface Order {
   orderId: string;
   customerName: string;
   phone: string;
+  customerEmail?: string; // গুগল অ্যাকাউন্ট ইমেইল (পার্সিস্ট্যান্ট অর্ডার হিস্ট্রি)
+  customerUid?: string; // Supabase Auth User ID
   deliveryZone: 'campus' | 'city' | 'nationwide';
   addressDetails: string;
   items: OrderItem[];
@@ -128,7 +130,10 @@ export interface BloodDonor {
   bloodGroup: 'A+' | 'A-' | 'B+' | 'B-' | 'O+' | 'O-' | 'AB+' | 'AB-';
   phone: string;
   departmentBn: string;
-  hallBn?: string;
+  hallBn?: string; // আবাসনের স্থান / হল / বর্তমান ঠিকানা
+  studentRoll?: string; // রাবি রোল / আইডি (যদি রাবি শিক্ষার্থী / ভেরিফাইড হয়)
+  isRuStudent?: boolean; // রাবি শিক্ষার্থী হিসেবে রোল দিয়ে ভেরিফাই করেছেন কিনা
+  isVerified?: boolean;
   lastDonationDate?: string; // ISO YYYY-MM-DD (খালি মানে আগে কখনো দেননি / তাৎক্ষণিক যোগ্য)
   totalDonations?: number;
   isPublicPhone: boolean;

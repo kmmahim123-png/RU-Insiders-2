@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { supabaseBrowser } from '@/lib/supabaseBrowser';
 import {
   Bot,
   Send,
@@ -75,12 +76,16 @@ export default function RuAiAssistant({ mode = 'floating' }: { mode?: 'embedded'
     setSending(true);
 
     try {
+      const { data: sessionData } = await supabaseBrowser.auth.getSession().catch(() => ({ data: { session: null } }));
+      const customerAccessToken = sessionData?.session?.access_token || '';
+
       const res = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'CHAT',
           messages: nextHistory.map((m) => ({ role: m.role, content: m.content })),
+          customerAccessToken,
         }),
       });
       const data = await res.json();
