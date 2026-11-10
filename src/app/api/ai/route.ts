@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readDb } from '@/lib/db';
-import { AI_MCP_TOOLS, executeAiTool } from '@/lib/aiTools';
+import { readDb, DatabaseSchema } from '@/lib/db';
+import { AI_MCP_TOOLS, executeAiTool, buildLiveWebsiteSnapshot } from '@/lib/aiTools';
 import { AiConfig, AiSlotKey } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -17,7 +17,10 @@ interface SlotExecutionMeta {
   label: string;
 }
 
-function buildSystemInstruction(aiConfig?: AiConfig, officialWhatsapp?: string, deliveryCharges?: any): string {
+function buildSystemInstruction(db: DatabaseSchema): string {
+  const aiConfig = db.settings.aiConfig;
+  const officialWhatsapp = db.settings.whatsappNumber;
+  const deliveryCharges = db.settings.deliveryCharges;
   const today = new Date().toISOString().slice(0, 10);
   const docs = (aiConfig?.trainingDocs || [])
     .map((d, i) => `${i + 1}. [${d.category}] ${d.title}: ${d.content}`)
@@ -27,21 +30,25 @@ function buildSystemInstruction(aiConfig?: AiConfig, officialWhatsapp?: string, 
     aiConfig?.systemPersonaBn ||
     'তুমি RU Insiders (রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল মার্চেন্ডাইজ স্টোর ও ক্যাম্পাস পোর্টাল)-এর স্মার্ট AI অ্যাসিস্ট্যান্ট। সবসময় ভদ্র ও স্পষ্ট বাংলায় উত্তর দাও।';
 
+  const liveSnapshot = buildLiveWebsiteSnapshot(db);
+
   return `${basePersona}
 
 আজকের তারিখ: ${today}
 অফিশিয়াল WhatsApp নম্বর: ${officialWhatsapp || '8801700000000'}
 ডেলিভারি চার্জ: ক্যাম্পাস ৳${deliveryCharges?.campus ?? 0}, রাজশাহী সিটি ৳${deliveryCharges?.city ?? 40}, সারাদেশ কুরিয়ার ৳${deliveryCharges?.nationwide ?? 100}।
 
-অ্যাডমিন প্যানেল থেকে শেখানো তথ্য (Custom Trained Knowledge):
-${docs || '(কোনো কাস্টম ডকুমেন্ট নেই)'}
+${liveSnapshot}
+
+অ্যাডমিন প্যানেল থেকে অতিরিক্ত শেখানো তথ্য (ঐচ্ছিক Custom Knowledge):
+${docs || '(অতিরিক্ত কোনো ডকুমেন্ট যোগ করা হয়নি — উপরের ওয়েবসাইটের লাইভ ডাটা ও টুল থেকেই উত্তর দাও)'}
 
 গুরুত্বপূর্ণ নিয়মাবলি:
-১. রক্তদানের (Blood Donor) প্রশ্ন এলে অবশ্যই \`check_blood_donors\` টুল কল করে আজকের (${today}) তারিখের সাথে ৯০ দিন (৩ মাস) হিসাব করে যোগ্য সংখ্যা এবং তাদের সরাসরি ফোন নম্বর দেখাবে।
-২. ডিপার্টমেন্ট বা স্যারদের সম্পর্কে জানতে চাইলে \`find_department_and_teachers\` টুল কল করবে।
-৩. পণ্য বা দাম জানতে চাইলে \`search_products\` কল করবে।
+১. রক্তদানের (Blood Donor) প্রশ্ন এলে \`check_blood_donors\` টুল কল করো অথবা উপরের লাইভ ব্লাড ব্যাংক স্ন্যাপশট থেকে আজকের (${today}) ৯০+ দিন হিসাব অনুযায়ী যোগ্য সংখ্যা ও সরাসরি ফোন নম্বর দেখাও।
+২. ডিপার্টমেন্ট বা স্যারদের সম্পর্কে জানতে চাইলে \`find_department_and_teachers\` টুল কল করবে (যাতে সব ৫৯টি বিভাগ পাওয়া যায়)।
+৩. পণ্য, দাম বা অর্ডার সংক্রান্ত প্রশ্নে লাইভ স্ন্যাপশট / \`search_products\` ব্যবহার করবে।
 ৪. কাস্টমার অর্ডার করতে চাইলে আগে পণ্য (id/নাম, সাইজ বা অপশন, পরিমাণ), কাস্টমারের নাম, মোবাইল নম্বর ও ঠিকানা জেনে নিয়ে তারপর \`create_shop_order\` কল করবে — কনফার্ম না হয়ে ভুয়া অর্ডার বানাবে না। অর্ডার আইডি পেলে পরিষ্কারভাবে দেখাবে।
-৫. অর্ডার ট্র্যাক করতে \`track_shop_order\` এবং ক্যাম্পাস/ম্যাপ/নিউজ খুঁজতে \`search_campus_and_maps\` কল করবে।
+৫. অর্ডার ট্র্যাক করতে \`track_shop_order\` এবং ক্যাম্পাস/ম্যাপ/নিউজ বিস্তারিত খুঁজতে \`search_campus_and_maps\` কল করবে।
 ৬. কখনোই মনগড়া ফোন নম্বর বা অসত্য তথ্য বানাবে না।`;
 }
 
@@ -388,11 +395,7 @@ export async function POST(req: NextRequest) {
       }, { status: 503 });
     }
 
-    const systemPrompt = buildSystemInstruction(
-      aiCfg,
-      db.settings.whatsappNumber,
-      db.settings.deliveryCharges
-    );
+    const systemPrompt = buildSystemInstruction(db);
 
     const failures: string[] = [];
     for (const s of orderedSlots) {

@@ -1,4 +1,4 @@
-import { readDb, writeDb } from '@/lib/db';
+import { readDb, writeDb, DatabaseSchema } from '@/lib/db';
 import { calculateDonorEligibility } from '@/lib/bloodUtils';
 import { RU_DEPARTMENTS } from '@/lib/ruAcademicData';
 import { RU_CAMPUS_PLACES } from '@/lib/ruCampusSvg';
@@ -498,4 +498,84 @@ export async function executeAiTool(name: string, rawArgs: any = {}): Promise<an
     default:
       return { error: `Unknown tool: ${name}` };
   }
+}
+
+/** Build a compact live snapshot from current website data so any AI model answers accurately without manual training. */
+export function buildLiveWebsiteSnapshot(db: DatabaseSchema): string {
+  const now = new Date();
+  const productsLines = (db.products || [])
+    .slice(0, 20)
+    .map(
+      (p) =>
+        `- [${p.id}] ${p.nameBn} (${p.category}): ৳${p.price} | ${p.inStock ? 'স্টকে আছে' : 'স্টক শেষ'}${
+          p.sizes?.length ? ` | সাইজ: ${p.sizes.join('/')}` : ''
+        }${p.weightOptions?.length ? ` | ওজন: ${p.weightOptions.join('/')}` : ''}${
+          p.merchantName ? ` | শপ: ${p.merchantName}` : ''
+        }`
+    )
+    .join('\n');
+
+  const donors = db.bloodDonors || [];
+  const groupCounts: Record<string, { total: number; eligible: number }> = {};
+  const eligibleDonorLines: string[] = [];
+  for (const d of donors) {
+    const elig = calculateDonorEligibility(d, now);
+    if (!groupCounts[d.bloodGroup]) groupCounts[d.bloodGroup] = { total: 0, eligible: 0 };
+    groupCounts[d.bloodGroup].total += 1;
+    if (elig.isEligible) {
+      groupCounts[d.bloodGroup].eligible += 1;
+      if (eligibleDonorLines.length < 20) {
+        const phoneText = d.isPublicPhone !== false ? d.phone : 'অ্যাডমিন মাধ্যমে';
+        eligibleDonorLines.push(
+          `- ${d.bloodGroup} | ${d.nameBn} (${d.departmentBn}${d.hallBn ? `, ${d.hallBn}` : ''}) | ফোন: ${phoneText} | ${elig.statusLabelBn}`
+        );
+      }
+    }
+  }
+  const bloodSummaryText = Object.entries(groupCounts)
+    .map(([g, c]) => `${g}: ${c.eligible}/${c.total} জন যোগ্য`)
+    .join(', ');
+
+  const deptWithTeachersLines = Object.values(db.departments || {})
+    .filter((d) => Array.isArray(d.teachers) && d.teachers.length > 0)
+    .slice(0, 12)
+    .map((d) => {
+      const base = RU_DEPARTMENTS.find((r) => r.id === d.departmentId);
+      const tList = (d.teachers || [])
+        .map((t) => `${t.nameBn} (${t.designationBn}${t.phone ? `, ফোন: ${t.phone}` : ''}${t.roomBn ? `, ${t.roomBn}` : ''})`)
+        .join('; ');
+      return `- ${d.nameBn || base?.nameBn || d.departmentId}: ${tList}`;
+    })
+    .join('\n');
+
+  const newsLines = (db.articles || [])
+    .filter((a) => a.status === 'Published')
+    .slice(0, 5)
+    .map((a) => `- [${a.category}] ${a.title} (${a.summary.slice(0, 90)})`)
+    .join('\n');
+
+  const clubNames = (db.clubs || [])
+    .slice(0, 12)
+    .map((c) => `${c.shortName} (${c.nameBn})`)
+    .join(', ');
+
+  return `
+=== ওয়েবসাইটের লাইভ ডাটাবেজ স্ন্যাপশট (স্বয়ংক্রিয়ভাবে সাইট থেকে সংগৃহীত) ===
+১. শপ পণ্য তালিকা (মোট ${(db.products || []).length}টি):
+${productsLines || '(কোনো পণ্য নেই)'}
+
+২. রাবি ব্লাড ব্যাংক (৯০-দিন / ৩ মাস নিয়ম — মোট ${donors.length} জন নিবন্ধিত):
+গ্রুপ সারসংক্ষেপ: ${bloodSummaryText || 'কোনো ডোনার নেই'}
+বর্তমানে ৯০+ দিন পূর্ণ হয়ে রক্তদানে যোগ্য তালিকা:
+${eligibleDonorLines.join('\n') || '(এই মুহূর্তে ৯০+ দিন যোগ্য কেউ নেই)'}
+
+৩. বিভাগ ও শিক্ষকমণ্ডলী (মোট ${RU_DEPARTMENTS.length}টি বিভাগ — বিস্তারিত জানতে find_department_and_teachers টুল ব্যবহার করুন):
+${deptWithTeachersLines || '(এখনো কোনো বিভাগে কাস্টম স্যার যোগ করা হয়নি — সাধারণ বিভাগ তথ্যের জন্য find_department_and_teachers টুল কল করুন)'}
+
+৪. সর্বশেষ ব্রেকিং ও ক্যাম্পাস নিউজ:
+${newsLines || '(কোনো প্রকাশিত নিউজ নেই)'}
+
+৫. ক্যাম্পাস ক্লাবসমূহ: ${clubNames || 'RUCS, RUDEU, RUSC, RUPS, বাঁধন'}
+৬. ম্যাপ গাইড: RU ক্যাম্পাসের ${RU_CAMPUS_PLACES.length}টি, রাজশাহী জেলার ${RAJSHAHI_PDF_REGIONS.length}টি ও বিভাগের ${DIVISION_SPOTS.length}টি স্পট রয়েছে।
+`.trim();
 }
