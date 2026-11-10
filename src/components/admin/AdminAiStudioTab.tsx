@@ -25,13 +25,18 @@ import {
 import { AiConfig, AiSlotKey, AiTrainingDoc } from '@/types';
 
 const OPENROUTER_FREE_MODELS = [
-  { id: 'openrouter/free', label: 'OpenRouter Free Auto-Router (সবসময় সক্রিয় ফ্রি)' },
-  { id: 'meta-llama/llama-3.3-70b-instruct:free', label: 'Meta Llama 3.3 70B Instruct (Free)' },
-  { id: 'google/gemini-2.0-flash-exp:free', label: 'Google Gemini 2.0 Flash (Free)' },
-  { id: 'qwen/qwen-2.5-72b-instruct:free', label: 'Qwen 2.5 72B Instruct (Free)' },
-  { id: 'deepseek/deepseek-chat-v3-0324:free', label: 'DeepSeek V3 Chat (Free)' },
-  { id: 'mistralai/mistral-small-3.1-24b-instruct:free', label: 'Mistral Small 3.1 24B (Free)' },
-  { id: 'nvidia/llama-3.1-nemotron-70b-instruct:free', label: 'NVIDIA Nemotron 70B (Free)' },
+  { id: 'openrouter/free', label: 'OpenRouter: Free Auto-Router (সবসময় সক্রিয় ফ্রি)' },
+  { id: 'meta-llama/llama-3.3-70b-instruct:free', label: 'OpenRouter: Meta Llama 3.3 70B (Free)' },
+  { id: 'google/gemini-2.0-flash-exp:free', label: 'OpenRouter: Google Gemini 2.0 Flash (Free)' },
+  { id: 'deepseek/deepseek-chat-v3-0324:free', label: 'OpenRouter: DeepSeek V3 Chat (Free)' },
+  { id: 'deepseek/deepseek-r1:free', label: 'OpenRouter: DeepSeek R1 Reasoning (Free)' },
+  { id: 'qwen/qwen-2.5-72b-instruct:free', label: 'OpenRouter: Qwen 2.5 72B Instruct (Free)' },
+  { id: 'mistralai/mistral-small-3.1-24b-instruct:free', label: 'OpenRouter: Mistral Small 3.1 24B (Free)' },
+  { id: 'nvidia/llama-3.1-nemotron-70b-instruct:free', label: 'OpenRouter: NVIDIA Nemotron 70B (Free)' },
+  { id: 'google/gemma-3-27b-it:free', label: 'OpenRouter: Google Gemma 3 27B (Free)' },
+  { id: 'openai/gpt-4o-mini', label: 'OpenRouter: OpenAI GPT-4o Mini' },
+  { id: 'anthropic/claude-3.5-haiku', label: 'OpenRouter: Anthropic Claude 3.5 Haiku' },
+  { id: 'google/gemini-2.5-flash', label: 'OpenRouter: Google Gemini 2.5 Flash' },
 ];
 
 const GEMINI_DIRECT_MODELS = [
@@ -485,13 +490,15 @@ export default function AdminAiStudioTab({
                   </div>
                 </div>
 
-                {/* Model Name Typing + Dropdown Preset Picker */}
-                <div className="space-y-1.5 bg-slate-50/80 border border-slate-200/80 rounded-2xl p-3">
-                  <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
-                    <span>মডেলের নাম লিখুন অথবা তালিকা থেকে বাছাই করুন (OpenRouter / Gemini Model Name)</span>
-                    <Cpu className="w-3.5 h-3.5 text-indigo-600" />
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {/* Model Selector (Top) + Manual Model Name Entry (Bottom) */}
+                <div className="space-y-2.5 bg-slate-50/90 border border-slate-200 rounded-2xl p-3.5">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
+                      <span>
+                        ১. {meta.slot === 'gemini' ? 'Gemini মডেল' : 'OpenRouter মডেল'} তালিকা থেকে সিলেক্ট করুন:
+                      </span>
+                      <Cpu className="w-3.5 h-3.5 text-indigo-600" />
+                    </label>
                     <select
                       value={presets.some((p) => p.id === modelVal) ? modelVal : '__custom__'}
                       onChange={(e) => {
@@ -503,16 +510,27 @@ export default function AdminAiStudioTab({
                           setConfig({ ...config, [meta.modelField]: chosen });
                         }
                       }}
-                      className="text-xs font-bold text-slate-900 border border-slate-200 rounded-xl p-2.5 bg-white"
+                      className="w-full text-xs font-bold text-slate-900 border border-slate-200 rounded-xl p-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
                       {presets.map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.label}
                         </option>
                       ))}
-                      <option value="__custom__">✏️ নিজের মতো মডেলের নাম লিখুন (Custom Model Name)</option>
+                      <option value="__custom__">✏️ নিচে ম্যানুয়ালি মডেলের নাম লিখব (Custom Model Name)</option>
                     </select>
+                  </div>
 
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-indigo-900 flex items-center justify-between">
+                      <span>
+                        ২. নিচে ম্যানুয়ালি মডেলের নাম লিখুন (যেমন:{' '}
+                        <code className="font-mono bg-white px-1.5 py-0.5 rounded border border-slate-200 text-indigo-700">
+                          {meta.slot === 'gemini' ? 'gemini-2.5-flash' : 'openrouter/free'}
+                        </code>
+                        ):
+                      </span>
+                    </label>
                     <div className="relative flex items-center">
                       <input
                         ref={(el) => {
@@ -524,10 +542,10 @@ export default function AdminAiStudioTab({
                         onChange={(e) => setConfig({ ...config, [meta.modelField]: e.target.value })}
                         placeholder={
                           meta.slot === 'gemini'
-                            ? 'মডেল নাম লিখুন: যেমন gemini-2.5-flash'
-                            : 'মডেল নাম লিখুন: যেমন openrouter/free বা meta-llama/llama-3.3-70b-instruct:free'
+                            ? 'এখানে ম্যানুয়ালি Gemini মডেলের নাম লিখুন (যেমন: gemini-2.5-flash)'
+                            : 'এখানে ম্যানুয়ালি OpenRouter মডেলের নাম লিখুন (যেমন: deepseek/deepseek-chat-v3-0324:free)'
                         }
-                        className="w-full text-xs font-mono text-slate-900 border border-indigo-200 bg-white rounded-xl p-2.5 pr-8 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full text-xs font-mono font-bold text-slate-900 border border-indigo-300 bg-white rounded-xl p-2.5 pr-9 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       />
                       {modelVal && (
                         <button
