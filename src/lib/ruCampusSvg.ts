@@ -37,7 +37,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 295,
       "y": 72
     },
-    "imageUrl": "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=800&q=80",
+    "imageUrl": "/map-spots/ru_academic_hall.jpg",
     "descriptionBn": "রেললাইনের উত্তর পাশে বিস্তৃত রাবির কৃষি ও ভেটেরিনারি সায়েন্স অনুষদ অঞ্চল।"
   },
   {
@@ -61,7 +61,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 456,
       "y": 64
     },
-    "imageUrl": "/campus/ru-gate.jpg",
+    "imageUrl": "/map-spots/ru_fine_arts.jpg",
     "descriptionBn": "উত্তর ক্যাম্পাসের প্রধান প্রবেশদ্বার, রেলক্রসিং এবং চারুকলা সংযোগ সড়ক অঞ্চল।"
   },
   {
@@ -85,7 +85,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 562,
       "y": 72
     },
-    "imageUrl": "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?auto=format&fit=crop&w=800&q=80",
+    "imageUrl": "/map-spots/ru_fine_arts.jpg",
     "descriptionBn": "শিল্পাচার্য জয়নুল আবেদীন একাডেমিক ভবন ও চারুকলা অনুষদের সবুজ চত্বর।"
   },
   {
@@ -133,7 +133,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 350,
       "y": 168
     },
-    "imageUrl": "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=800&q=80",
+    "imageUrl": "/map-spots/ru_botanical.jpg",
     "descriptionBn": "দুর্লভ উদ্ভিদ প্রজাতি, পুকুর ও সবুজ প্রকৃতিতে ঘেরা রাবি বোটানিক্যাল গার্ডেন অঞ্চল।"
   },
   {
@@ -205,7 +205,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 730,
       "y": 152
     },
-    "imageUrl": "https://images.unsplash.com/photo-1474487548417-781cb71495f3?auto=format&fit=crop&w=800&q=80",
+    "imageUrl": "/map-spots/ru_station.jpg",
     "descriptionBn": "রাজশাহী-ঢাকা রেলপথে বিশ্ববিদ্যালয়ের নিজস্ব রেলস্টেশন ও জনপ্রিয় স্টেশন বাজার চত্বর।"
   },
   {
@@ -301,7 +301,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 1062,
       "y": 198
     },
-    "imageUrl": "/campus/ru-spot.jpg",
+    "imageUrl": "/map-spots/ru_boddhobhumi.jpg",
     "descriptionBn": "১৯৭১ সালের মহান মুক্তিযুদ্ধে শহীদদের স্মরণে ক্যাম্পাসের উত্তর-পূর্ব প্রান্তে নির্মিত বধ্যভূমি স্মৃতিস্তম্ভ।"
   },
   {
@@ -469,7 +469,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 539,
       "y": 262
     },
-    "imageUrl": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80",
+    "imageUrl": "/map-spots/ru_academic_hall.jpg",
     "descriptionBn": "শহীদ হবিবুর রহমান খেলার মাঠ এবং নির্মিতব্য আধুনিক ২০তলা একাডেমিক ভবন অঞ্চল।"
   },
   {
@@ -493,7 +493,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 524,
       "y": 328
     },
-    "imageUrl": "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=800&q=80",
+    "imageUrl": "/map-spots/ru_wazed.jpg",
     "descriptionBn": "দ্বিতীয় ও তৃতীয় বিজ্ঞান ভবন (জীববিজ্ঞান, রসায়ন ও প্রাণরসায়ন অনুষদ) কমপ্লেক্স।"
   },
   {
@@ -517,7 +517,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 494,
       "y": 392
     },
-    "imageUrl": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80",
+    "imageUrl": "/map-spots/ru_wazed.jpg",
     "descriptionBn": "চতুর্থ বিজ্ঞান ভবন; প্রকৌশল, সিএসই ও বিজ্ঞান অনুষদের আধুনিক ল্যাবরেটরি ও বিভাগসমূহ।"
   },
   {
@@ -541,7 +541,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 558,
       "y": 392
     },
-    "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&w=800&q=80",
+    "imageUrl": "/map-spots/ru_academic_hall.jpg",
     "descriptionBn": "প্রথম বিজ্ঞান ভবন (পদার্থবিজ্ঞান, গণিত ও পরিসংখ্যান বিভাগ)।"
   },
   {
@@ -565,7 +565,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 313,
       "y": 395
     },
-    "imageUrl": "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=800&q=80",
+    "imageUrl": "/map-spots/ru_kazi_nazrul.jpg",
     "descriptionBn": "শিক্ষা ও গবেষণা ইনস্টিটিউট (IER) এবং সামাজিক বিজ্ঞান ও কলা অনুষদের বিভিন্ন বিভাগ।"
   },
   {
@@ -589,7 +589,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 399,
       "y": 395
     },
-    "imageUrl": "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=800&q=80",
+    "imageUrl": "/map-spots/ru_kazi_nazrul.jpg",
     "descriptionBn": "কলা, আইন ও সামাজিক বিজ্ঞান অনুষদের অন্যতম প্রধান একাডেমিক ভবন।"
   },
   {
@@ -613,7 +613,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 313,
       "y": 446
     },
-    "imageUrl": "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80",
+    "imageUrl": "/map-spots/ru_academic_hall.jpg",
     "descriptionBn": "প্যারিস রোডের উত্তর-পশ্চিম প্রান্তে কলা অনুষদের ঐতিহাসিক মমতাজউদ্দিন ভবন।"
   },
   {
@@ -637,7 +637,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 399,
       "y": 446
     },
-    "imageUrl": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80",
+    "imageUrl": "/map-spots/ru_admin_senate.jpg",
     "descriptionBn": "কেন্দ্রীয় গ্রন্থাগারের পশ্চিম পাশে অবস্থিত সুপরিচিত কলা অনুষদ ভবন।"
   },
   {
@@ -661,7 +661,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 526,
       "y": 449
     },
-    "imageUrl": "/campus/ru-master-plan-3d.jpg",
+    "imageUrl": "/map-spots/ru_central_library.jpg",
     "descriptionBn": "লক্ষাধিক বই সমৃদ্ধ রাবি কেন্দ্রীয় গ্রন্থাগার, কাজী নজরুল ইসলাম মিলনায়তন ও শহীদ সুখরঞ্জন সমাদ্দার টিএসসিসি।"
   },
   {
@@ -685,7 +685,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 672,
       "y": 342
     },
-    "imageUrl": "https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=800&q=80",
+    "imageUrl": "/map-spots/ru_stadium.jpg",
     "descriptionBn": "ক্যাম্পাসের ঠিক হৃদপিণ্ডে অবস্থিত ডিম্বাকৃতির বিশাল শেখ কামাল স্টেডিয়াম এবং ইনডোর স্টেডিয়াম চত্বর।"
   },
   {
@@ -829,7 +829,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 175,
       "y": 576
     },
-    "imageUrl": "/campus/ru-gate.jpg",
+    "imageUrl": "/map-spots/ru_main_gate.jpg",
     "descriptionBn": "কাজলা গেট, জুবেরী ভবন ও খেলার মাঠ, পশ্চিম পার্কিং জোন এবং শেখ রাসেল মডেল স্কুল।"
   },
   {
@@ -853,7 +853,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 367,
       "y": 492
     },
-    "imageUrl": "/campus/paris-road-rain.jpg",
+    "imageUrl": "/map-spots/ru_paris_road.jpg",
     "descriptionBn": "সুউচ্চ গগনশিরীষ বৃক্ষশোভিত রাবির সবচেয়ে নান্দনিক ও ঐতিহাসিক রাস্তা প্যারিস রোড।"
   },
   {
@@ -877,7 +877,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 329,
       "y": 572
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "/map-spots/ru_admin_senate.jpg",
     "descriptionBn": "সৈয়দ নজরুল ইসলাম প্রশাসন ভবন, সিনেট ভবন এবং উপাচার্যের বাসভবন অঞ্চল।"
   },
   {
@@ -901,7 +901,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 433,
       "y": 544
     },
-    "imageUrl": "/campus/ru-roundabout.jpg",
+    "imageUrl": "/map-spots/ru_shabash_bd.jpg",
     "descriptionBn": "শিল্পী নিতুন কুন্ডু নির্মিত মহান মুক্তিযুদ্ধের অমর ভাস্কর্য \"সাবাস বাংলাদেশ\" ও উন্মুক্ত মাঠ।"
   },
   {
@@ -925,7 +925,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 475,
       "y": 594
     },
-    "imageUrl": "/campus/ru-gate.jpg",
+    "imageUrl": "/map-spots/ru_main_gate.jpg",
     "descriptionBn": "রাজশাহী বিশ্ববিদ্যালয়ের প্রধান প্রবেশদ্বার, গোলচত্বর এবং ড. শামসুজ্জোহার সমাধিস্থল সংলগ্ন জোহা চত্বর।"
   },
   {
@@ -949,7 +949,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 524,
       "y": 524
     },
-    "imageUrl": "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80",
+    "imageUrl": "/map-spots/ru_central_mosque.jpg",
     "descriptionBn": "মেইন গেটের উত্তর-পূর্ব পাশে অবস্থিত অনন্য স্থাপত্যশৈলীর রাবি কেন্দ্রীয় জামে মসজিদ ও সুবর্ণ জয়ন্তী টাওয়ার।"
   },
   {
@@ -973,7 +973,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 599,
       "y": 534
     },
-    "imageUrl": "/campus/ru-spot.jpg",
+    "imageUrl": "/map-spots/ru_smriti_museum.jpg",
     "descriptionBn": "বাংলাদেশের প্রথম স্থায়ী মুক্তিযুদ্ধ জাদুঘর — শহীদ স্মৃতি সংগ্রহশালা অঞ্চল।"
   },
   {
@@ -1021,7 +1021,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 935,
       "y": 492
     },
-    "imageUrl": "/campus/ru-gate.jpg",
+    "imageUrl": "/map-spots/ru_main_gate.jpg",
     "descriptionBn": "বিনোদপুর গেট, পুলিশ ফাঁড়ি, রাবি আইবিএ ভবন এবং বিনোদপুর বাজার সংযোগ অঞ্চল।"
   }
 ];

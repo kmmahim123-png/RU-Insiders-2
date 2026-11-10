@@ -20,9 +20,13 @@ import {
   Lock,
   Search,
   Store,
+  Copy,
+  Check,
+  ExternalLink,
 } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 import { BreakingNewsItem } from '@/types';
+import { supabaseBrowser, SUPABASE_PUBLIC_URL, SUPABASE_PUBLIC_ANON_KEY } from '@/lib/supabaseBrowser';
 
 export interface UserSession {
   name: string;
@@ -35,9 +39,10 @@ export default function NavbarAndAuth() {
   const pathname = usePathname();
   const [showSplash, setShowSplash] = useState(false);
   const [user, setUser] = useState<UserSession | null>(null);
-  const [showGoogleModal, setShowGoogleModal] = useState(false);
-  const [customEmail, setCustomEmail] = useState('');
-  const [customName, setCustomName] = useState('');
+  const [showGoogleSetupModal, setShowGoogleSetupModal] = useState(false);
+  const [googleAuthLoading, setGoogleAuthLoading] = useState(false);
+  const [googleAuthError, setGoogleAuthError] = useState('');
+  const [copiedCallback, setCopiedCallback] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -110,6 +115,45 @@ export default function NavbarAndAuth() {
     window.addEventListener('ru_auth_changed', loadLocalState);
     window.addEventListener('ru_cart_updated', loadLocalState);
 
+    // Sync real Supabase Google OAuth Session
+    const syncSupabaseUser = (session: any, triggerPush = false) => {
+      if (!session?.user) return;
+      const meta = session.user.user_metadata || {};
+      const realUser: UserSession = {
+        name: meta.full_name || meta.name || (session.user.email || '').split('@')[0] || 'User',
+        email: session.user.email || '',
+        avatar: meta.avatar_url || meta.picture || '/logo.png',
+        role: 'visitor',
+      };
+      localStorage.setItem('ru_user_session', JSON.stringify(realUser));
+      setUser(realUser);
+      setShowGoogleSetupModal(false);
+      window.dispatchEvent(new Event('ru_auth_changed'));
+      if (triggerPush) {
+        requestChromeNotification();
+      }
+      // Clean OAuth code params from URL if present
+      if (typeof window !== 'undefined' && (window.location.search.includes('code=') || window.location.hash.includes('access_token='))) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    };
+
+    supabaseBrowser.auth.getSession().then(({ data }) => {
+      if (data?.session?.user) {
+        syncSupabaseUser(data.session, false);
+      }
+    }).catch(() => {});
+
+    const { data: authSub } = supabaseBrowser.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        syncSupabaseUser(session, true);
+      } else if (event === 'SIGNED_OUT') {
+        localStorage.removeItem('ru_user_session');
+        setUser(null);
+        window.dispatchEvent(new Event('ru_auth_changed'));
+      }
+    });
+
     // Fetch store metadata (breaking news, whatsapp, notifications)
     const fetchStoreMeta = async () => {
       try {
@@ -151,6 +195,7 @@ export default function NavbarAndAuth() {
     window.addEventListener('ru_breaking_updated', fetchStoreMeta);
 
     return () => {
+      authSub?.subscription?.unsubscribe();
       clearInterval(intervalStore);
       window.removeEventListener('ru_breaking_updated', fetchStoreMeta);
       window.removeEventListener('ru_auth_changed', loadLocalState);
@@ -187,16 +232,56 @@ export default function NavbarAndAuth() {
     } catch {}
   };
 
-  // Google Login Completion
-  const completeLogin = async (sessionData: UserSession) => {
-    localStorage.setItem('ru_user_session', JSON.stringify(sessionData));
-    setUser(sessionData);
-    setShowGoogleModal(false);
-    window.dispatchEvent(new Event('ru_auth_changed'));
-    await requestChromeNotification();
+  // Authentic Google OAuth Sign-In (shows real phone/browser Gmail account picker via accounts.google.com)
+  const handleGoogleSignIn = async () => {
+    setGoogleAuthError('');
+    setGoogleAuthLoading(true);
+    try {
+      // Check if Google OAuth is enabled in Supabase project settings
+      const settingsRes = await fetch(`${SUPABASE_PUBLIC_URL}/auth/v1/settings`, {
+        headers: { apikey: SUPABASE_PUBLIC_ANON_KEY },
+      });
+      const settingsData = settingsRes.ok ? await settingsRes.json() : null;
+
+      if (settingsData?.external && settingsData.external.google === false) {
+        setShowGoogleSetupModal(true);
+        return;
+      }
+
+      const redirectUrl =
+        typeof window !== 'undefined' ? window.location.origin : undefined;
+
+      const { error } = await supabaseBrowser.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: redirectUrl,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'select_account',
+          },
+        },
+      });
+
+      if (error) {
+        if (error.message.toLowerCase().includes('provider') || error.message.toLowerCase().includes('not enabled')) {
+          setShowGoogleSetupModal(true);
+        } else {
+          setGoogleAuthError(error.message);
+          setShowGoogleSetupModal(true);
+        }
+      }
+    } catch (err: any) {
+      setGoogleAuthError(err?.message || 'Google লগইন চালু করা যায়নি।');
+      setShowGoogleSetupModal(true);
+    } finally {
+      setGoogleAuthLoading(false);
+    }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await supabaseBrowser.auth.signOut();
+    } catch {}
     localStorage.removeItem('ru_user_session');
     setUser(null);
     window.dispatchEvent(new Event('ru_auth_changed'));
@@ -417,7 +502,15 @@ export default function NavbarAndAuth() {
               {user ? (
                 <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5">
                   <div className="relative">
-                    <img src={user.avatar} alt={user.name} className="w-7 h-7 rounded-full object-cover" />
+                    <img
+                      src={user.avatar}
+                      alt={user.name}
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        e.currentTarget.src = '/logo.png';
+                      }}
+                      className="w-7 h-7 rounded-full object-cover"
+                    />
                     <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border border-white" />
                   </div>
                   <span className="text-xs font-bold text-slate-800 max-w-[110px] truncate">
@@ -433,11 +526,17 @@ export default function NavbarAndAuth() {
                 </div>
               ) : (
                 <button
-                  onClick={() => setShowGoogleModal(true)}
-                  className="h-11 px-3 sm:px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-800 shadow-sm"
+                  onClick={handleGoogleSignIn}
+                  disabled={googleAuthLoading}
+                  className="h-11 px-3 sm:px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-800 shadow-sm cursor-pointer disabled:opacity-60 transition"
                 >
-                  <span className="font-extrabold text-blue-600 text-base">G</span>
-                  <span>Google দিয়ে লগইন</span>
+                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z" />
+                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z" />
+                    <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z" />
+                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z" />
+                  </svg>
+                  <span>{googleAuthLoading ? 'অ্যাকাউন্ট খুলছে...' : 'Google দিয়ে লগইন'}</span>
                 </button>
               )}
             </div>
@@ -561,7 +660,15 @@ export default function NavbarAndAuth() {
             <div className="pb-2 border-b border-slate-100 flex items-center justify-between">
               {user ? (
                 <div className="flex items-center gap-2">
-                  <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full object-cover" />
+                  <img
+                    src={user.avatar}
+                    alt={user.name}
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      e.currentTarget.src = '/logo.png';
+                    }}
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
                   <div>
                     <p className="text-xs font-bold text-slate-900">{user.name}</p>
                     <p className="text-[10px] text-slate-500">{user.email}</p>
@@ -571,12 +678,18 @@ export default function NavbarAndAuth() {
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    setShowGoogleModal(true);
+                    handleGoogleSignIn();
                   }}
-                  className="w-full py-2 px-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center gap-2"
+                  disabled={googleAuthLoading}
+                  className="w-full py-2.5 px-3 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-900 font-bold text-xs flex items-center justify-center gap-2 shadow-xs"
                 >
-                  <span className="font-extrabold text-blue-600">G</span>
-                  <span>Google দিয়ে লগইন করুন</span>
+                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z" />
+                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z" />
+                    <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z" />
+                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z" />
+                  </svg>
+                  <span>Sign in with Google (Gmail নির্বাচন করুন)</span>
                 </button>
               )}
 
@@ -635,22 +748,25 @@ export default function NavbarAndAuth() {
         )}
       </header>
 
-      {/* 5. Google Account Chooser Modal (Zero Redirect, Mobile Ergonomic) */}
-      {showGoogleModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-150">
-          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-slate-200 shadow-2xl p-5 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto overscroll-contain">
-            <div className="flex items-center justify-between pb-1 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <span className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 font-extrabold flex items-center justify-center">
-                  G
-                </span>
+      {/* 5. Google OAuth Setup Helper (Shown only if Supabase Google Provider is not yet enabled in Dashboard) */}
+      {showGoogleSetupModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-150">
+          <div className="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl border border-slate-200 shadow-2xl p-5 sm:p-6 space-y-4 max-h-[92vh] overflow-y-auto overscroll-contain">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <svg className="w-7 h-7 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z" />
+                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z" />
+                  <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z" />
+                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z" />
+                </svg>
                 <div>
-                  <h3 className="font-extrabold text-slate-900 text-base">Google অ্যাকাউন্ট নির্বাচন করুন</h3>
-                  <p className="text-xs text-slate-500">লগইন করলে Chrome ব্রাউজার নোটিফিকেশন চালু হবে</p>
+                  <h3 className="font-black text-slate-900 text-base">আসল Google Sign-In অ্যাক্টিভেশন বাকি</h3>
+                  <p className="text-[11px] text-slate-500">আপনার Supabase প্রোজেক্টে Google Provider এখন অফ আছে</p>
                 </div>
               </div>
-              <button 
-                onClick={() => setShowGoogleModal(false)} 
+              <button
+                onClick={() => setShowGoogleSetupModal(false)}
                 className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition"
                 aria-label="Close"
               >
@@ -658,87 +774,84 @@ export default function NavbarAndAuth() {
               </button>
             </div>
 
-            <div className="space-y-2">
-              <button
-                onClick={() =>
-                  completeLogin({
-                    name: 'Mahim',
-                    email: 'kmmahim123@gmail.com',
-                    avatar: '/logo.png',
-                    role: 'admin',
-                  })
-                }
-                className="w-full flex items-center gap-3 p-3 rounded-2xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/40 text-left transition"
-              >
-                <img src="/logo.png" alt="Mahim" className="w-10 h-10 rounded-full border border-slate-200 shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-slate-900 truncate">Mahim (Primary Admin)</p>
-                  <p className="text-xs text-slate-500 truncate">kmmahim123@gmail.com</p>
-                </div>
-                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-              </button>
+            {googleAuthError && (
+              <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-bold">
+                ত্রুটি: {googleAuthError}
+              </div>
+            )}
 
-              <button
-                onClick={() =>
-                  completeLogin({
-                    name: 'রাবি শিক্ষার্থী',
-                    email: 'student@ru.ac.bd',
-                    avatar: '/logo.png',
-                    role: 'student',
-                  })
-                }
-                className="w-full flex items-center gap-3 p-3 rounded-2xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/40 text-left transition"
-              >
-                <img src="/logo.png" alt="Student" className="w-10 h-10 rounded-full border border-slate-200 shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-slate-900 truncate">রাবি শিক্ষার্থী (Campus Verified)</p>
-                  <p className="text-xs text-slate-500 truncate">student@ru.ac.bd</p>
-                </div>
-                <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0" />
-              </button>
+            <div className="p-4 rounded-2xl bg-blue-50/70 border border-blue-200 space-y-2.5 text-xs text-slate-800 leading-relaxed">
+              <p className="font-black text-blue-950">
+                আসল Google অ্যাকাউন্ট পিকার (ফোনের সব Gmail লিস্ট) চালু করতে মাত্র ২ মিনিটের এই ২টি ধাপ সম্পন্ন করুন:
+              </p>
+              <ol className="list-decimal list-inside space-y-1.5 text-[11px] sm:text-xs">
+                <li>
+                  <a
+                    href="https://console.cloud.google.com/apis/credentials"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-bold text-blue-700 underline inline-flex items-center gap-1"
+                  >
+                    Google Cloud Console → Credentials <ExternalLink className="w-3 h-3" />
+                  </a>
+                  -এ গিয়ে <strong>OAuth 2.0 Client ID (Web application)</strong> তৈরি করুন এবং নিচের Callback URL-টি{" "}
+                  <strong>Authorized redirect URIs</strong>-এ পেস্ট করুন:
+                </li>
+              </ol>
+
+              <div className="flex items-center gap-2 bg-white p-2 rounded-xl border border-blue-200">
+                <code className="text-[11px] font-mono text-slate-800 flex-1 truncate">
+                  {`${SUPABASE_PUBLIC_URL}/auth/v1/callback`}
+                </code>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${SUPABASE_PUBLIC_URL}/auth/v1/callback`);
+                    setCopiedCallback(true);
+                    setTimeout(() => setCopiedCallback(false), 2000);
+                  }}
+                  className="px-2.5 py-1 bg-blue-600 text-white rounded-lg text-[10px] font-bold flex items-center gap-1 shrink-0 cursor-pointer"
+                >
+                  {copiedCallback ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                  <span>{copiedCallback ? 'কপি হয়েছে' : 'কপি'}</span>
+                </button>
+              </div>
+
+              <ol start={2} className="list-decimal list-inside space-y-1.5 text-[11px] sm:text-xs">
+                <li>
+                  পাওয়া <strong>Client ID</strong> এবং <strong>Client Secret</strong>-টি{" "}
+                  <a
+                    href="https://supabase.com/dashboard/project/skqtcsoovtnxxbhtracp/auth/providers"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-bold text-emerald-700 underline inline-flex items-center gap-1"
+                  >
+                    Supabase Dashboard → Auth → Google <ExternalLink className="w-3 h-3" />
+                  </a>
+                  -এ বসিয়ে <strong>Enable Google</strong> অন করে Save দিন (এবং Site URL-এ{" "}
+                  <code className="bg-white px-1 rounded">https://ruinsider-2.vercel.app</code> যুক্ত করুন)।
+                </li>
+              </ol>
+              <p className="text-[11px] text-emerald-800 font-bold pt-1">
+                ✓ Save দেওয়ার সাথে সাথেই আর কোনো কোড বদলাতে হবে না — প্রতিবার এই বাটনে চাপলেই ইউজারের ফোনে থাকা সব আসল Gmail অ্যাকাউন্ট দেখাবে!
+              </p>
             </div>
 
-            <div className="pt-3 border-t border-slate-200 space-y-2.5">
-              <p className="text-xs font-bold text-slate-700">অথবা আপনার নিজের নাম ও Gmail দিন:</p>
-              <input
-                type="text"
-                placeholder="আপনার নাম"
-                value={customName}
-                onChange={(e) => setCustomName(e.target.value)}
-                className="w-full text-base sm:text-sm border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-blue-500"
-              />
-              <input
-                type="email"
-                placeholder="yourname@gmail.com"
-                value={customEmail}
-                onChange={(e) => setCustomEmail(e.target.value)}
-                className="w-full text-base sm:text-sm border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-blue-500"
-              />
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100">
               <button
-                onClick={() => {
-                  if (!customEmail.includes('@')) return;
-                  completeLogin({
-                    name: customName.trim() || customEmail.split('@')[0],
-                    email: customEmail.trim(),
-                    avatar: '/logo.png',
-                    role: 'visitor',
-                  });
-                }}
-                className="w-full py-3 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold text-sm shadow-sm transition"
+                type="button"
+                onClick={handleGoogleSignIn}
+                className="px-4 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold transition cursor-pointer"
               >
-                লগইন ও নোটিফিকেশন চালু করুন
+                সেটআপ শেষ? পুনরায় চেষ্টা করুন
               </button>
-            </div>
-
-            {/* Direct Admin & Club Portal Link */}
-            <div className="pt-2 border-t border-slate-100">
               <Link
                 href="/admin"
-                onClick={() => setShowGoogleModal(false)}
-                className="w-full py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition"
+                onClick={() => setShowGoogleSetupModal(false)}
+                className="py-2.5 px-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition"
               >
                 <Lock className="w-3.5 h-3.5 text-amber-400" />
-                <span>অ্যাডমিন ও ক্লাব পাসওয়ার্ড পোর্টাল →</span>
+                <span>অ্যাডমিন / মার্চেন্ট পোর্টাল</span>
               </Link>
             </div>
           </div>
