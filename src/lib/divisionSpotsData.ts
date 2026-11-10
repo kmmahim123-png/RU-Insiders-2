@@ -140,7 +140,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'যমুনা বহুমুখী সেতু (বঙ্গবন্ধু সেতু)',
     locationBn: 'সিরাজগঞ্জ-টাঙ্গাইল যমুনা নদী',
     summaryBn: '৪.৮ কিমি দীর্ঘ বাংলাদেশের উত্তরাঞ্চলের প্রবেশদ্বার। যমুনা নদীর ওপর নির্মিত স্থাপত্যশৈলীর অন্যতম বিস্ময় ও দেশের প্রধান সংযোগ সেতু।',
-    imageUrl: 'https://images.unsplash.com/photo-1545649479-7984f494f6c5?auto=format&fit=crop&w=800&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=800&q=80',
     tags: ['যমুনা সেতু', 'বঙ্গবন্ধু সেতু', 'মেগাস্ট্রাকচার'],
   },
   {
@@ -160,7 +160,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'মখদুম শাহের মাজার শরীফ',
     locationBn: 'শাহজাদপুর, সিরাজগঞ্জ',
     summaryBn: 'হযরত মখদুম শাহ দৌলা শহীদ (রহ.) এর ঐতিহাসিক মাজার শরীফ ও প্রাচীন ইসলামী ঐতিহ্যবাহী তীর্থস্থান।',
-    imageUrl: 'https://images.unsplash.com/photo-1590076215667-875d4ef2d7ee?auto=format&fit=crop&w=800&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&w=800&q=80',
     tags: ['সুফি মাজার', 'শাহজাদপুর', 'ইতিহাস'],
   },
   {
@@ -220,7 +220,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'মিল্কভিটা কেন্দ্রীয় দুগ্ধ কারখানা',
     locationBn: 'বাঘাবাড়ি, শাহজাদপুর',
     summaryBn: 'বাংলাদেশের বৃহত্তম দুগ্ধ প্রক্রিয়াজাতকরণ কারখানা ও সমবায়ী দুগ্ধ খামার অঞ্চল।',
-    imageUrl: 'https://images.unsplash.com/photo-1527153857715-3908f2ae5e81?auto=format&fit=crop&w=800&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1500595046743-cd271d694d30?auto=format&fit=crop&w=800&q=80',
     tags: ['মিল্কভিটা', 'বাঘাবাড়ি', 'দুগ্ধ শিল্প'],
   },
   {
@@ -354,7 +354,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'লালন শাহ সেতু',
     locationBn: 'পাকশী, ঈশ্বরদী',
     summaryBn: 'পদ্মা নদীর ওপর নির্মিত ১.৮ কিমি দীর্ঘ দৃষ্টিনন্দন সড়ক সেতু যা উত্তর ও দক্ষিণ-পশ্চিম বাংলাদেশকে যুক্ত করেছে।',
-    imageUrl: 'https://images.unsplash.com/photo-1545649479-7984f494f6c5?auto=format&fit=crop&w=800&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=800&q=80',
     tags: ['লালন শাহ সেতু', 'পাকশী', 'পদ্মা নদী'],
   },
   {
@@ -454,7 +454,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'পাকশীস্থ হার্ডিঞ্জ ব্রিজ (১৯১৫)',
     locationBn: 'পাকশী, ঈশ্বরদী, পদ্মা নদী',
     summaryBn: '১৯১৫ সালে লর্ড হার্ডিঞ্জ কর্তৃক উন্মুক্ত শতবর্ষী ঐতিহাসিক রেল সেতু। স্টিল ট্রাস ইঞ্জিনিয়ারিংয়ের এক অনুপম নিদর্শন।',
-    imageUrl: 'https://images.unsplash.com/photo-1545649479-7984f494f6c5?auto=format&fit=crop&w=800&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=800&q=80',
     tags: ['হার্ডিঞ্জ ব্রিজ', 'শতবর্ষী সেতু', 'পাকশী'],
   },
   {
@@ -488,7 +488,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'পাঁচপীর মাজার কাহালু',
     locationBn: 'কাহালু উপজেলা',
     summaryBn: 'পাঁচজন সুফি পীর আউলিয়ার ঐতিহাসিক যৌথ মাজার শরীফ ও ধর্মীয় সম্প্রীতির পুণ্যভূমি।',
-    imageUrl: 'https://images.unsplash.com/photo-1590076215667-875d4ef2d7ee?auto=format&fit=crop&w=800&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&w=800&q=80',
     tags: ['পাঁচপীর মাজার', 'কাহালু'],
   },
   {
@@ -558,7 +558,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'জয়পীরের মাজার, দুপচাঁচিয়া',
     locationBn: 'দুপচাঁচিয়া উপজেলা',
     summaryBn: 'দুপচাঁচিয়ার শতবর্ষী সুফি আউলিয়া জয়পীরের ঐতিহাসিক মাজার ও বার্ষিক ওরশ মাহফিল কেন্দ্র।',
-    imageUrl: 'https://images.unsplash.com/photo-1590076215667-875d4ef2d7ee?auto=format&fit=crop&w=800&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&w=800&q=80',
     tags: ['জয়পীর', 'দুপচাঁচিয়া', 'মাজার'],
   },
 
@@ -632,7 +632,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'বনপাড়া লুর্দের রাণী মা মারিয়া ধর্মপল্লী',
     locationBn: 'বনপাড়া, বড়াইগ্রাম',
     summaryBn: '১৯৫৮ সালে প্রতিষ্ঠিত এশিয়ার অন্যতম বড় ক্যাথলিক খ্রিষ্টধর্মীয় উপাসনালয় ও লুর্দের রাণী মা মারিয়ার গির্জা।',
-    imageUrl: 'https://images.unsplash.com/photo-1548625361-16a7f3408a68?auto=format&fit=crop&w=800&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1548625149-fc4a29cf7092?auto=format&fit=crop&w=800&q=80',
     tags: ['বনপাড়া চার্চ', 'খ্রিষ্টধর্মীয় পল্লী'],
   },
   {
@@ -736,7 +736,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'নিমাই পিরের মাজার শরীফ',
     locationBn: 'পাঁচবিবি উপজেলা',
     summaryBn: 'মধ্যযুগের আধ্যাত্মিক সুফি সাধক হযরত নিমাই পীরের মাজার ও ঐতিহাসিক ভক্ত সম্মিলন কেন্দ্র।',
-    imageUrl: 'https://images.unsplash.com/photo-1590076215667-875d4ef2d7ee?auto=format&fit=crop&w=800&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&w=800&q=80',
     tags: ['নিমাই পির', 'পাঁচবিবি', 'মাজার'],
   },
   {
@@ -890,7 +890,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'শাহ্ নেয়ামতউল্লাহ (রহঃ) এর মাজার শরীফ',
     locationBn: 'তাহখানা চত্বর, শিবগঞ্জ',
     summaryBn: 'মুঘল সুবেদার শাহ সুজার আধ্যাত্মিক পীর হযরত শাহ্ নেয়ামতউল্লাহ (রহ.) এর মাজার ও সংলগ্ন সুবিশাল তাহখানা দিঘী।',
-    imageUrl: 'https://images.unsplash.com/photo-1590076215667-875d4ef2d7ee?auto=format&fit=crop&w=800&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&w=800&q=80',
     tags: ['শাহ নেয়ামতউল্লাহ', 'তাহখানা', 'মাজার'],
   },
 
@@ -974,7 +974,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'মাহি সন্তোষ দরগাহ ও প্রত্নস্থল',
     locationBn: 'ধামইরহাট উপজেলা',
     summaryBn: 'সুলতানি আমলের বরেন্দ্র অঞ্চলের প্রাচীন রাজধানী সান্তোষপুর ও বিখ্যাত সুফি সন্ত হযরত মাহি সন্তোষের পুণ্যভূমি।',
-    imageUrl: 'https://images.unsplash.com/photo-1590076215667-875d4ef2d7ee?auto=format&fit=crop&w=800&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&w=800&q=80',
     tags: ['মাহি সন্তোষ', 'ধামইরহাট', 'ইতিহাস'],
   },
   {

@@ -776,7 +776,11 @@ export async function POST(req: NextRequest) {
           );
 
           // ONLY add to breakingNews if it is Published!
-          if (article.status === 'Published' && (article.category === 'ব্রেকিং নিউজ' || article.isBreaking)) {
+          const isBreakingArticle =
+            article.category === 'ব্রেকিং নিউজ' ||
+            article.category === '🔥 ব্রেকিং নিউজ' ||
+            Boolean(article.isBreaking);
+          if (article.status === 'Published' && isBreakingArticle) {
             const headline = `🔥 ${article.title}`;
             breakingNews = [headline, ...breakingNews];
             breakingNewsItems = [
@@ -832,7 +836,11 @@ export async function POST(req: NextRequest) {
             breakingNews = breakingNews.filter((b) => !b.includes(target.title));
             breakingNewsItems = breakingNewsItems.filter((b) => b.articleId !== target.id && !b.title.includes(target.title));
             // Only add if newStatus is Published and is breaking
-            if (newStatus === 'Published' && (target.category === 'ব্রেকিং নিউজ' || target.isBreaking)) {
+            const targetIsBreaking =
+              target.category === 'ব্রেকিং নিউজ' ||
+              target.category === '🔥 ব্রেকিং নিউজ' ||
+              Boolean(target.isBreaking);
+            if (newStatus === 'Published' && targetIsBreaking) {
               breakingNews = [`🔥 ${target.title}`, ...breakingNews];
               breakingNewsItems = [
                 {

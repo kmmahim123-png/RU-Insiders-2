@@ -519,35 +519,33 @@ export default function NavbarAndAuth() {
           return (
             <Link
               href={linkUrl}
-              className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white px-3 sm:px-4 py-2.5 sm:py-3.5 text-xs sm:text-sm block hover:opacity-95 transition group shadow-md cursor-pointer border-y border-red-500/40 relative z-20"
+              className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white px-3 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm block hover:opacity-95 transition group shadow-md cursor-pointer border-y border-red-500/40 relative z-20"
               title="Inside RU নিউজ পোর্টালে সম্পূর্ণ সংবাদ পড়ুন"
             >
-              <div className="max-w-7xl mx-auto flex items-center justify-between gap-2.5 sm:gap-4 overflow-hidden">
-                <div className="flex items-center gap-2.5 sm:gap-3.5 overflow-hidden flex-1 min-w-0">
-                  <span className="bg-white text-red-700 font-black px-2.5 sm:px-3 py-1 rounded-lg flex items-center gap-1.5 shrink-0 shadow text-[11px] sm:text-xs">
-                    <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-red-600 text-red-600 animate-pulse" />
+              <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 sm:gap-4 overflow-hidden">
+                <div className="flex items-center gap-3 sm:gap-4 overflow-hidden flex-1 min-w-0">
+                  <span className="bg-white text-red-700 font-black px-2.5 sm:px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 shrink-0 shadow text-[11px] sm:text-xs">
+                    <Flame className="w-4 h-4 fill-red-600 text-red-600 animate-pulse" />
                     <span>ব্রেকিং নিউজ</span>
                   </span>
 
-                  {imageUrl && (
-                    <div className="w-10 h-7 sm:w-14 sm:h-9 rounded-md overflow-hidden shrink-0 border border-white/40 shadow-sm bg-black/20">
-                      <img
-                        src={imageUrl}
-                        alt="নিউজ ছবি"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        onError={(e) => {
-                          (e.target as HTMLElement).style.display = 'none';
-                        }}
-                      />
-                    </div>
-                  )}
+                  <div className="w-14 h-10 sm:w-20 sm:h-12 rounded-xl overflow-hidden shrink-0 border-2 border-white/50 shadow-md bg-black/20">
+                    <img
+                      src={imageUrl || '/campus/paris-road-rain.jpg'}
+                      alt="নিউজ ছবি"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        e.currentTarget.src = '/campus/paris-road-rain.jpg';
+                      }}
+                    />
+                  </div>
 
-                  <p className="truncate font-semibold text-white/95 group-hover:underline text-xs sm:text-sm tracking-wide">
+                  <p className="line-clamp-2 sm:truncate font-bold text-white group-hover:underline text-xs sm:text-sm tracking-wide leading-snug">
                     {title.replace(/^[🔥🚨\s]+/, '')}
                   </p>
                 </div>
 
-                <div className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-bold text-amber-200 group-hover:text-white shrink-0 bg-black/25 group-hover:bg-black/35 px-2.5 sm:px-3 py-1.5 rounded-lg border border-white/10 transition">
+                <div className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-bold text-amber-200 group-hover:text-white shrink-0 bg-black/25 group-hover:bg-black/35 px-2.5 sm:px-3.5 py-2 rounded-xl border border-white/15 transition">
                   <span className="hidden xs:inline">বিস্তারিত</span>
                   <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition" />
                 </div>

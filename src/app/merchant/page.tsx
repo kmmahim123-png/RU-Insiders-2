@@ -69,6 +69,9 @@ export default function MerchantPortalPage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'orders' | 'logistics' | 'marketing' | 'download'>('overview');
   const [copiedFeed, setCopiedFeed] = useState(false);
   const [copiedPixel, setCopiedPixel] = useState(false);
+  const [fbAdProductId, setFbAdProductId] = useState('');
+  const [fbAdCampaign, setFbAdCampaign] = useState('ru_winter_sale');
+  const [copiedAdLink, setCopiedAdLink] = useState(false);
   const [centralRiderGroupUrl, setCentralRiderGroupUrl] = useState<string>('https://chat.whatsapp.com/');
 
   // Orders Workflow & Dispatch State
@@ -1827,6 +1830,74 @@ export default function MerchantPortalPage() {
                     )}
                   </div>
                 </div>
+
+                {/* Facebook Ad Landing URL & UTM Campaign Builder */}
+                <div className="p-5 rounded-2xl bg-indigo-50/70 border border-indigo-200 space-y-3">
+                  <h4 className="text-xs font-black text-indigo-950 flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-indigo-600" />
+                    <span>Facebook Ads ডাইরেক্ট প্রোডাক্ট ল্যান্ডিং লিংক ও UTM জেনারেটর:</span>
+                  </h4>
+                  <p className="text-[11px] text-indigo-800">
+                    ফেসবুকে বুস্ট বা অ্যাডস চালানোর জন্য যেকোনো পণ্যের ডাইরেক্ট লিংক ও UTM ট্যাগ তৈরি করুন (অটো Open Graph প্রিভিউ ও পিক্সেল ট্র্যাকিংসহ)।
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <select
+                      value={fbAdProductId || products[0]?.id || ''}
+                      onChange={(e) => setFbAdProductId(e.target.value)}
+                      className="text-xs p-2.5 bg-white border border-indigo-200 rounded-xl font-bold text-slate-800"
+                    >
+                      {products.length === 0 ? (
+                        <option value="">প্রথমে একটি পণ্য যোগ করুন</option>
+                      ) : (
+                        products.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.nameBn} (৳{p.price})
+                          </option>
+                        ))
+                      )}
+                    </select>
+                    <input
+                      type="text"
+                      placeholder="Campaign নাম (যেমন: winter_promo)"
+                      value={fbAdCampaign}
+                      onChange={(e) => setFbAdCampaign(e.target.value)}
+                      className="text-xs p-2.5 bg-white border border-indigo-200 rounded-xl font-bold text-slate-800"
+                    />
+                  </div>
+                  {products.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        readOnly
+                        value={
+                          typeof window !== 'undefined'
+                            ? `${window.location.origin}/shop/${fbAdProductId || products[0]?.id}?utm_source=facebook&utm_medium=paid_social&utm_campaign=${encodeURIComponent(
+                                fbAdCampaign.trim() || 'ru_promo'
+                              )}`
+                            : ''
+                        }
+                        className="flex-1 text-xs p-2.5 bg-white border border-indigo-200 rounded-xl font-mono text-slate-700"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (typeof window !== 'undefined') {
+                            const adUrl = `${window.location.origin}/shop/${fbAdProductId || products[0]?.id}?utm_source=facebook&utm_medium=paid_social&utm_campaign=${encodeURIComponent(
+                              fbAdCampaign.trim() || 'ru_promo'
+                            )}`;
+                            navigator.clipboard.writeText(adUrl);
+                            setCopiedAdLink(true);
+                            setTimeout(() => setCopiedAdLink(false), 2000);
+                          }
+                        }}
+                        className="px-3.5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold flex items-center gap-1 shrink-0 cursor-pointer"
+                      >
+                        {copiedAdLink ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{copiedAdLink ? 'লিংক কপি হয়েছে' : 'অ্যাড লিংক কপি'}</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -1958,7 +2029,7 @@ export default function MerchantPortalPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-slate-700">ক্যাটাগরি</label>
                   <select
@@ -1972,6 +2043,19 @@ export default function MerchantPortalPage() {
                     <option value="খেজুরের গুড় ও ঐতিহ্যবাহী খাবার">খেজুরের গুড় ও ঐতিহ্যবাহী খাবার</option>
                     <option value="নাড়ু ও হোমমেড ফুড">নাড়ু ও হোমমেড ফুড</option>
                     <option value="ক্যাম্পাস গিফট ও স্যুভেনির">ক্যাম্পাস গিফট ও স্যুভেনির</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700">পণ্যের ধরন</label>
+                  <select
+                    value={prodForm.productType}
+                    onChange={(e) => setProdForm({ ...prodForm, productType: e.target.value as any })}
+                    className="w-full text-xs p-3 border border-slate-200 rounded-2xl font-bold bg-white"
+                  >
+                    <option value="apparel">পোশাক (সাইজ: M/L/XL/XXL)</option>
+                    <option value="food_weight">খাবার / ওজন ভিত্তিক</option>
+                    <option value="standard">সাধারণ / ফ্রি সাইজ</option>
                   </select>
                 </div>
 

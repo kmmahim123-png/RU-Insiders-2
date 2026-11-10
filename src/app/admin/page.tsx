@@ -419,7 +419,11 @@ export default function AdminPage() {
       const data = await safeParseApiResponse(res);
       if (data.ok && data.articles) {
         setArticles(data.articles);
+        if (data.settings) setSettings(data.settings);
         showToast('✓ নিউজ মুছে ফেলা হয়েছে');
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('ru_breaking_updated'));
+        }
       } else {
         alert(data.error || 'মুছে ফেলা সম্ভব হয়নি');
       }
@@ -892,7 +896,11 @@ export default function AdminPage() {
       const data = await safeParseApiResponse(res);
       if (data.ok && data.articles) {
         setArticles(data.articles);
+        if (data.settings) setSettings(data.settings);
         showToast(`✓ লেখা স্ট্যাটাস আপডেট হয়েছে`);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('ru_breaking_updated'));
+        }
       } else {
         alert(data.error || 'লেখা স্ট্যাটাস আপডেট ব্যর্থ হয়েছে');
       }
@@ -1116,7 +1124,11 @@ export default function AdminPage() {
       });
       const data = await safeParseApiResponse(res);
       if (data.ok) {
+        if (data.settings) setSettings(data.settings);
         showToast('✓ সেটিংস ও পাসওয়ার্ড সফলভাবে আপডেট হয়েছে!');
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('ru_breaking_updated'));
+        }
       } else {
         alert(data.error || 'সেটিংস আপডেট ব্যর্থ হয়েছে');
       }

@@ -589,7 +589,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 399,
       "y": 395
     },
-    "imageUrl": "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=800&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=800&q=80",
     "descriptionBn": "কলা, আইন ও সামাজিক বিজ্ঞান অনুষদের অন্যতম প্রধান একাডেমিক ভবন।"
   },
   {
@@ -637,7 +637,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 399,
       "y": 446
     },
-    "imageUrl": "https://images.unsplash.com/photo-1568792923760-d70635a89fa0?auto=format&fit=crop&w=800&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80",
     "descriptionBn": "কেন্দ্রীয় গ্রন্থাগারের পশ্চিম পাশে অবস্থিত সুপরিচিত কলা অনুষদ ভবন।"
   },
   {
@@ -685,7 +685,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 672,
       "y": 342
     },
-    "imageUrl": "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=800&q=80",
+    "imageUrl": "https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=800&q=80",
     "descriptionBn": "ক্যাম্পাসের ঠিক হৃদপিণ্ডে অবস্থিত ডিম্বাকৃতির বিশাল শেখ কামাল স্টেডিয়াম এবং ইনডোর স্টেডিয়াম চত্বর।"
   },
   {

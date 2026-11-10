@@ -981,6 +981,9 @@ export default function InteractiveThreeMaps() {
                         <img
                           src={spot.imageUrl}
                           alt={spot.nameBn}
+                          onError={(e) => {
+                            e.currentTarget.src = '/campus/paris-road-rain.jpg';
+                          }}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                         <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 font-black text-[10px] shadow">
@@ -1315,6 +1318,9 @@ export default function InteractiveThreeMaps() {
                         <img
                           src={region.imageUrl}
                           alt={region.nameBn}
+                          onError={(e) => {
+                            e.currentTarget.src = '/campus/paris-road-rain.jpg';
+                          }}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                         <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 font-black text-[10px] shadow">
@@ -1858,6 +1864,9 @@ export default function InteractiveThreeMaps() {
                         <img
                           src={place.imageUrl}
                           alt={place.nameBn}
+                          onError={(e) => {
+                            e.currentTarget.src = '/campus/paris-road-rain.jpg';
+                          }}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                         <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 font-black text-[10px] shadow">
@@ -1971,6 +1980,9 @@ export default function InteractiveThreeMaps() {
                     detailModalSpot.imageUrl
                   }
                   alt={detailModalSpot.nameBn}
+                  onError={(e) => {
+                    e.currentTarget.src = '/campus/paris-road-rain.jpg';
+                  }}
                   className="w-full h-full object-cover"
                 />
               </div>

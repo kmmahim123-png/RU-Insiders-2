@@ -15,6 +15,7 @@ import {
   ArrowRight,
   X,
   CheckCircle2,
+  Upload,
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -44,8 +45,26 @@ export default function InsideRuPage() {
   const [subImageUrl, setSubImageUrl] = useState('');
   const [subSummary, setSubSummary] = useState('');
   const [subBody, setSubBody] = useState('');
+  const [uploadingCover, setUploadingCover] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [subSuccess, setSubSuccess] = useState(false);
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingCover(true);
+    try {
+      const formData = new FormData();
+      formData.append('files', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.ok && data.urls?.[0]) {
+        setSubImageUrl(data.urls[0]);
+      }
+    } catch {} finally {
+      setUploadingCover(false);
+    }
+  };
 
   useEffect(() => {
     fetch('/api/store')
@@ -382,15 +401,38 @@ export default function InsideRuPage() {
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-700">ছবি লিংক / কভার ফটো (ঐচ্ছিক)</label>
-                  <input
-                    type="text"
-                    placeholder="যেমন: /campus/paris-road-rain.jpg বা ইমেজ ইউআরএল"
-                    value={subImageUrl}
-                    onChange={(e) => setSubImageUrl(e.target.value)}
-                    className="w-full text-xs sm:text-sm border border-slate-200 rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-blue-600"
-                  />
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                    <span>ছবি আপলোড / কভার ফটো লিংক (ঐচ্ছিক)</span>
+                    {uploadingCover && <span className="text-[11px] text-blue-600 animate-pulse">আপলোড হচ্ছে...</span>}
+                  </label>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <label className="cursor-pointer px-3.5 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 text-xs font-bold flex items-center gap-1.5 shrink-0 transition">
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>গ্যালারি থেকে ছবি আপলোড</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        disabled={uploadingCover}
+                        onChange={handleCoverUpload}
+                        className="hidden"
+                      />
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="অথবা ছবির ইউআরএল পেস্ট করুন"
+                      value={subImageUrl}
+                      onChange={(e) => setSubImageUrl(e.target.value)}
+                      className="flex-1 min-w-[180px] text-xs sm:text-sm border border-slate-200 rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-blue-600"
+                    />
+                  </div>
+                  {subImageUrl && (
+                    <img
+                      src={subImageUrl}
+                      alt="Cover preview"
+                      className="w-28 h-16 object-cover rounded-xl border border-slate-200 mt-1"
+                    />
+                  )}
                 </div>
 
                 <div className="space-y-1">
