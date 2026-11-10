@@ -22,6 +22,9 @@ export interface Product {
   weightOptions?: ProductVariant[]; // গুড়/নাড়ু ইত্যাদির জন্য ওজন অনুযায়ী দাম
   inStock: boolean;
   featured: boolean;
+  merchantId?: string; // মার্চেন্ট আইডি (মাল্টি-ভেন্ডর সিস্টেম)
+  merchantName?: string; // মার্চেন্ট ব্র্যান্ডের নাম
+  facebookPixelId?: string; // মার্চেন্টের নির্দিষ্ট মেটা পিক্সেল আইডি
   createdAt: string;
 }
 
@@ -41,6 +44,8 @@ export interface OrderItem {
   selectedOption: string; // সাইজ বা ওজন
   unitPrice: number;
   quantity: number;
+  merchantId?: string; // মার্চেন্ট ট্র্যাকিং
+  merchantName?: string;
 }
 
 export interface Order {
@@ -148,6 +153,35 @@ export interface NotificationItem {
   createdAt: string;
 }
 
+export interface BreakingNewsItem {
+  id: string;
+  title: string;
+  imageUrl?: string;
+  link?: string;
+  articleId?: string;
+  createdAt?: string;
+  isActive?: boolean;
+}
+
+export interface Merchant {
+  id: string;
+  shopName: string;
+  ownerName: string;
+  phone: string;
+  email: string;
+  password?: string;
+  status: 'pending' | 'active' | 'suspended';
+  category: string;
+  address?: string;
+  payoutPhone?: string;
+  payoutMethod?: 'bkash' | 'nagad' | 'rocket' | 'bank';
+  facebookPixelId?: string;
+  commissionRate?: number; // percentage (e.g. 0, 5, 10)
+  totalSales?: number;
+  totalOrders?: number;
+  createdAt: string;
+}
+
 export interface SiteSettings {
   superAdminPassword: string;
   productManagerPassword: string;
@@ -159,4 +193,6 @@ export interface SiteSettings {
   };
   categories: string[];
   breakingNews: string[];
+  breakingNewsItems?: BreakingNewsItem[];
+  defaultFacebookPixelId?: string;
 }

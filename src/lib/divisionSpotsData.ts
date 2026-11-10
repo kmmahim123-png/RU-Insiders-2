@@ -86,7 +86,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'রাজশাহী সাধারণ গ্রন্থাগার (১৮৮৪)',
     locationBn: 'মিঞাপাড়া, সাহেব বাজার',
     summaryBn: '১৮৮৪ সালে রাজা আনন্দনাথ রায়ের পৃষ্ঠপোষকতায় প্রতিষ্ঠিত দেশের অন্যতম প্রাচীন গণগ্রন্থাগার। দুর্লভ পান্ডুলিপি ও ব্রিটিশ আমলের ঐতিহাসিক নথিপত্রের আধার।',
-    imageUrl: '/campus/ru-admin.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=800&q=80',
     tags: ['১৮৮৪ সাল', 'দুর্লভ পান্ডুলিপি', 'হেরিটেজ'],
   },
   {
@@ -96,7 +96,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'শাহ্ মখদুমের মাজার শরীফ ও দরগাপাড়া',
     locationBn: 'দরগাপাড়া, পদ্মা নদীর তীর, রাজশাহী',
     summaryBn: 'ত্রয়োদশ শতাব্দীর সুফি সাধক হযরত শাহ্ মখদুম রূপোশ (রহ.)-এর মাজার। প্রতি বছর দূর-দূরান্ত থেকে হাজারো ভক্তের আগমন ঘটে। সংলগ্ন পদ্মা নদীর দৃশ্য অত্যন্ত শান্তিময়।',
-    imageUrl: '/campus/ru-spot.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80',
     tags: ['সুফি মাজার', 'পদ্মা তীর', 'দরগাপাড়া'],
   },
   {
@@ -160,7 +160,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'মখদুম শাহের মাজার শরীফ',
     locationBn: 'শাহজাদপুর, সিরাজগঞ্জ',
     summaryBn: 'হযরত মখদুম শাহ দৌলা শহীদ (রহ.) এর ঐতিহাসিক মাজার শরীফ ও প্রাচীন ইসলামী ঐতিহ্যবাহী তীর্থস্থান।',
-    imageUrl: '/campus/ru-spot.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1590076215667-875d4ef2d7ee?auto=format&fit=crop&w=800&q=80',
     tags: ['সুফি মাজার', 'শাহজাদপুর', 'ইতিহাস'],
   },
   {
@@ -200,7 +200,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'পোতাজিয়া নবরত্ন মন্দির',
     locationBn: 'পোতাজিয়া, শাহজাদপুর',
     summaryBn: 'পোতাজিয়া গ্রামের শতাব্দী প্রাচীন নান্দনিক হিন্দু মন্দির ও প্রত্নতাত্ত্বিক স্থাপত্যকীর্তি।',
-    imageUrl: '/campus/ru-spot.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=800&q=80',
     tags: ['পোতাজিয়া', 'মন্দির', 'হেরিটেজ'],
   },
   {
@@ -210,7 +210,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'মহকুমার হিন্দু তীর্থ ও দর্শনীয় স্থান',
     locationBn: 'সিরাজগঞ্জ সদর ও সংলগ্ন এলাকা',
     summaryBn: 'প্রাচীন সিরাজগঞ্জ মহকুমার ঐতিহ্যবাহী মন্দির, ঘাট এবং হিন্দু ধর্মাবলম্বীদের ঐতিহাসিক তীর্থ কেন্দ্র।',
-    imageUrl: '/campus/ru-admin.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80',
     tags: ['তীর্থস্থান', 'ঐতিহাসিক মন্দির'],
   },
   {
@@ -220,7 +220,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'মিল্কভিটা কেন্দ্রীয় দুগ্ধ কারখানা',
     locationBn: 'বাঘাবাড়ি, শাহজাদপুর',
     summaryBn: 'বাংলাদেশের বৃহত্তম দুগ্ধ প্রক্রিয়াজাতকরণ কারখানা ও সমবায়ী দুগ্ধ খামার অঞ্চল।',
-    imageUrl: '/campus/ru-admin.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1527153857715-3908f2ae5e81?auto=format&fit=crop&w=800&q=80',
     tags: ['মিল্কভিটা', 'বাঘাবাড়ি', 'দুগ্ধ শিল্প'],
   },
   {
@@ -280,7 +280,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'ঐতিহ্যবাহী তাঁত শিল্প ও তাঁতপল্লী',
     locationBn: 'বেলকুচি ও এনায়েতপুর',
     summaryBn: 'বিশ্ববিখ্যাত সিরাজগঞ্জের তাঁতের শাড়ি, লুঙ্গি ও গামছার জীবন্ত উৎপাদন কেন্দ্র ও হাজারো হস্তচালিত তাঁতের খটখট শব্দমুখর পল্লী।',
-    imageUrl: '/campus/ru-spot.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=800&q=80',
     tags: ['তাঁত শিল্প', 'বেলকুচি', 'হস্তশিল্প'],
   },
 
@@ -324,7 +324,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'সুজানগর আজিম চৌধুরী জমিদার বাড়ী',
     locationBn: 'দুলাই, সুজানগর',
     summaryBn: 'দুলাই গ্রামের ঐতিহাসিক আজিম চৌধুরীর সুরম্য জমিদার প্রাসাদ ও প্রাচীন সিংহদ্বার।',
-    imageUrl: '/campus/ru-admin.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=800&q=80',
     tags: ['জমিদার প্রাসাদ', 'দুলাই'],
   },
   {
@@ -364,7 +364,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'প্রমথ চৌধুরীর পৈত্রিক নিবাস',
     locationBn: 'হরিপুর, চাটমোহর',
     summaryBn: 'বাংলা চলিত গদ্যরীতির প্রবর্তক ও বিখ্যাত সাহিত্যিক প্রমথ চৌধুরীর ঐতিহাসিক পৈতৃক বাড়ি।',
-    imageUrl: '/campus/ru-spot.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80',
     tags: ['প্রমথ চৌধুরী', 'সাহিত্যিক বাড়ি', 'চাটমোহর'],
   },
   {
@@ -384,7 +384,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'এডরুক লিমিটেড, পাবনা (১৯৪৮)',
     locationBn: 'পাবনা সদর',
     summaryBn: '১৯৪৮ সালে প্রতিষ্ঠিত বাংলাদেশের ওষুধ শিল্পের অন্যতম পথিকৃৎ ঐতিহাসিক প্রতিষ্ঠান।',
-    imageUrl: '/campus/ru-admin.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80',
     tags: ['এডরুক', 'ফার্মাসিউটিক্যাল ঐতিহ্য'],
   },
   {
@@ -394,7 +394,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'পাবনা মানসিক হাসপাতাল (১৯৫৭)',
     locationBn: 'হেমায়েতপুর, পাবনা সদর',
     summaryBn: '১৯৫৭ সালে প্রতিষ্ঠিত উপমহাদেশের বিখ্যাত ও বাংলাদেশের একমাত্র পূর্ণাঙ্গ বিশেষায়িত মানসিক স্বাস্থ্য ইনস্টিটিউট। মনোরম সুবৃক্ষশোভিত ক্যাম্পাস।',
-    imageUrl: '/campus/ru-admin.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80',
     tags: ['হেমায়েতপুর', 'মানসিক হাসপাতাল', 'ঐতিহাসিক'],
   },
   {
@@ -404,7 +404,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'পাবনার ঐতিহ্যবাহী তাঁতশিল্প',
     locationBn: 'দোগাছী ও আতাইকুলা',
     summaryBn: 'পাবনার বিশ্বখ্যাত সুতি ও জামদানি শাড়ির সূতিকাগার। কারিগরদের নিপুণ বুননশিল্প ও তাঁতপল্লী।',
-    imageUrl: '/campus/ru-spot.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=800&q=80',
     tags: ['তাঁতশিল্প', 'দোগাছী শাড়ি', 'ঐতিহ্য'],
   },
   {
@@ -414,7 +414,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'শ্রী শ্রী ঠাকুর অনুকূল চন্দ্রের সৎসঙ্গ (আশ্রম-মন্দির)',
     locationBn: 'হেমায়েতপুর, পদ্মা তীর',
     summaryBn: 'যুগপুরুষোত্তম শ্রী শ্রী ঠাকুর অনুকূল চন্দ্রের জন্মভূমি ও বিশ্ববিখ্যাত আন্তর্জাতিক সৎসঙ্গ আশ্রম মন্দির।',
-    imageUrl: '/campus/ru-spot.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80',
     tags: ['অনুকূল ঠাকুর', 'সৎসঙ্গ আশ্রম', 'হেমায়েতপুর'],
   },
   {
@@ -464,7 +464,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'ক্ষেতুপাড়া জমিদার বাড়ী',
     locationBn: 'সাঁথিয়া উপজেলা, ক্ষেতুপাড়া',
     summaryBn: 'সাঁথিয়া উপজেলার প্রাচীন জমিদার বংশের সুরম্য কারুকার্যখচিত অট্টালিকা ও দৃষ্টিনন্দন দীঘি।',
-    imageUrl: '/campus/ru-admin.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=800&q=80',
     tags: ['ক্ষেতুপাড়া', 'জমিদার বাড়ি', 'সাঁথিয়া'],
   },
 
@@ -478,7 +478,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'ঐতিহাসিক যোগীর ভবনের মন্দির',
     locationBn: 'কাহালু উপজেলা',
     summaryBn: 'নাথ সম্প্রদায়ের প্রাচীন সাধকদের আস্তানা ও প্রায় সহস্র বছরের প্রাচীন সনাতন মন্দির চত্বর।',
-    imageUrl: '/campus/ru-spot.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=800&q=80',
     tags: ['যোগীর ভবন', 'কাহালু', 'নাথ মন্দির'],
   },
   {
@@ -488,7 +488,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'পাঁচপীর মাজার কাহালু',
     locationBn: 'কাহালু উপজেলা',
     summaryBn: 'পাঁচজন সুফি পীর আউলিয়ার ঐতিহাসিক যৌথ মাজার শরীফ ও ধর্মীয় সম্প্রীতির পুণ্যভূমি।',
-    imageUrl: '/campus/ru-spot.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1590076215667-875d4ef2d7ee?auto=format&fit=crop&w=800&q=80',
     tags: ['পাঁচপীর মাজার', 'কাহালু'],
   },
   {
@@ -508,7 +508,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'সান্তাহার সাইলো (শস্য গুদাম)',
     locationBn: 'আদমদীঘি উপজেলা, সান্তাহার',
     summaryBn: '১৯৬৯ সালে মার্কিন সহায়তায় নির্মিত দেশের বৃহত্তম আধুনিক স্বয়ংক্রিয় খাদ্যশস্য সংরক্ষণাগার।',
-    imageUrl: '/campus/ru-admin.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1587293852726-70cdb56c2866?auto=format&fit=crop&w=800&q=80',
     tags: ['সান্তাহার সাইলো', 'ঐতিহাসিক স্থাপনা'],
   },
   {
@@ -538,7 +538,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'দেওতা খানকাহ্ মাজার শরিফ, নন্দীগ্রাম',
     locationBn: 'নন্দীগ্রাম উপজেলা',
     summaryBn: 'প্রাচীন সুফি সাধকদের স্মৃতিধন্য ধর্মীয় সাধনালয় ও ঐতিহাসিক খানকাহ্ চত্বর।',
-    imageUrl: '/campus/ru-spot.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80',
     tags: ['দেওতা খানকাহ্', 'নন্দীগ্রাম'],
   },
   {
@@ -558,7 +558,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'জয়পীরের মাজার, দুপচাঁচিয়া',
     locationBn: 'দুপচাঁচিয়া উপজেলা',
     summaryBn: 'দুপচাঁচিয়ার শতবর্ষী সুফি আউলিয়া জয়পীরের ঐতিহাসিক মাজার ও বার্ষিক ওরশ মাহফিল কেন্দ্র।',
-    imageUrl: '/campus/ru-spot.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1590076215667-875d4ef2d7ee?auto=format&fit=crop&w=800&q=80',
     tags: ['জয়পীর', 'দুপচাঁচিয়া', 'মাজার'],
   },
 
@@ -592,7 +592,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'ধরাইল জমিদার বাড়ি',
     locationBn: 'ধরাইল, নাটোর সদর',
     summaryBn: 'ধরাইলের প্রাচীন জমিদারদের দৃষ্টিনন্দন কারুকার্যময় বাসভবন ও প্রাচীন নাটমণ্ডপ।',
-    imageUrl: '/campus/ru-admin.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=800&q=80',
     tags: ['ধরাইল', 'জমিদার বাড়ি'],
   },
   {
@@ -632,7 +632,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'বনপাড়া লুর্দের রাণী মা মারিয়া ধর্মপল্লী',
     locationBn: 'বনপাড়া, বড়াইগ্রাম',
     summaryBn: '১৯৫৮ সালে প্রতিষ্ঠিত এশিয়ার অন্যতম বড় ক্যাথলিক খ্রিষ্টধর্মীয় উপাসনালয় ও লুর্দের রাণী মা মারিয়ার গির্জা।',
-    imageUrl: '/campus/ru-spot.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1548625361-16a7f3408a68?auto=format&fit=crop&w=800&q=80',
     tags: ['বনপাড়া চার্চ', 'খ্রিষ্টধর্মীয় পল্লী'],
   },
   {
@@ -642,7 +642,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'দয়ারামপুর রাজবাড়ি',
     locationBn: 'দয়ারামপুর, বাগাতিপাড়া',
     summaryBn: 'দিঘাপতিয়া রাজবংশের ছোট তরফের কুমার শরৎ কুমার রায়ের ঐতিহাসিক সুদৃশ্য বাসভবন। বর্তমানে বাংলাদেশ আর্মি ইউনিভার্সিটি ক্যাম্পাস সংলগ্ন।',
-    imageUrl: '/campus/ru-admin.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=800&q=80',
     tags: ['দয়ারামপুর', 'বাগাতিপাড়া', 'রাজবাড়ি'],
   },
   {
@@ -652,7 +652,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'ফকিরচাঁদ বৈষ্ণব গোঁসাইজির আশ্রম',
     locationBn: 'বাগাতিপাড়া উপজেলা',
     summaryBn: 'শতাব্দী প্রাচীন বৈষ্ণব বাউল সাধক ফকিরচাঁদ গোঁসাইয়ের স্মৃতিবিজড়িত মিলনমেলা ও আশ্রম।',
-    imageUrl: '/campus/ru-spot.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80',
     tags: ['ফকিরচাঁদ আশ্রম', 'বাগাতিপাড়া'],
   },
   {
@@ -736,7 +736,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'নিমাই পিরের মাজার শরীফ',
     locationBn: 'পাঁচবিবি উপজেলা',
     summaryBn: 'মধ্যযুগের আধ্যাত্মিক সুফি সাধক হযরত নিমাই পীরের মাজার ও ঐতিহাসিক ভক্ত সম্মিলন কেন্দ্র।',
-    imageUrl: '/campus/ru-spot.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1590076215667-875d4ef2d7ee?auto=format&fit=crop&w=800&q=80',
     tags: ['নিমাই পির', 'পাঁচবিবি', 'মাজার'],
   },
   {
@@ -756,7 +756,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'প্রাচীন সভ্যতার লীলাভূমি পাথরঘাটা',
     locationBn: 'পাঁচবিবি উপজেলা, তুলসীগঙ্গা তীর',
     summaryBn: 'পাল আমলের বহু প্রত্নতাত্ত্বিক ইট ও পাথরের ধ্বংসাবশেষ ও প্রাচীন বৌদ্ধ সভ্যতার ঐতিহাসিক প্রত্নস্থল।',
-    imageUrl: '/campus/ru-spot.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80',
     tags: ['পাথরঘাটা', 'তুলসীগঙ্গা', 'পাল আমল'],
   },
 
@@ -790,7 +790,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'ঐতিহাসিক ষাঁড়বুরুজ',
     locationBn: 'শিবগঞ্জ উপজেলা, গৌড় অঞ্চল',
     summaryBn: 'প্রাচীন বাংলার রাজধানী গৌড়ের প্রতিরক্ষা প্রাচীর ও ঐতিহাসিক ওয়াচটাওয়ার ঢিবি।',
-    imageUrl: '/campus/ru-spot.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80',
     tags: ['ষাঁড়বুরুজ', 'গৌড় প্রাচীর', 'শিবগঞ্জ'],
   },
   {
@@ -850,7 +850,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'চামচিকা মসজিদ ও ঢিবি',
     locationBn: 'গৌড় এলাকা, শিবগঞ্জ',
     summaryBn: 'গৌড়ের প্রাচীন লোকালয়ের ঐতিহাসিক ধ্বংসাবশেষ ও মধ্যযুগীয় এক গম্বুজ মসজিদ।',
-    imageUrl: '/campus/ru-spot.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80',
     tags: ['চামচিকা মসজিদ', 'গৌড়'],
   },
   {
@@ -890,7 +890,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'শাহ্ নেয়ামতউল্লাহ (রহঃ) এর মাজার শরীফ',
     locationBn: 'তাহখানা চত্বর, শিবগঞ্জ',
     summaryBn: 'মুঘল সুবেদার শাহ সুজার আধ্যাত্মিক পীর হযরত শাহ্ নেয়ামতউল্লাহ (রহ.) এর মাজার ও সংলগ্ন সুবিশাল তাহখানা দিঘী।',
-    imageUrl: '/campus/ru-spot.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1590076215667-875d4ef2d7ee?auto=format&fit=crop&w=800&q=80',
     tags: ['শাহ নেয়ামতউল্লাহ', 'তাহখানা', 'মাজার'],
   },
 
@@ -974,7 +974,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'মাহি সন্তোষ দরগাহ ও প্রত্নস্থল',
     locationBn: 'ধামইরহাট উপজেলা',
     summaryBn: 'সুলতানি আমলের বরেন্দ্র অঞ্চলের প্রাচীন রাজধানী সান্তোষপুর ও বিখ্যাত সুফি সন্ত হযরত মাহি সন্তোষের পুণ্যভূমি।',
-    imageUrl: '/campus/ru-spot.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1590076215667-875d4ef2d7ee?auto=format&fit=crop&w=800&q=80',
     tags: ['মাহি সন্তোষ', 'ধামইরহাট', 'ইতিহাস'],
   },
   {
@@ -984,7 +984,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'কৈবর্ত নেতা দিব্যক জয় স্তম্ভ',
     locationBn: 'পত্নীতলা উপজেলা, দিবর দিঘী',
     summaryBn: 'একাদশ শতকে কৈবর্ত বিদ্রোহের মহানায়ক দিব্যকের বিজয়ের স্মারক হিসেবে দিঘীর মাঝখানে স্থাপিত একখণ্ডের গ্রানাইট পাথরের সুউচ্চ জয়স্তম্ভ।',
-    imageUrl: '/campus/ru-spot.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80',
     tags: ['দিব্যক স্তম্ভ', 'দিবর দিঘী', 'পত্নীতলা'],
   },
   {
@@ -994,7 +994,7 @@ export const DIVISION_SPOTS: DivisionSpotItem[] = [
     nameBn: 'ভীমের পান্টি (ঐতিহাসিক গরুড় স্তম্ভ)',
     locationBn: 'ধামইরহাট উপজেলা',
     summaryBn: 'পাল রাজা নারায়ণপালের মন্ত্রী ভট্ট গুরুবমিশ্রের স্থাপিত হাজার বছরের প্রাচীন পাথুরে গরুড় স্তম্ভ।',
-    imageUrl: '/campus/ru-spot.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80',
     tags: ['ভীমের পান্টি', 'গরুড় স্তম্ভ', 'ধামইরহাট'],
   },
   {

@@ -13,11 +13,23 @@ export async function GET() {
   const publishedBreakingArticles = db.articles.filter(
     (a) => a.status === 'Published' && (a.category === 'ব্রেকিং নিউজ' || a.category === '🔥 ব্রেকিং নিউজ' || a.isBreaking)
   );
-  const articleHeadlines = publishedBreakingArticles.map((a) => `🔥 ${a.title}`);
 
-  // Clean settings announcements to ignore any unpublished article titles
+  // 1. Articles with breaking status
+  const articleBreakingItems = publishedBreakingArticles.map((a) => ({
+    id: `art-${a.id}`,
+    title: a.title,
+    imageUrl: a.images?.[0] || '/campus/paris-road-rain.jpg',
+    link: `/inside-ru/${a.id}`,
+    articleId: a.id,
+    createdAt: a.createdAt,
+    isActive: true,
+  }));
+
+  // 2. Custom rich breaking items from settings
+  const customBreakingItems = (db.settings.breakingNewsItems || []).filter((it) => it.isActive !== false);
+
+  // 3. Clean settings announcements to ignore any unpublished article titles
   const cleanCustomAnnouncements = (db.settings.breakingNews || []).filter((headline) => {
-    // If this announcement matches an unpublished/draft article, exclude it!
     const matchingArticle = db.articles.find((a) => headline.includes(a.title));
     if (matchingArticle && matchingArticle.status !== 'Published') {
       return false;
@@ -25,7 +37,36 @@ export async function GET() {
     return true;
   });
 
-  const activeBreakingNews = Array.from(new Set([...articleHeadlines, ...cleanCustomAnnouncements]));
+  const stringFallbackItems = cleanCustomAnnouncements.map((hl, idx) => ({
+    id: `txt-${idx}`,
+    title: hl.replace(/^[🔥🚨\s]+/, ''),
+    imageUrl: '/campus/paris-road-rain.jpg',
+    link: '/inside-ru',
+    createdAt: new Date().toISOString(),
+    isActive: true,
+  }));
+
+  // Combine and deduplicate
+  const allBreakingItems = [
+    ...articleBreakingItems,
+    ...customBreakingItems,
+    ...stringFallbackItems,
+  ];
+
+  const seenTitles = new Set<string>();
+  const activeBreakingItems = allBreakingItems.filter((item) => {
+    const key = (item.title || '').trim().toLowerCase();
+    if (!key || seenTitles.has(key)) return false;
+    seenTitles.add(key);
+    return true;
+  });
+
+  const activeBreakingNews = activeBreakingItems.map((item) => `🔥 ${item.title}`);
+
+  // Safe merchants view for public catalog
+  const publicMerchants = (db.merchants || [])
+    .filter((m) => m.status === 'active')
+    .map(({ password, payoutPhone, ...rest }) => rest);
 
   return NextResponse.json(
     {
@@ -34,8 +75,11 @@ export async function GET() {
         deliveryCharges: db.settings.deliveryCharges,
         categories: db.settings.categories,
         breakingNews: activeBreakingNews,
+        breakingNewsItems: activeBreakingItems,
+        defaultFacebookPixelId: db.settings.defaultFacebookPixelId || '',
       },
       products: db.products,
+      merchants: publicMerchants,
       mapSpots: db.mapSpots,
       clubs: safeClubs,
       departments: db.departments || {},
@@ -79,6 +123,18 @@ export async function POST(req: NextRequest) {
           deliveryCharges: db.settings.deliveryCharges,
         });
       }
+      const matchedMerchant = (db.merchants || []).find((m) => m.password === cleanPass);
+      if (matchedMerchant) {
+        return NextResponse.json({
+          ok: true,
+          role: 'MERCHANT',
+          merchantId: matchedMerchant.id,
+          roleTitle: `${matchedMerchant.shopName} — মার্চেন্ট ড্যাশবোর্ড`,
+          merchant: matchedMerchant,
+          products: db.products.filter((p) => p.merchantId === matchedMerchant.id),
+          orders: db.orders.filter((o) => (o.items || []).some((it) => it.merchantId === matchedMerchant.id)),
+        });
+      }
       const matchedClub = db.clubs.find((c) => c.password === cleanPass);
       if (matchedClub) {
         return NextResponse.json({
@@ -119,6 +175,8 @@ export async function POST(req: NextRequest) {
           selectedOption: item.selectedOption || (product.sizes?.[0] ?? 'Standard'),
           unitPrice,
           quantity: qty,
+          merchantId: product.merchantId || '',
+          merchantName: product.merchantName || '',
         };
       });
 
@@ -143,10 +201,25 @@ export async function POST(req: NextRequest) {
         createdAt: new Date().toISOString(),
       };
 
-      await writeDb((state) => ({
-        ...state,
-        orders: [newOrder, ...state.orders],
-      }));
+      await writeDb((state) => {
+        const updatedMerchants = (state.merchants || []).map((m) => {
+          const merchantItems = validatedItems.filter((it: any) => it.merchantId === m.id);
+          if (merchantItems.length > 0) {
+            const addedAmount = merchantItems.reduce((acc: number, it: any) => acc + (it.unitPrice * it.quantity), 0);
+            return {
+              ...m,
+              totalSales: (m.totalSales || 0) + addedAmount,
+              totalOrders: (m.totalOrders || 0) + 1,
+            };
+          }
+          return m;
+        });
+        return {
+          ...state,
+          orders: [newOrder, ...state.orders],
+          merchants: updatedMerchants,
+        };
+      });
 
       return NextResponse.json({ ok: true, order: newOrder });
     }
@@ -250,16 +323,95 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, status });
     }
 
+    // 7.7. Merchant Public Registration
+    if (action === 'MERCHANT_REGISTER') {
+      const { shopName, ownerName, phone, email, password: merchantPassword, category, address, payoutPhone, payoutMethod, facebookPixelId } = payload || {};
+      if (!shopName || !ownerName || !phone || !merchantPassword) {
+        return NextResponse.json({ ok: false, error: 'দোকানের নাম, মালিকের নাম, মোবাইল নম্বর ও পাসওয়ার্ড আবশ্যক।' }, { status: 400 });
+      }
+
+      const existingPhone = (db.merchants || []).find((m) => m.phone.replace(/\D/g, '') === phone.replace(/\D/g, ''));
+      if (existingPhone) {
+        return NextResponse.json({ ok: false, error: 'এই মোবাইল নম্বর দিয়ে ইতিমধ্যে একটি মার্চেন্ট অ্যাকাউন্ট তৈরি করা আছে।' }, { status: 400 });
+      }
+
+      const newMerchant = {
+        id: `m-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
+        shopName: shopName.trim(),
+        ownerName: ownerName.trim(),
+        phone: phone.trim(),
+        email: (email || '').trim(),
+        password: merchantPassword.trim(),
+        status: 'active' as const, // auto-active so merchants can immediately start selling
+        category: category || 'সাধারণ মার্চেন্ট',
+        address: address || '',
+        payoutPhone: payoutPhone || phone,
+        payoutMethod: payoutMethod || 'bkash',
+        facebookPixelId: facebookPixelId || '',
+        commissionRate: 0,
+        totalSales: 0,
+        totalOrders: 0,
+        createdAt: new Date().toISOString(),
+      };
+
+      const updatedDb = await writeDb((state) => ({
+        ...state,
+        merchants: [newMerchant, ...(state.merchants || [])],
+      }));
+
+      return NextResponse.json({ ok: true, merchant: newMerchant });
+    }
+
+    // 7.8. Merchant Direct Login
+    if (action === 'MERCHANT_LOGIN') {
+      const { identifier, password: merchantPass } = payload || {};
+      const cleanId = (identifier || '').trim().toLowerCase();
+      const cleanP = (merchantPass || '').trim();
+
+      const foundMerchant = (db.merchants || []).find(
+        (m) =>
+          ((m.phone && m.phone.replace(/\D/g, '').includes(cleanId.replace(/\D/g, ''))) ||
+            (m.email && m.email.toLowerCase() === cleanId) ||
+            m.password === cleanP) &&
+          m.password === cleanP
+      );
+
+      if (!foundMerchant) {
+        return NextResponse.json({ ok: false, error: 'মার্চেন্ট ফোন/ইমেইল অথবা পাসওয়ার্ড সঠিক নয়।' }, { status: 401 });
+      }
+
+      const merchantProducts = db.products.filter((p) => p.merchantId === foundMerchant.id);
+      const merchantOrders = db.orders.filter((o) => (o.items || []).some((it) => it.merchantId === foundMerchant.id));
+
+      return NextResponse.json({
+        ok: true,
+        merchant: foundMerchant,
+        products: merchantProducts,
+        orders: merchantOrders,
+      });
+    }
+
     // 8. Role-Protected Actions
     const cleanPass = (password || '').trim();
     const isSuper = cleanPass === db.settings.superAdminPassword;
     const isProdMgr = cleanPass === db.settings.productManagerPassword;
     const matchedClub = db.clubs.find((c) => c.password === cleanPass);
+    const matchedMerchant = (db.merchants || []).find((m) => m.password === cleanPass);
 
-    // Product & Order Manager + Super Admin Actions
-    if (action === 'SAVE_PRODUCT' && (isSuper || isProdMgr)) {
-      const prod = payload.product;
+    // Product & Order Manager + Super Admin + Merchant Actions
+    if (action === 'SAVE_PRODUCT' && (isSuper || isProdMgr || matchedMerchant)) {
+      const prod = { ...payload.product };
       const sendPush = Boolean(payload.sendChromePush);
+
+      // If called by merchant, enforce their ownership
+      if (matchedMerchant) {
+        prod.merchantId = matchedMerchant.id;
+        prod.merchantName = matchedMerchant.shopName;
+        if (matchedMerchant.facebookPixelId && !prod.facebookPixelId) {
+          prod.facebookPixelId = matchedMerchant.facebookPixelId;
+        }
+      }
+
       const updatedDb = await writeDb((state) => {
         const exists = state.products.some((p) => p.id === prod.id);
         const products = exists
@@ -271,7 +423,7 @@ export async function POST(req: NextRequest) {
               {
                 id: `notif-${Date.now()}`,
                 title: `🛍️ নতুন পণ্য: ${prod.nameBn}`,
-                message: `মাত্র ৳${prod.price} টাকায় প্রি-অর্ডার করুন!`,
+                message: `মাত্র ৳${prod.price} টাকায় অর্ডার করুন!`,
                 link: `/shop`,
                 sendChromePush: true,
                 createdAt: new Date().toISOString(),
@@ -285,12 +437,30 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, products: updatedDb.products, notifications: updatedDb.notifications });
     }
 
-    if (action === 'DELETE_PRODUCT' && (isSuper || isProdMgr)) {
+    if (action === 'DELETE_PRODUCT' && (isSuper || isProdMgr || matchedMerchant)) {
+      const targetProd = db.products.find((p) => p.id === payload.productId);
+      if (matchedMerchant && targetProd?.merchantId !== matchedMerchant.id) {
+        return NextResponse.json({ ok: false, error: 'অন্য মার্চেন্টের পণ্য মোছার অনুমতি নেই।' }, { status: 403 });
+      }
       const updatedDb = await writeDb((state) => ({
         ...state,
         products: state.products.filter((p) => p.id !== payload.productId),
       }));
       return NextResponse.json({ ok: true, products: updatedDb.products });
+    }
+
+    if (action === 'MERCHANT_UPDATE_PROFILE' && (matchedMerchant || isSuper)) {
+      const merchantId = matchedMerchant ? matchedMerchant.id : payload.merchantId;
+      const updates = payload.updates || {};
+
+      const updatedDb = await writeDb((state) => ({
+        ...state,
+        merchants: (state.merchants || []).map((m) =>
+          m.id === merchantId ? { ...m, ...updates } : m
+        ),
+      }));
+      const found = (updatedDb.merchants || []).find((m) => m.id === merchantId);
+      return NextResponse.json({ ok: true, merchant: found });
     }
 
     if (action === 'UPDATE_ORDER_STATUS' && (isSuper || isProdMgr)) {
@@ -403,11 +573,26 @@ export async function POST(req: NextRequest) {
           let breakingNews = (state.settings.breakingNews || []).filter(
             (b) => !b.includes(article.title)
           );
+          let breakingNewsItems = (state.settings.breakingNewsItems || []).filter(
+            (b) => b.articleId !== article.id && !b.title.includes(article.title)
+          );
 
           // ONLY add to breakingNews if it is Published!
           if (article.status === 'Published' && (article.category === 'ব্রেকিং নিউজ' || article.isBreaking)) {
             const headline = `🔥 ${article.title}`;
             breakingNews = [headline, ...breakingNews];
+            breakingNewsItems = [
+              {
+                id: `art-${article.id}`,
+                title: article.title,
+                imageUrl: article.images?.[0] || '/campus/paris-road-rain.jpg',
+                link: `/inside-ru/${article.id}`,
+                articleId: article.id,
+                createdAt: article.createdAt || new Date().toISOString(),
+                isActive: true,
+              },
+              ...breakingNewsItems,
+            ];
           }
 
           const notifications = sendPush && article.status === 'Published'
@@ -424,7 +609,7 @@ export async function POST(req: NextRequest) {
               ]
             : state.notifications;
 
-          return { ...state, articles, settings: { ...state.settings, breakingNews }, notifications };
+          return { ...state, articles, settings: { ...state.settings, breakingNews, breakingNewsItems }, notifications };
         });
         return NextResponse.json({
           ok: true,
@@ -443,16 +628,30 @@ export async function POST(req: NextRequest) {
           );
 
           let breakingNews = [...(state.settings.breakingNews || [])];
+          let breakingNewsItems = [...(state.settings.breakingNewsItems || [])];
           if (target) {
             // Remove old headline first
             breakingNews = breakingNews.filter((b) => !b.includes(target.title));
+            breakingNewsItems = breakingNewsItems.filter((b) => b.articleId !== target.id && !b.title.includes(target.title));
             // Only add if newStatus is Published and is breaking
             if (newStatus === 'Published' && (target.category === 'ব্রেকিং নিউজ' || target.isBreaking)) {
               breakingNews = [`🔥 ${target.title}`, ...breakingNews];
+              breakingNewsItems = [
+                {
+                  id: `art-${target.id}`,
+                  title: target.title,
+                  imageUrl: target.images?.[0] || '/campus/paris-road-rain.jpg',
+                  link: `/inside-ru/${target.id}`,
+                  articleId: target.id,
+                  createdAt: target.createdAt || new Date().toISOString(),
+                  isActive: true,
+                },
+                ...breakingNewsItems,
+              ];
             }
           }
 
-          return { ...state, articles, settings: { ...state.settings, breakingNews } };
+          return { ...state, articles, settings: { ...state.settings, breakingNews, breakingNewsItems } };
         });
         return NextResponse.json({ ok: true, articles: updatedDb.articles, settings: updatedDb.settings });
       }
@@ -462,12 +661,76 @@ export async function POST(req: NextRequest) {
           const target = state.articles.find((a) => a.id === payload.articleId);
           const articles = state.articles.filter((a) => a.id !== payload.articleId);
           let breakingNews = [...(state.settings.breakingNews || [])];
+          let breakingNewsItems = [...(state.settings.breakingNewsItems || [])];
           if (target) {
             breakingNews = breakingNews.filter((b) => !b.includes(target.title));
+            breakingNewsItems = breakingNewsItems.filter((b) => b.articleId !== target.id && !b.title.includes(target.title));
           }
-          return { ...state, articles, settings: { ...state.settings, breakingNews } };
+          return { ...state, articles, settings: { ...state.settings, breakingNews, breakingNewsItems } };
         });
         return NextResponse.json({ ok: true, articles: updatedDb.articles, settings: updatedDb.settings });
+      }
+
+      // Breaking News Item Custom Management
+      if (action === 'SAVE_BREAKING_NEWS_ITEM') {
+        const item = payload.item;
+        const updatedDb = await writeDb((state) => {
+          const current = state.settings.breakingNewsItems || [];
+          const exists = current.some((it) => it.id === item.id);
+          const breakingNewsItems = exists
+            ? current.map((it) => (it.id === item.id ? item : it))
+            : [item, ...current];
+          return {
+            ...state,
+            settings: { ...state.settings, breakingNewsItems },
+          };
+        });
+        return NextResponse.json({ ok: true, settings: updatedDb.settings });
+      }
+
+      if (action === 'DELETE_BREAKING_NEWS_ITEM') {
+        const { id } = payload;
+        const updatedDb = await writeDb((state) => {
+          const current = state.settings.breakingNewsItems || [];
+          const breakingNewsItems = current.filter((it) => it.id !== id);
+          return {
+            ...state,
+            settings: { ...state.settings, breakingNewsItems },
+          };
+        });
+        return NextResponse.json({ ok: true, settings: updatedDb.settings });
+      }
+
+      // Admin Merchant Management
+      if (action === 'ADMIN_APPROVE_MERCHANT') {
+        const { merchantId, status } = payload;
+        const updatedDb = await writeDb((state) => ({
+          ...state,
+          merchants: (state.merchants || []).map((m) =>
+            m.id === merchantId ? { ...m, status: status || 'active' } : m
+          ),
+        }));
+        return NextResponse.json({ ok: true, merchants: updatedDb.merchants });
+      }
+
+      if (action === 'ADMIN_UPDATE_MERCHANT') {
+        const { merchant } = payload;
+        const updatedDb = await writeDb((state) => ({
+          ...state,
+          merchants: (state.merchants || []).map((m) =>
+            m.id === merchant.id ? { ...m, ...merchant } : m
+          ),
+        }));
+        return NextResponse.json({ ok: true, merchants: updatedDb.merchants });
+      }
+
+      if (action === 'ADMIN_DELETE_MERCHANT') {
+        const { merchantId } = payload;
+        const updatedDb = await writeDb((state) => ({
+          ...state,
+          merchants: (state.merchants || []).filter((m) => m.id !== merchantId),
+        }));
+        return NextResponse.json({ ok: true, merchants: updatedDb.merchants });
       }
 
       if (action === 'APPROVE_ALUMNI') {

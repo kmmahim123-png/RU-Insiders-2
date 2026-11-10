@@ -32,6 +32,8 @@ import {
   Building,
   Check,
   X,
+  Store,
+  DollarSign,
 } from 'lucide-react';
 import {
   Product,
@@ -45,6 +47,8 @@ import {
   DetailBlock,
   ProductVariant,
   CustomDepartmentData,
+  Merchant,
+  BreakingNewsItem,
 } from '@/types';
 import { RU_CAMPUS_PLACES } from '@/lib/ruCampusSvg';
 import { RAJSHAHI_PDF_REGIONS } from '@/lib/rajshahiPdfRegions';
@@ -61,9 +65,10 @@ export default function AdminPage() {
   const [loggingIn, setLoggingIn] = useState(false);
 
   // Super Admin / Shared state
-  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'map' | 'articles' | 'departments' | 'alumni' | 'clubs' | 'settings'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'map' | 'articles' | 'departments' | 'alumni' | 'clubs' | 'merchants' | 'settings'>('products');
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [merchants, setMerchants] = useState<Merchant[]>([]);
   const [mapSpots, setMapSpots] = useState<Record<string, MapSpotCustomData>>({});
   const [clubs, setClubs] = useState<ClubInfo[]>([]);
   const [departments, setDepartments] = useState<Record<string, CustomDepartmentData>>({});
@@ -99,6 +104,12 @@ export default function AdminPage() {
     images: [],
     password: 'rucs-2026',
   });
+
+  // Breaking News State
+  const [newBreakingTitle, setNewBreakingTitle] = useState('');
+  const [newBreakingImage, setNewBreakingImage] = useState('/campus/paris-road-rain.jpg');
+  const [newBreakingLink, setNewBreakingLink] = useState('/inside-ru');
+  const [uploadingBreakingImg, setUploadingBreakingImg] = useState(false);
 
   // Notification / Toast
   const [toastMessage, setToastMessage] = useState('');
@@ -148,6 +159,7 @@ export default function AdminPage() {
           setClubApplications(db.clubApplications || []);
           setArticles(db.articles || []);
           setAlumni(db.alumni || []);
+          setMerchants(db.merchants || []);
           setSettings(db.settings || null);
           setActiveTab('products');
           if (RU_DEPARTMENTS.length > 0) {
@@ -167,6 +179,10 @@ export default function AdminPage() {
             setEditClub(db.clubs[0]);
             setSelectedClubToEditId(db.clubs[0].id);
           }
+        } else if (data.role === 'MERCHANT') {
+          localStorage.setItem('ru_merchant_session', JSON.stringify(data.merchant));
+          window.location.href = '/merchant';
+          return;
         } else if (data.role === 'PRODUCT_MANAGER') {
           setProducts(data.products || []);
           setOrders(data.orders || []);
@@ -215,6 +231,7 @@ export default function AdminPage() {
               setClubApplications(db.clubApplications || []);
               setArticles(db.articles || []);
               setAlumni(db.alumni || []);
+              setMerchants(db.merchants || []);
               setSettings(db.settings || null);
               if (RU_DEPARTMENTS.length > 0) {
                 const firstD = RU_DEPARTMENTS[0];
@@ -375,6 +392,9 @@ export default function AdminPage() {
         if (data.settings) setSettings(data.settings);
         setShowArticleModal(false);
         showToast('✓ নিউজ ও ছবি সফলভাবে সংরক্ষিত ও প্রকাশিত হয়েছে!');
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('ru_breaking_updated'));
+        }
       } else {
         alert(data.error || 'সংরক্ষণ ব্যর্থ হয়েছে। পাসওয়ার্ড বা তথ্যে সমস্যা থাকতে পারে।');
       }
@@ -928,6 +948,145 @@ export default function AdminPage() {
       }
     } catch (err: any) {
       alert('সার্ভার ত্রুটি: ' + err.message);
+    }
+  };
+
+  // Merchant Management Handlers
+  const handleApproveMerchant = async (merchantId: string, status: 'active' | 'pending' | 'suspended') => {
+    const currentPass = getActivePass();
+    try {
+      const res = await fetch('/api/store', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'ADMIN_APPROVE_MERCHANT',
+          password: currentPass,
+          payload: { merchantId, status },
+        }),
+      });
+      const data = await safeParseApiResponse(res);
+      if (data.ok && data.merchants) {
+        setMerchants(data.merchants);
+        showToast(`✓ মার্চেন্ট স্ট্যাটাস '${status === 'active' ? 'অনুমোদিত' : status}' করা হয়েছে`);
+      }
+    } catch (err: any) {
+      alert('সমস্যা: ' + err.message);
+    }
+  };
+
+  const handleDeleteMerchant = async (merchantId: string) => {
+    if (!confirm('আপনি কি এই মার্চেন্ট অ্যাকাউন্টটি মুছে ফেলতে চান?')) return;
+    const currentPass = getActivePass();
+    try {
+      const res = await fetch('/api/store', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'ADMIN_DELETE_MERCHANT',
+          password: currentPass,
+          payload: { merchantId },
+        }),
+      });
+      const data = await safeParseApiResponse(res);
+      if (data.ok && data.merchants) {
+        setMerchants(data.merchants);
+        showToast('✓ মার্চেন্ট সফলভাবে মুছে ফেলা হয়েছে');
+      }
+    } catch (err: any) {
+      alert('সমস্যা: ' + err.message);
+    }
+  };
+
+  // Breaking News Image Upload Handler
+  const handleUploadBreakingImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingBreakingImg(true);
+    const formData = new FormData();
+    formData.append('files', file);
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await safeParseApiResponse(res);
+      if (data.ok && data.urls?.[0]) {
+        setNewBreakingImage(data.urls[0]);
+        showToast('✓ ছবি সফলভাবে আপলোড হয়েছে!');
+      } else {
+        alert(data.error || 'ছবি আপলোড করা যায়নি');
+      }
+    } catch (err: any) {
+      alert('আপলোড সমস্যা: ' + err.message);
+    } finally {
+      setUploadingBreakingImg(false);
+    }
+  };
+
+  const handleAddBreakingItem = async () => {
+    if (!newBreakingTitle.trim()) {
+      alert('ব্রেকিং নিউজের শিরোনাম লিখুন');
+      return;
+    }
+    const currentPass = getActivePass();
+    const item: BreakingNewsItem = {
+      id: `bn-custom-${Date.now()}`,
+      title: newBreakingTitle.trim(),
+      imageUrl: newBreakingImage.trim() || '/campus/paris-road-rain.jpg',
+      link: newBreakingLink.trim() || '/inside-ru',
+      createdAt: new Date().toISOString(),
+      isActive: true,
+    };
+
+    try {
+      const res = await fetch('/api/store', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'SAVE_BREAKING_NEWS_ITEM',
+          password: currentPass,
+          payload: { item },
+        }),
+      });
+      const data = await safeParseApiResponse(res);
+      if (data.ok && data.settings) {
+        setSettings(data.settings);
+        setNewBreakingTitle('');
+        setNewBreakingImage('/campus/paris-road-rain.jpg');
+        showToast('✓ ব্রেকিং নিউজ ব্যানারে যুক্ত হয়েছে!');
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('ru_breaking_updated'));
+        }
+      }
+    } catch (err: any) {
+      alert('সমস্যা: ' + err.message);
+    }
+  };
+
+  const handleDeleteBreakingItem = async (id: string) => {
+    const currentPass = getActivePass();
+    try {
+      const res = await fetch('/api/store', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'DELETE_BREAKING_NEWS_ITEM',
+          password: currentPass,
+          payload: { id },
+        }),
+      });
+      const data = await safeParseApiResponse(res);
+      if (data.ok && data.settings) {
+        setSettings(data.settings);
+        showToast('✓ ব্রেকিং নিউজ মুছে ফেলা হয়েছে');
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('ru_breaking_updated'));
+        }
+      }
+    } catch (err: any) {
+      alert('সমস্যা: ' + err.message);
     }
   };
 
@@ -1559,6 +1718,18 @@ export default function AdminPage() {
                 >
                   <Trophy className="w-4 h-4" />
                   <span>🏆 ক্লাব ও আবেদন ({clubApplications.length})</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('merchants')}
+                  className={`py-2 px-4 rounded-xl text-xs font-extrabold shrink-0 transition flex items-center gap-1.5 ${
+                    activeTab === 'merchants'
+                      ? 'bg-blue-700 text-white shadow-sm'
+                      : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <Store className="w-4 h-4 text-amber-500" />
+                  <span>মার্চেন্ট হাব ({merchants.length})</span>
                 </button>
 
                 <button
@@ -2582,6 +2753,107 @@ export default function AdminPage() {
         )}
 
           {/* ============================================================================ */}
+          {/* TAB: MERCHANTS HUB & MULTI-VENDOR MANAGEMENT (Super Admin) */}
+          {/* ============================================================================ */}
+          {role === 'SUPER_ADMIN' && activeTab === 'merchants' && (
+            <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider bg-amber-400 text-slate-950 px-2 py-0.5 rounded-md">
+                      মাল্টি-ভেন্ডর সিস্টেম
+                    </span>
+                    <span className="text-xs text-slate-500">• ০% প্ল্যাটফর্ম ফি (১০০% টাকা মার্চেন্টের)</span>
+                  </div>
+                  <h2 className="text-xl font-black text-slate-900 mt-1">
+                    মার্চেন্ট তালিকা ও অনুমোদন হাব ({merchants.length}টি দোকান)
+                  </h2>
+                  <p className="text-xs text-slate-500">
+                    রাবি শপে যুক্ত মার্চেন্টদের অনুমোদন, পণ্য ও পিক্সেল স্ট্যাটাস নিয়ন্ত্রণ করুন
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Link
+                    href="/merchant"
+                    target="_blank"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-1.5 shadow transition"
+                  >
+                    <Store className="w-4 h-4 text-amber-300" />
+                    <span>মার্চেন্ট পোর্টাল ওপেন করুন ↗</span>
+                  </Link>
+                </div>
+              </div>
+
+              {merchants.length === 0 ? (
+                <div className="p-8 text-center text-slate-400 font-bold text-xs bg-slate-50 rounded-2xl">
+                  কোনো মার্চেন্ট অ্যাকাউন্ট পাওয়া যায়নি।
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100">
+                  {merchants.map((m) => {
+                    const merchantProds = products.filter((p) => p.merchantId === m.id);
+                    return (
+                      <div key={m.id} className="py-4 space-y-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-sm font-extrabold text-slate-900">{m.shopName}</h3>
+                              <span
+                                className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                                  m.status === 'active'
+                                    ? 'bg-emerald-100 text-emerald-800'
+                                    : m.status === 'suspended'
+                                    ? 'bg-red-100 text-red-800'
+                                    : 'bg-amber-100 text-amber-800'
+                                }`}
+                              >
+                                {m.status === 'active' ? 'সক্রিয় (Active)' : m.status === 'suspended' ? 'স্থগিত' : 'অপেক্ষমান'}
+                              </span>
+                              <span className="text-[10px] bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded-md">
+                                {m.category}
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-600 mt-1">
+                              মালিক: <span className="font-bold">{m.ownerName}</span> • মোবাইল: <span className="font-bold">{m.phone}</span> • পাসওয়ার্ড: <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-[11px] text-slate-700 font-bold">{m.password || 'N/A'}</code>
+                            </p>
+                            <p className="text-[11px] text-slate-400">
+                              পেআউট: {m.payoutMethod?.toUpperCase()} ({m.payoutPhone || m.phone}) • মেটা পিক্সেল: {m.facebookPixelId || 'নেই'} • মোট পণ্য: {merchantProds.length}টি • মোট বিক্রি: ৳{m.totalSales || 0}
+                            </p>
+                          </div>
+
+                          <div className="flex items-center gap-2 self-start sm:self-auto">
+                            <button
+                              type="button"
+                              onClick={() => handleApproveMerchant(m.id, m.status === 'active' ? 'suspended' : 'active')}
+                              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                                m.status === 'active'
+                                  ? 'bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300'
+                                  : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                              }`}
+                            >
+                              {m.status === 'active' ? 'স্থগিত করুন' : 'অনুমোদন দিন'}
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteMerchant(m.id)}
+                              className="p-1.5 text-red-500 hover:bg-red-50 rounded-xl transition border border-red-200"
+                              title="মার্চেন্ট মুছুন"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ============================================================================ */}
           {/* TAB 7: SETTINGS & PASSWORD MANAGER (Super Admin) */}
           {/* ============================================================================ */}
           {role === 'SUPER_ADMIN' && activeTab === 'settings' && settings && (
@@ -2834,59 +3106,183 @@ CREATE POLICY "Allow public read uploads" ON storage.objects FOR SELECT USING (b
                   />
                 </div>
 
-                {/* Breaking News Ticker Manager */}
-                <div className="pt-4 border-t border-slate-100 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
-                        <Flame className="w-4 h-4 text-red-600" />
-                        <span>হোমপেজ ব্রেকিং নিউজ টিকার তালিকা (Ticker Headlines)</span>
-                      </h4>
-                      <p className="text-xs text-slate-500">
-                        এখানে থাকা প্রতিটি শিরোনাম হোমপেজের লাল টিকারে পর্যায়ক্রমে দেখাবে
-                      </p>
+                {/* Upgraded Rich Breaking News Banner Manager */}
+                <div className="pt-4 border-t border-slate-100 space-y-4">
+                  <div>
+                    <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
+                      <Flame className="w-4 h-4 text-red-600 animate-pulse" />
+                      <span>ব্রেকিং নিউজ ব্যানার ও লাইভ ছবি কন্ট্রোল (Breaking News Studio)</span>
+                    </h4>
+                    <p className="text-xs text-slate-500">
+                      ওয়েবসাইটের শীর্ষে থাকা লাল ব্রেকিং নিউজ ব্যানারে ছবি সহ তাজা খবর প্রকাশ ও নিয়ন্ত্রণ করুন
+                    </p>
+                  </div>
+
+                  {/* Add New Breaking News Form */}
+                  <div className="bg-red-50/70 p-4 sm:p-5 rounded-2xl border border-red-200/80 space-y-3">
+                    <span className="text-[10px] font-black uppercase tracking-wider bg-red-600 text-white px-2 py-0.5 rounded-md inline-block">
+                      + নতুন ব্রেকিং নিউজ প্রকাশ করুন
+                    </span>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-slate-800">শিরোনাম (Title) *</label>
+                      <input
+                        type="text"
+                        placeholder="যেমন: রাবি ক্যাম্পাসে অফিশিয়াল উইন্টার হুডির প্রি-অর্ডার শুরু..."
+                        value={newBreakingTitle}
+                        onChange={(e) => setNewBreakingTitle(e.target.value)}
+                        className="w-full text-xs sm:text-sm p-3 border border-red-200 rounded-xl font-bold bg-white"
+                      />
                     </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
+                          <span>ব্যানার ছবি (Picture)</span>
+                          {uploadingBreakingImg && <span className="text-red-600 text-[10px] animate-pulse">আপলোড হচ্ছে...</span>}
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <label className="cursor-pointer bg-white border border-red-300 hover:bg-red-100 text-red-800 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1 shadow-xs">
+                            <Upload className="w-3.5 h-3.5" />
+                            <span>ছবি আপলোড</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleUploadBreakingImage}
+                              className="hidden"
+                            />
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="বা ছবির লিংক পেস্ট করুন"
+                            value={newBreakingImage}
+                            onChange={(e) => setNewBreakingImage(e.target.value)}
+                            className="flex-1 text-xs p-2 border border-red-200 rounded-xl font-medium bg-white"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-800">ক্লিক লিংক (Link URL)</label>
+                        <input
+                          type="text"
+                          placeholder="/inside-ru বা /shop"
+                          value={newBreakingLink}
+                          onChange={(e) => setNewBreakingLink(e.target.value)}
+                          className="w-full text-xs p-2 border border-red-200 rounded-xl font-medium bg-white"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Preview of Breaking Banner */}
+                    {newBreakingTitle && (
+                      <div className="p-2.5 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white flex items-center gap-2 shadow-sm">
+                        <span className="bg-white text-red-700 font-black text-[10px] px-2 py-0.5 rounded shadow">
+                          ব্রেকিং নিউজ প্রিভিউ
+                        </span>
+                        {newBreakingImage && (
+                          <img src={newBreakingImage} alt="Preview" className="w-9 h-6 object-cover rounded border border-white/50" />
+                        )}
+                        <p className="text-xs font-bold truncate flex-1">{newBreakingTitle}</p>
+                      </div>
+                    )}
+
                     <button
                       type="button"
-                      onClick={() => {
-                        const currentNews = settings.breakingNews || [];
-                        setSettings({
-                          ...settings,
-                          breakingNews: [...currentNews, '🔥 নতুন ব্রেকিং নিউজ শিরোনাম লিখুন...'],
-                        });
-                      }}
-                      className="text-xs text-blue-700 font-bold hover:underline"
+                      onClick={handleAddBreakingItem}
+                      className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-black flex items-center gap-1.5 shadow transition cursor-pointer"
                     >
-                      + নতুন টিকার যোগ করুন
+                      <Flame className="w-3.5 h-3.5 fill-white" />
+                      <span>ব্রেকিং নিউজ প্রকাশ করুন</span>
                     </button>
                   </div>
 
-                  <div className="space-y-2">
-                    {(settings.breakingNews || []).map((headline, hIdx) => (
-                      <div key={hIdx} className="flex items-center gap-2">
-                        <input
-                          type="text"
-                          value={headline}
-                          onChange={(e) => {
-                            const updated = [...(settings.breakingNews || [])];
-                            updated[hIdx] = e.target.value;
-                            setSettings({ ...settings, breakingNews: updated });
-                          }}
-                          className="flex-1 text-xs border border-slate-200 rounded-xl p-2.5 font-bold"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const updated = (settings.breakingNews || []).filter((_, i) => i !== hIdx);
-                            setSettings({ ...settings, breakingNews: updated });
-                          }}
-                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg border border-red-200 text-xs"
-                          title="টিকার মুছুন"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                  {/* List of Active Rich Breaking News Items */}
+                  {(settings.breakingNewsItems || []).length > 0 && (
+                    <div className="space-y-2">
+                      <h5 className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                        বর্তমান সক্রিয় ব্রেকিং নিউজসমূহ ({(settings.breakingNewsItems || []).length}টি):
+                      </h5>
+                      <div className="space-y-2">
+                        {(settings.breakingNewsItems || []).map((item) => (
+                          <div
+                            key={item.id}
+                            className="p-3 bg-white rounded-2xl border border-slate-200 flex items-center justify-between gap-3 shadow-xs"
+                          >
+                            <div className="flex items-center gap-3 overflow-hidden flex-1">
+                              {item.imageUrl && (
+                                <img
+                                  src={item.imageUrl}
+                                  alt="News"
+                                  className="w-12 h-8 rounded-lg object-cover border border-slate-200 shrink-0"
+                                />
+                              )}
+                              <div className="overflow-hidden">
+                                <p className="text-xs font-bold text-slate-900 truncate">{item.title}</p>
+                                <p className="text-[10px] text-slate-400 truncate">লিংক: {item.link || '/inside-ru'}</p>
+                              </div>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteBreakingItem(item.id)}
+                              className="p-1.5 text-red-500 hover:bg-red-50 rounded-xl transition border border-red-200 shrink-0"
+                              title="ব্রেকিং নিউজ মুছুন"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    </div>
+                  )}
+
+                  {/* Backward-compatible Text Headlines */}
+                  <div className="space-y-2 pt-2 border-t border-slate-100">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-700">অতিরিক্ত টেক্সট হেডলাইনসমূহ:</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const currentNews = settings.breakingNews || [];
+                          setSettings({
+                            ...settings,
+                            breakingNews: [...currentNews, '🔥 নতুন হেডলাইন লিখুন...'],
+                          });
+                        }}
+                        className="text-[11px] text-blue-700 font-bold hover:underline"
+                      >
+                        + টেক্সট যোগ করুন
+                      </button>
+                    </div>
+
+                    <div className="space-y-2">
+                      {(settings.breakingNews || []).map((headline, hIdx) => (
+                        <div key={hIdx} className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={headline}
+                            onChange={(e) => {
+                              const updated = [...(settings.breakingNews || [])];
+                              updated[hIdx] = e.target.value;
+                              setSettings({ ...settings, breakingNews: updated });
+                            }}
+                            className="flex-1 text-xs border border-slate-200 rounded-xl p-2.5 font-bold"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = (settings.breakingNews || []).filter((_, i) => i !== hIdx);
+                              setSettings({ ...settings, breakingNews: updated });
+                            }}
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg border border-red-200 text-xs"
+                            title="মুছুন"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
@@ -3501,6 +3897,29 @@ CREATE POLICY "Allow public read uploads" ON storage.objects FOR SELECT USING (b
                   <span>🔔 Chrome পুশ নোটিফিকেশন পাঠান</span>
                 </label>
               </div>
+
+              {/* Live Breaking News Preview in Modal */}
+              {(editArticle.isBreaking || editArticle.category === 'ব্রেকিং নিউজ') && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-2xl space-y-1.5">
+                  <p className="text-[11px] font-black text-red-700 flex items-center gap-1">
+                    <Flame className="w-3.5 h-3.5 fill-red-600" />
+                    <span>ব্রেকিং নিউজ ব্যানার প্রিভিউ (ওয়েবসাইটের শীর্ষে দেখাবে):</span>
+                  </p>
+                  <div className="p-2.5 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white flex items-center gap-2.5 shadow-xs">
+                    <span className="bg-white text-red-700 font-black text-[10px] px-2 py-0.5 rounded shadow">
+                      ব্রেকিং নিউজ
+                    </span>
+                    {editArticle.images?.[0] && (
+                      <img
+                        src={editArticle.images[0]}
+                        alt="Thumb"
+                        className="w-10 h-7 object-cover rounded border border-white/50"
+                      />
+                    )}
+                    <p className="text-xs font-bold truncate flex-1">{editArticle.title || 'শিরোনাম লিখুন...'}</p>
+                  </div>
+                </div>
+              )}
 
               <button
                 type="submit"

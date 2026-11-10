@@ -1441,7 +1441,7 @@ export default function InteractiveThreeMaps() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
             {/* Left Column: Gemini Argon RU Campus Map */}
             <div className="lg:col-span-6 flex flex-col items-center justify-center">
-              <div className="relative w-full aspect-[16/10] min-h-[250px] sm:min-h-[480px] bg-[#f6f4ec] rounded-[24px] sm:rounded-[28px] p-2 sm:p-4 border-2 border-emerald-900/15 shadow-inner flex items-center justify-center overflow-hidden group">
+              <div className="relative w-full aspect-[16/10] min-h-[250px] sm:min-h-[480px] bg-[#fdfcf9] rounded-[24px] sm:rounded-[28px] p-2 sm:p-4 border-2 border-stone-300 shadow-inner flex items-center justify-center overflow-hidden group">
                 <svg
                   viewBox={RU_CAMPUS_VIEWBOX}
                   className="w-full h-full object-contain select-none transition-transform duration-200"
@@ -1471,96 +1471,194 @@ export default function InteractiveThreeMaps() {
                     })}
                   </defs>
 
-                  {/* 1. Base Turf & Railway Base */}
+                  {/* 0. Clean Ivory Background Canvas */}
+                  <rect width="1200" height="750" fill="#f8f6f0" rx="20" />
+
+                  {/* 1. Base Campus Turf & Boundary matching Reference Blueprint Image 4 */}
                   <polygon
-                    points="72,118 1152,118 1110,535 552,608 106,690 68,355"
-                    fill="#ebe6d8"
-                    stroke="#d6d0c0"
-                    strokeWidth="2"
+                    points="55,118 1165,118 1125,535 552,608 106,690 55,355"
+                    fill="#f2eee4"
+                    stroke="#e2dcce"
+                    strokeWidth="1.5"
                     strokeLinejoin="round"
                   />
                   <polygon
-                    points="155,18 655,28 635,112 145,112"
-                    fill="#ebe6d8"
-                    stroke="#d6d0c0"
+                    points="155,18 665,28 645,112 145,112"
+                    fill="#f2eee4"
+                    stroke="#e2dcce"
                     strokeWidth="1.5"
                     strokeLinejoin="round"
                   />
 
-                  {/* 2. South Highway & Internal Roads */}
-                  <path
-                    d="M 95,692 L 395,624 L 555,598 L 785,562 L 1135,524"
-                    fill="none"
-                    stroke="#15803d"
-                    strokeWidth="14"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeOpacity="0.85"
-                  />
+                  {/* 2. Internal Blueprint Road Network & Pathways */}
+                  {/* Internal Road Guide Lines (Light dashed pathways between blocks) */}
                   <path
                     d="
+                      M 245,475 L 895,475
                       M 480,592 L 480,475
-                      M 254,475 L 895,475
-                      M 254,645 L 254,122
-                      M 450,475 L 450,24
-                      M 450,220 L 968,258
+                      M 450,475 L 450,118
                       M 658,220 L 658,125
                       M 756,250 L 756,475
                       M 895,258 L 895,475
-                      M 254,360 L 450,360
+                      M 245,360 L 450,360
                       M 450,296 L 605,296
                       M 968,258 L 1030,45
                     "
                     fill="none"
-                    stroke="#15803d"
-                    strokeWidth="9"
+                    stroke="#cbd5e1"
+                    strokeWidth="1.5"
+                    strokeDasharray="5 5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
 
-                  {/* Pedestrian Paris Road Walkway */}
+                  {/* Paris Road (Iconic Green Dotted Walkway along the West corridor) */}
                   <path
-                    d="M 105,128 L 254,128 M 254,128 L 254,250"
+                    d="M 245,124 L 245,475"
                     fill="none"
-                    stroke="#0d9488"
-                    strokeWidth="5"
-                    strokeDasharray="4 5"
-                    strokeOpacity="0.75"
+                    stroke="#10b981"
+                    strokeWidth="3.2"
+                    strokeDasharray="5 5"
+                    opacity="0.85"
                   />
+                  <text
+                    x="238"
+                    y="320"
+                    transform="rotate(-90 238, 320)"
+                    fontSize="9.5"
+                    fontWeight="bold"
+                    fill="#047857"
+                    fontFamily="sans-serif"
+                    className="select-none pointer-events-none"
+                  >
+                    🚗 🛺 প্যারিস রোড
+                  </text>
+
+                  {/* Charukola Road (Dotted Green Guide Line to Fine Arts) */}
+                  <path
+                    d="M 436,20 L 436,118"
+                    fill="none"
+                    stroke="#10b981"
+                    strokeWidth="2.5"
+                    strokeDasharray="4 4"
+                    opacity="0.85"
+                  />
+                  <text
+                    x="430"
+                    y="75"
+                    transform="rotate(-90 430, 75)"
+                    fontSize="8.5"
+                    fontWeight="bold"
+                    fill="#047857"
+                    fontFamily="sans-serif"
+                    className="select-none pointer-events-none"
+                  >
+                    চারুকলা রোড
+                  </text>
+
+                  {/* Road Names across campus matching Image 4 */}
+                  <text x="300" y="471" fontSize="9" fontWeight="bold" fill="#64748b" fontFamily="sans-serif">
+                    নাসির রোড
+                  </text>
+                  <text x="785" y="471" fontSize="9" fontWeight="bold" fill="#64748b" fontFamily="sans-serif">
+                    বিনোদপুর রোড
+                  </text>
+                  <text x="635" y="415" fontSize="8" fontWeight="bold" fill="#64748b" fontFamily="sans-serif">
+                    সায়েন্স রোড
+                  </text>
 
                   {/* Zoha Roundabout Circle */}
-                  <circle cx="480" cy="475" r="14" fill="#15803d" stroke="#ffffff" strokeWidth="2.5" />
-                  <circle cx="480" cy="475" r="6" fill="#fef08a" />
+                  <circle cx="480" cy="475" r="12" fill="#15803d" stroke="#ffffff" strokeWidth="2.5" />
+                  <circle cx="480" cy="475" r="5" fill="#fef08a" />
 
-                  {/* Railway track */}
+                  {/* Top Right Reference Badge (Clickable to Stage 1 Division Map) */}
+                  <g
+                    onClick={() => setStage('division')}
+                    className="cursor-pointer transition-transform duration-200 hover:scale-105"
+                  >
+                    <rect
+                      x="815"
+                      y="24"
+                      width="345"
+                      height="48"
+                      rx="12"
+                      fill="#fef3c7"
+                      stroke="#f59e0b"
+                      strokeWidth="2"
+                    />
+                    <text
+                      x="987"
+                      y="53"
+                      textAnchor="middle"
+                      fill="#78350f"
+                      fontSize="13"
+                      fontWeight="bold"
+                      fontFamily="sans-serif"
+                    >
+                      📷 রাজশাহীর সরকারি দর্শনীয় স্থান (ছবিসহ) ➔
+                    </text>
+                  </g>
+
+                  {/* Left Pill (Clickable to Stage 2 Rajshahi District Map) */}
+                  <g
+                    onClick={() => setStage('rajshahi_district')}
+                    className="cursor-pointer transition-transform duration-200 hover:scale-105"
+                  >
+                    <rect
+                      x="2"
+                      y="300"
+                      width="44"
+                      height="200"
+                      rx="14"
+                      fill="#15803d"
+                      stroke="#ffffff"
+                      strokeWidth="2"
+                    />
+                    <text
+                      x="-400"
+                      y="28"
+                      textAnchor="middle"
+                      fill="#ffffff"
+                      fontSize="11.5"
+                      fontWeight="bold"
+                      fontFamily="sans-serif"
+                      transform="rotate(-90)"
+                    >
+                      🗺️ রাজশাহী সিটি ম্যাপ দেখুন ➔
+                    </text>
+                  </g>
+
+                  {/* Railway track at top */}
                   <line x1="55" y1="118" x2="1158" y2="118" stroke="#57534e" strokeWidth="4" strokeOpacity="0.8" />
                   <line x1="55" y1="118" x2="1158" y2="118" stroke="#f7f5ee" strokeWidth="2.2" strokeDasharray="8 8" />
                   <text x="765" y="108" textAnchor="middle" fill="#57534e" fontSize="10.5" fontWeight="bold" fontFamily="sans-serif">
                     🚂 রাজশাহী - ঢাকা রেলপথ
                   </text>
 
-                  {/* Highway Label */}
+                  {/* South Highway (Slanted Green Strip matching Reference Image 4) */}
+                  <polygon
+                    points="155,705 1175,540 1180,578 155,742"
+                    fill="#86efac"
+                    fillOpacity="0.8"
+                    stroke="#16a34a"
+                    strokeWidth="2"
+                  />
                   <text
                     x="665"
-                    y="592"
+                    y="630"
                     textAnchor="middle"
-                    fill="#ffffff"
-                    fontSize="10.5"
+                    fill="#064e3b"
+                    fontSize="11"
                     fontWeight="bold"
-                    transform="rotate(-7.8, 665, 592)"
+                    transform="rotate(-8.8, 665, 630)"
                     fontFamily="sans-serif"
                   >
                     রাজশাহী - নাটোর মহাসড়ক (মেইন গেট, কাজলা গেট ও বিনোদপুর গেট)
                   </text>
 
-                  {/* Paris Road Label */}
-                  <text x="368" y="479" textAnchor="middle" fontSize="9.5" fontWeight="bold" fill="#fef08a" fontFamily="sans-serif">
-                    🚗 🛺 প্যারিস রোড →
-                  </text>
-
-                  {/* North Compass Indicator */}
-                  <g transform="translate(68, 615)" className="pointer-events-none select-none">
-                    <circle cx="0" cy="0" r="22" fill="#ffffff" fillOpacity="0.92" stroke="#d6d0c4" strokeWidth="1.5" />
+                  {/* North Compass Indicator (Bottom-Left) */}
+                  <g transform="translate(68, 625)" className="pointer-events-none select-none">
+                    <circle cx="0" cy="0" r="22" fill="#ffffff" fillOpacity="0.95" stroke="#d6d0c4" strokeWidth="1.5" />
                     <polygon points="0,-17 4,-4 0,-7 -4,-4" fill="#15803d" />
                     <polygon points="0,17 4,4 0,7 -4,4" fill="#a8a29e" />
                     <text x="0" y="-25" textAnchor="middle" fontSize="9.5" fontWeight="bold" fill="#0f172a" fontFamily="sans-serif">

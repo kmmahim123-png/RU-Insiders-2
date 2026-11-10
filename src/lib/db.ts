@@ -12,6 +12,7 @@ import {
   NotificationItem,
   SiteSettings,
   CustomDepartmentData,
+  Merchant,
 } from '@/types';
 
 // Path resolution supporting both local development and Vercel serverless runtime
@@ -31,6 +32,7 @@ export interface DatabaseSchema {
   alumni: AlumniProfile[];
   notifications: NotificationItem[];
   subscribers: { contact: string; createdAt: string }[];
+  merchants?: Merchant[];
   departments?: Record<string, CustomDepartmentData>;
 }
 
@@ -56,6 +58,32 @@ const INITIAL_DB: DatabaseSchema = {
       '🔥 রাবি অফিশিয়াল উইন্টার হুডি ও রাজশাহীর খাঁটি খেজুরের গুড়ের প্রি-অর্ডার চলছে! মতিহার ক্যাম্পাসে ফ্রি ডেলিভারি।',
       '🎓 রাবির ৪২টি স্পট ও রাজশাহী জেলার ২২টি অঞ্চল কতটুকু ঘুরলেন? এখনই ম্যাপে টিক দিয়ে নিজের ভ্রমণ সনদ ডাউনলোড করুন!',
       '✍️ Inside RU পোর্টালে আপনার গল্প, কবিতা বা গবেষণাপত্র জমা দিন এবং জিতে নিন আকর্ষণীয় গিফট হ্যাম্পার।',
+    ],
+    breakingNewsItems: [
+      {
+        id: 'bn-init-1',
+        title: 'রাবি অফিশিয়াল উইন্টার হুডি ও রাজশাহীর খাঁটি খেজুরের গুড়ের প্রি-অর্ডার শুরু! মতিহার ক্যাম্পাসে ফ্রি ডেলিভারি',
+        imageUrl: '/mockups/hoodie-front.jpg',
+        link: '/shop',
+        createdAt: new Date().toISOString(),
+        isActive: true,
+      },
+      {
+        id: 'bn-init-2',
+        title: 'ঐতিহাসিক প্যারিস রোড ও রাবি ক্যাম্পাসের ৪২টি স্থাপত্য স্পট এক্সপ্লোর করুন ও নিজের সনদপত্র ডাউনলোড করুন',
+        imageUrl: '/campus/paris-road-rain.jpg',
+        link: '/map',
+        createdAt: new Date().toISOString(),
+        isActive: true,
+      },
+      {
+        id: 'bn-init-3',
+        title: 'ইনসাইড রাবি নিউজ ও সাহিত্য পোর্টাল উন্মোচিত — ক্যাম্পাসের তাজা খবর ও গবেষণাপত্র পড়ুন',
+        imageUrl: '/campus/ru-spot.jpg',
+        link: '/inside-ru',
+        createdAt: new Date().toISOString(),
+        isActive: true,
+      },
     ],
   },
   products: [
@@ -367,6 +395,44 @@ const INITIAL_DB: DatabaseSchema = {
     },
   ],
   subscribers: [],
+  merchants: [
+    {
+      id: 'm-motihar-crafts',
+      shopName: 'মতিহার ক্রাফটস অ্যান্ড এপারেল',
+      ownerName: 'শাকিব আল হাসান',
+      phone: '01711223344',
+      email: 'motihar.crafts@gmail.com',
+      password: 'merchant-2026',
+      status: 'active',
+      category: 'পোশাক ও হুডি',
+      address: 'টুকিটাকি চত্বর, রাবি ক্যাম্পাস',
+      payoutPhone: '01711223344',
+      payoutMethod: 'bkash',
+      facebookPixelId: '123456789012345',
+      commissionRate: 0,
+      totalSales: 18500,
+      totalOrders: 24,
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: 'm-varendra-foods',
+      shopName: 'বরেন্দ্র খাঁটি গুড় ও রসাল খাবার',
+      ownerName: 'মো: রফিকুল ইসলাম',
+      phone: '01822334455',
+      email: 'varendra.foods@gmail.com',
+      password: 'merchant-2026',
+      status: 'active',
+      category: 'ঐতিহ্যবাহী খাবার ও গুড়',
+      address: 'চারঘাট ও বাঘা, রাজশাহী',
+      payoutPhone: '01822334455',
+      payoutMethod: 'bkash',
+      facebookPixelId: '',
+      commissionRate: 0,
+      totalSales: 34200,
+      totalOrders: 42,
+      createdAt: new Date().toISOString(),
+    },
+  ],
   departments: {},
 };
 

@@ -37,7 +37,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 295,
       "y": 72
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=800&q=80",
     "descriptionBn": "রেললাইনের উত্তর পাশে বিস্তৃত রাবির কৃষি ও ভেটেরিনারি সায়েন্স অনুষদ অঞ্চল।"
   },
   {
@@ -85,7 +85,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 562,
       "y": 72
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?auto=format&fit=crop&w=800&q=80",
     "descriptionBn": "শিল্পাচার্য জয়নুল আবেদীন একাডেমিক ভবন ও চারুকলা অনুষদের সবুজ চত্বর।"
   },
   {
@@ -109,7 +109,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 170,
       "y": 192
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "/uploads/ru-1794141495627-4vut1.jpg",
     "descriptionBn": "বেগম রোকেয়ার নামে নামকরণকৃত ছাত্রী আবাসিক হল ও সংলগ্ন শিক্ষক ডরমেটরি সীমানা।"
   },
   {
@@ -133,7 +133,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 350,
       "y": 168
     },
-    "imageUrl": "/campus/paris-road-rain.jpg",
+    "imageUrl": "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=800&q=80",
     "descriptionBn": "দুর্লভ উদ্ভিদ প্রজাতি, পুকুর ও সবুজ প্রকৃতিতে ঘেরা রাবি বোটানিক্যাল গার্ডেন অঞ্চল।"
   },
   {
@@ -157,7 +157,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 510,
       "y": 174
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "/uploads/ru-1794141501081-mce2s.jpg",
     "descriptionBn": "হবিবুর রহমান খেলার মাঠের উত্তর পাশে অবস্থিত বৃহৎ ছাত্র আবাসিক হল অঞ্চল।"
   },
   {
@@ -181,7 +181,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 608,
       "y": 174
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "/uploads/ru-1794141536860-sz4u9.jpg",
     "descriptionBn": "উত্তর ক্যাম্পাসে হবিবুর রহমান হলের পূর্ব পাশে অবস্থিত ছাত্র আবাসিক হল।"
   },
   {
@@ -205,7 +205,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 730,
       "y": 152
     },
-    "imageUrl": "/campus/ru-spot.jpg",
+    "imageUrl": "https://images.unsplash.com/photo-1474487548417-781cb71495f3?auto=format&fit=crop&w=800&q=80",
     "descriptionBn": "রাজশাহী-ঢাকা রেলপথে বিশ্ববিদ্যালয়ের নিজস্ব রেলস্টেশন ও জনপ্রিয় স্টেশন বাজার চত্বর।"
   },
   {
@@ -229,7 +229,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 703,
       "y": 215
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "/uploads/ru-1794154040015-5vwji.jpg",
     "descriptionBn": "রাবির অন্যতম প্রতিষ্ঠাতা মাদার বখ্শের নামে নামকরণকৃত ছাত্র আবাসিক হল অঞ্চল।"
   },
   {
@@ -253,7 +253,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 792,
       "y": 215
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "/uploads/ru-1794154057585-c9r0v.jpg",
     "descriptionBn": "স্টেশন বাজার ও জোহা হলের মধ্যবর্তী স্থানে অবস্থিত ছাত্রদের আবাসিক হল।"
   },
   {
@@ -277,7 +277,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 900,
       "y": 192
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "/uploads/ru-1794154065708-z3z4s.jpg",
     "descriptionBn": "শহীদ বুদ্ধিজীবী ড. শামসুজ্জোহার স্মৃতিবিজড়িত আবাসিক হল ও সংলগ্ন পুকুর অঞ্চল।"
   },
   {
@@ -325,7 +325,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 350,
       "y": 229
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "/uploads/ru-1794159579684-dc2ry.webp",
     "descriptionBn": "বোটানিক্যাল গার্ডেনের দক্ষিণ সীমানায় অবস্থিত ছাত্রীদের আবাসিক হল।"
   },
   {
@@ -349,7 +349,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 311,
       "y": 281
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "/uploads/ru-1794159590411-hz6vw.webp",
     "descriptionBn": "রোকেয়া হলের পূর্ব পাশে এবং রহমতুন্নেসা হলের দক্ষিণে অবস্থিত ছাত্রী হল।"
   },
   {
@@ -373,7 +373,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 311,
       "y": 333
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "/uploads/1793774256208-134337096780936258_j.jpg",
     "descriptionBn": "সিরাজী ভবনের উত্তর সীমানায় অবস্থিত ছাত্রীদের আবাসিক হল।"
   },
   {
@@ -397,7 +397,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 400,
       "y": 306
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "/uploads/1793774284198-134361855682621347_j.jpg",
     "descriptionBn": "ছাত্রী হল জোনের পূর্ব প্রান্তে বিজ্ঞান ভবন সংলগ্ন আবাসিক হল।"
   },
   {
@@ -421,7 +421,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 166,
       "y": 304
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "/uploads/1793774324791-134361855682621347_j.jpg",
     "descriptionBn": "রোকেয়া হলের দক্ষিণে এবং মন্নুজান হলের উত্তরে অবস্থিত ছাত্রী আবাসিক হল।"
   },
   {
@@ -445,7 +445,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 166,
       "y": 412
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "/uploads/1793774352397-134337096780936258_j.jpg",
     "descriptionBn": "রাবির ছাত্রীদের প্রথম আবাসিক হল, শেখ রাসেল মডেল স্কুল মাঠ ও পশ্চিমপাড়া আবাসিক এলাকা।"
   },
   {
@@ -469,7 +469,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 539,
       "y": 262
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80",
     "descriptionBn": "শহীদ হবিবুর রহমান খেলার মাঠ এবং নির্মিতব্য আধুনিক ২০তলা একাডেমিক ভবন অঞ্চল।"
   },
   {
@@ -493,7 +493,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 524,
       "y": 328
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=800&q=80",
     "descriptionBn": "দ্বিতীয় ও তৃতীয় বিজ্ঞান ভবন (জীববিজ্ঞান, রসায়ন ও প্রাণরসায়ন অনুষদ) কমপ্লেক্স।"
   },
   {
@@ -517,7 +517,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 494,
       "y": 392
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80",
     "descriptionBn": "চতুর্থ বিজ্ঞান ভবন; প্রকৌশল, সিএসই ও বিজ্ঞান অনুষদের আধুনিক ল্যাবরেটরি ও বিভাগসমূহ।"
   },
   {
@@ -541,7 +541,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 558,
       "y": 392
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&w=800&q=80",
     "descriptionBn": "প্রথম বিজ্ঞান ভবন (পদার্থবিজ্ঞান, গণিত ও পরিসংখ্যান বিভাগ)।"
   },
   {
@@ -565,7 +565,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 313,
       "y": 395
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=800&q=80",
     "descriptionBn": "শিক্ষা ও গবেষণা ইনস্টিটিউট (IER) এবং সামাজিক বিজ্ঞান ও কলা অনুষদের বিভিন্ন বিভাগ।"
   },
   {
@@ -589,7 +589,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 399,
       "y": 395
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=800&q=80",
     "descriptionBn": "কলা, আইন ও সামাজিক বিজ্ঞান অনুষদের অন্যতম প্রধান একাডেমিক ভবন।"
   },
   {
@@ -613,7 +613,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 313,
       "y": 446
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80",
     "descriptionBn": "প্যারিস রোডের উত্তর-পশ্চিম প্রান্তে কলা অনুষদের ঐতিহাসিক মমতাজউদ্দিন ভবন।"
   },
   {
@@ -637,7 +637,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 399,
       "y": 446
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "https://images.unsplash.com/photo-1568792923760-d70635a89fa0?auto=format&fit=crop&w=800&q=80",
     "descriptionBn": "কেন্দ্রীয় গ্রন্থাগারের পশ্চিম পাশে অবস্থিত সুপরিচিত কলা অনুষদ ভবন।"
   },
   {
@@ -661,7 +661,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 526,
       "y": 449
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "/campus/ru-master-plan-3d.jpg",
     "descriptionBn": "লক্ষাধিক বই সমৃদ্ধ রাবি কেন্দ্রীয় গ্রন্থাগার, কাজী নজরুল ইসলাম মিলনায়তন ও শহীদ সুখরঞ্জন সমাদ্দার টিএসসিসি।"
   },
   {
@@ -685,7 +685,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 672,
       "y": 342
     },
-    "imageUrl": "/campus/ru-roundabout.jpg",
+    "imageUrl": "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=800&q=80",
     "descriptionBn": "ক্যাম্পাসের ঠিক হৃদপিণ্ডে অবস্থিত ডিম্বাকৃতির বিশাল শেখ কামাল স্টেডিয়াম এবং ইনডোর স্টেডিয়াম চত্বর।"
   },
   {
@@ -709,7 +709,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 828,
       "y": 304
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "/uploads/1793774883033-134376982312850041_j.jpg",
     "descriptionBn": "পূর্ব ক্যাম্পাসে শামসুজ্জোহা হলের দক্ষিণে ও শহীদ মীর কাইয়ুম আন্তর্জাতিক ডরমেটরি সংলগ্ন আবাসিক হল।"
   },
   {
@@ -733,7 +733,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 1005,
       "y": 340
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "/uploads/1793774896378-134337096780936258_j.jpg",
     "descriptionBn": "সৈয়দ আমীর আলী হল, পূর্বপাড়া আবাসিক এলাকা এবং পূর্বাঞ্চলীয় কৃষি প্রকল্প মাঠ।"
   },
   {
@@ -757,7 +757,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 828,
       "y": 408
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "/uploads/1793775027367-134361855682621347.jpg",
     "descriptionBn": "হযরত শাহ মখদুম (রহ.) ছাত্র হল, রাবি চিকিৎসা কেন্দ্র (মেডিকেল সেন্টার) ও আই.বি.এস সংলগ্ন অঞ্চল।"
   },
   {
@@ -781,7 +781,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 632,
       "y": 448
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "/uploads/1793775125422-134349740643136223.jpg",
     "descriptionBn": "শেখ কামাল স্টেডিয়ামের দক্ষিণ পাশে অবস্থিত ছাত্র আবাসিক হল।"
   },
   {
@@ -805,7 +805,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 711,
       "y": 448
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "/uploads/1793866616044-134376982312850041.jpg",
     "descriptionBn": "মতিহারের সবুজ চত্বরের নামে নামকরণকৃত ছাত্র হল ও কেন্দ্রীয় মন্দির সীমানা।"
   },
   {
@@ -829,7 +829,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 175,
       "y": 576
     },
-    "imageUrl": "/campus/ru-spot.jpg",
+    "imageUrl": "/campus/ru-gate.jpg",
     "descriptionBn": "কাজলা গেট, জুবেরী ভবন ও খেলার মাঠ, পশ্চিম পার্কিং জোন এবং শেখ রাসেল মডেল স্কুল।"
   },
   {
@@ -949,7 +949,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 524,
       "y": 524
     },
-    "imageUrl": "/campus/ru-roundabout.jpg",
+    "imageUrl": "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80",
     "descriptionBn": "মেইন গেটের উত্তর-পূর্ব পাশে অবস্থিত অনন্য স্থাপত্যশৈলীর রাবি কেন্দ্রীয় জামে মসজিদ ও সুবর্ণ জয়ন্তী টাওয়ার।"
   },
   {
@@ -997,7 +997,7 @@ export const RU_CAMPUS_PLACES: RuPlaceSvgData[] = [
       "x": 705,
       "y": 528
     },
-    "imageUrl": "/campus/ru-admin.jpg",
+    "imageUrl": "/uploads/1793874078052-134367067615803428.jpg",
     "descriptionBn": "শহীদ স্মৃতি সংগ্রহশালার পূর্ব পাশে ও দক্ষিণ সড়কের সাথে অবস্থিত ঐতিহাসিক ছাত্র হল।"
   },
   {

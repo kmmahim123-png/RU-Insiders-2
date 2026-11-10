@@ -19,8 +19,10 @@ import {
   ArrowRight,
   Lock,
   Search,
+  Store,
 } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
+import { BreakingNewsItem } from '@/types';
 
 export interface UserSession {
   name: string;
@@ -44,6 +46,26 @@ export default function NavbarAndAuth() {
     '🔥 রাবি অফিশিয়াল উইন্টার হুডি ও রাজশাহীর খাঁটি খেজুরের গুড়ের প্রি-অর্ডার চলছে! মতিহার ক্যাম্পাসে ফ্রি ডেলিভারি।',
     '🎓 রাবির ৪২টি স্পট ও রাজশাহী জেলার ২২টি অঞ্চল কতটুকু ঘুরলেন? এখনই ম্যাপে টিক দিয়ে নিজের ভ্রমণ সনদ ডাউনলোড করুন!',
     '✍️ Inside RU পোর্টালে আপনার গল্প, কবিতা বা গবেষণাপত্র জমা দিন এবং জিতে নিন আকর্ষণীয় গিফট হ্যাম্পার।',
+  ]);
+  const [breakingItems, setBreakingItems] = useState<BreakingNewsItem[]>([
+    {
+      id: 'bn-init-1',
+      title: 'রাবি অফিশিয়াল উইন্টার হুডি ও রাজশাহীর খাঁটি খেজুরের গুড়ের প্রি-অর্ডার চলছে! মতিহার ক্যাম্পাসে ফ্রি ডেলিভারি',
+      imageUrl: '/mockups/hoodie-front.jpg',
+      link: '/shop',
+    },
+    {
+      id: 'bn-init-2',
+      title: 'ঐতিহাসিক প্যারিস রোড ও রাবি ক্যাম্পাসের ৪২টি স্থাপত্য স্পট এক্সপ্লোর করুন ও নিজের ভ্রমণ সনদ ডাউনলোড করুন',
+      imageUrl: '/campus/paris-road-rain.jpg',
+      link: '/map',
+    },
+    {
+      id: 'bn-init-3',
+      title: 'Inside RU সাহিত্য ও নিউজ পোর্টাল — ক্যাম্পাসের তাজা খবর ও গবেষণাপত্র পড়ুন',
+      imageUrl: '/campus/ru-spot.jpg',
+      link: '/inside-ru',
+    },
   ]);
   const [tickerIdx, setTickerIdx] = useState(0);
   const [whatsappNumber, setWhatsappNumber] = useState('8801700000000');
@@ -93,7 +115,12 @@ export default function NavbarAndAuth() {
       try {
         const res = await fetch('/api/store');
         const data = await res.json();
-        if (data.settings?.breakingNews?.length) setBreakingNews(data.settings.breakingNews);
+        if (data.settings?.breakingNewsItems?.length) {
+          setBreakingItems(data.settings.breakingNewsItems);
+        }
+        if (data.settings?.breakingNews?.length) {
+          setBreakingNews(data.settings.breakingNews);
+        }
         if (data.settings?.whatsappNumber) setWhatsappNumber(data.settings.whatsappNumber);
         if (data.notifications?.length) {
           setNotifications(data.notifications);
@@ -118,7 +145,14 @@ export default function NavbarAndAuth() {
     };
 
     fetchStoreMeta();
+
+    // Auto-refresh breaking news on custom event or periodic interval
+    const intervalStore = setInterval(fetchStoreMeta, 25000);
+    window.addEventListener('ru_breaking_updated', fetchStoreMeta);
+
     return () => {
+      clearInterval(intervalStore);
+      window.removeEventListener('ru_breaking_updated', fetchStoreMeta);
       window.removeEventListener('ru_auth_changed', loadLocalState);
       window.removeEventListener('ru_cart_updated', loadLocalState);
     };
@@ -126,12 +160,13 @@ export default function NavbarAndAuth() {
 
   // Breaking news ticker cycling every 4.5 seconds
   useEffect(() => {
-    if (breakingNews.length <= 1) return;
+    const listLen = breakingItems.length > 0 ? breakingItems.length : breakingNews.length;
+    if (listLen <= 1) return;
     const interval = setInterval(() => {
-      setTickerIdx((prev) => (prev + 1) % breakingNews.length);
+      setTickerIdx((prev) => (prev + 1) % listLen);
     }, 4500);
     return () => clearInterval(interval);
-  }, [breakingNews]);
+  }, [breakingItems, breakingNews]);
 
   // Request Chrome Notification Permission
   const requestChromeNotification = async () => {
@@ -473,27 +508,53 @@ export default function NavbarAndAuth() {
           </div>
         </div>
 
-        {/* 4. Breaking News Ticker (Clickable to Inside RU Breaking News Portal) */}
-        <Link
-          href="/inside-ru?category=ব্রেকিং নিউজ"
-          className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white px-3 py-2 text-xs block hover:opacity-95 transition group shadow-inner cursor-pointer"
-          title="Inside RU নিউজ পোর্টালে সম্পূর্ণ সংবাদ ও সাহিত্য পড়ুন"
-        >
-          <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 overflow-hidden">
-            <div className="flex items-center gap-2 overflow-hidden flex-1">
-              <span className="bg-white text-red-700 font-extrabold px-2.5 py-0.5 rounded-md flex items-center gap-1 shrink-0 shadow-sm text-[11px]">
-                <Flame className="w-3.5 h-3.5 fill-red-600 animate-pulse" /> ব্রেকিং নিউজ
-              </span>
-              <p className="truncate font-medium text-white/95 group-hover:underline">
-                {breakingNews[tickerIdx] || 'রাবি ক্যাম্পাসের তাজা খবর ও সাহিত্য পড়তে ক্লিক করুন'}
-              </p>
-            </div>
-            <div className="flex items-center gap-1 text-[11px] font-bold text-amber-200 group-hover:text-white shrink-0 bg-black/20 group-hover:bg-black/30 px-2.5 py-1 rounded-lg transition">
-              <span>নিউজ পড়ুন</span>
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition" />
-            </div>
-          </div>
-        </Link>
+        {/* 4. Breaking News Ticker (Clickable with Rich Image Thumbnail) */}
+        {(() => {
+          const activeItem = breakingItems[tickerIdx % (breakingItems.length || 1)] || null;
+          const fallbackText = breakingNews[tickerIdx % (breakingNews.length || 1)] || 'রাবি ক্যাম্পাসের তাজা খবর ও সাহিত্য পড়তে ক্লিক করুন';
+          const title = activeItem?.title || fallbackText;
+          const imageUrl = activeItem?.imageUrl;
+          const linkUrl = activeItem?.link || '/inside-ru?category=ব্রেকিং নিউজ';
+
+          return (
+            <Link
+              href={linkUrl}
+              className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white px-3 sm:px-4 py-2.5 sm:py-3.5 text-xs sm:text-sm block hover:opacity-95 transition group shadow-md cursor-pointer border-y border-red-500/40 relative z-20"
+              title="Inside RU নিউজ পোর্টালে সম্পূর্ণ সংবাদ পড়ুন"
+            >
+              <div className="max-w-7xl mx-auto flex items-center justify-between gap-2.5 sm:gap-4 overflow-hidden">
+                <div className="flex items-center gap-2.5 sm:gap-3.5 overflow-hidden flex-1 min-w-0">
+                  <span className="bg-white text-red-700 font-black px-2.5 sm:px-3 py-1 rounded-lg flex items-center gap-1.5 shrink-0 shadow text-[11px] sm:text-xs">
+                    <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-red-600 text-red-600 animate-pulse" />
+                    <span>ব্রেকিং নিউজ</span>
+                  </span>
+
+                  {imageUrl && (
+                    <div className="w-10 h-7 sm:w-14 sm:h-9 rounded-md overflow-hidden shrink-0 border border-white/40 shadow-sm bg-black/20">
+                      <img
+                        src={imageUrl}
+                        alt="নিউজ ছবি"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          (e.target as HTMLElement).style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  <p className="truncate font-semibold text-white/95 group-hover:underline text-xs sm:text-sm tracking-wide">
+                    {title.replace(/^[🔥🚨\s]+/, '')}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-bold text-amber-200 group-hover:text-white shrink-0 bg-black/25 group-hover:bg-black/35 px-2.5 sm:px-3 py-1.5 rounded-lg border border-white/10 transition">
+                  <span className="hidden xs:inline">বিস্তারিত</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition" />
+                </div>
+              </div>
+            </Link>
+          );
+        })()}
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
@@ -556,10 +617,11 @@ export default function NavbarAndAuth() {
                 { href: '/shop', label: '🛍️ শপ (হুডি, খেজুরের গুড়, নাড়ু)' },
                 { href: '/map', label: '🗺️ ৩-ধাপের ওয়াটার ম্যাপ ও সনদ' },
                 { href: '/inside-ru', label: '📰 নিউজ, সাহিত্য ও গবেষণা' },
+                { href: '/merchant', label: '🏪 মার্চেন্ট পোর্টাল (পণ্য বিক্রি করুন)' },
                 { href: '/academics', label: '🎓 বিভাগ ও অ্যালামনাই ডিরেক্টরি' },
                 { href: '/clubs', label: '🏆 ক্লাবসমূহ ও মেম্বারশিপ' },
                 { href: '/track', label: '📦 অর্ডার ট্র্যাকিং' },
-                { href: '/admin', label: '🔐 অ্যাডমিন ও ক্লাব লগইন পোর্টাল' },
+                { href: '/admin', label: '🔐 অ্যাডমিন ও মার্চেন্ট লগইন' },
               ].map((item) => (
                 <Link
                   key={item.href}
