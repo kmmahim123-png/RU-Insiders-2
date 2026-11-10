@@ -147,12 +147,15 @@ export interface AiTrainingDoc {
 export type AiSlotKey = 'openrouter1' | 'openrouter2' | 'gemini';
 
 export interface AiConfig {
+  openRouterName1?: string;
   openRouterKey1?: string;
   openRouterModel1?: string;
   openRouterEnabled1?: boolean;
+  openRouterName2?: string;
   openRouterKey2?: string;
   openRouterModel2?: string;
   openRouterEnabled2?: boolean;
+  geminiName?: string;
   geminiApiKey?: string;
   geminiModel?: string;
   geminiEnabled?: boolean;

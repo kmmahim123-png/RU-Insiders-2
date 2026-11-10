@@ -274,8 +274,8 @@ function buildOrderedSlots(cfg: AiConfig | undefined): SlotExecutionMeta[] {
         ? {
             slot: 'openrouter1',
             provider: 'openrouter',
-            model: (cfg.openRouterModel1 || 'google/gemini-2.0-flash-exp:free').trim(),
-            label: 'OpenRouter #1 (Primary)',
+            model: (cfg.openRouterModel1 || 'openrouter/free').trim(),
+            label: cfg.openRouterName1?.trim() || 'OpenRouter #1 (Primary)',
           }
         : null,
     openrouter2:
@@ -284,7 +284,7 @@ function buildOrderedSlots(cfg: AiConfig | undefined): SlotExecutionMeta[] {
             slot: 'openrouter2',
             provider: 'openrouter',
             model: (cfg.openRouterModel2 || 'meta-llama/llama-3.3-70b-instruct:free').trim(),
-            label: 'OpenRouter #2 (Backup)',
+            label: cfg.openRouterName2?.trim() || 'OpenRouter #2 (Backup)',
           }
         : null,
     gemini:
@@ -293,7 +293,7 @@ function buildOrderedSlots(cfg: AiConfig | undefined): SlotExecutionMeta[] {
             slot: 'gemini',
             provider: 'gemini',
             model: (cfg.geminiModel || 'gemini-2.5-flash').trim(),
-            label: 'Google Gemini Direct',
+            label: cfg.geminiName?.trim() || 'Google Gemini Direct',
           }
         : null,
   };
@@ -332,7 +332,7 @@ export async function POST(req: NextRequest) {
       const resolvedModel =
         (model || '').trim() ||
         (targetSlot === 'openrouter1'
-          ? aiCfg?.openRouterModel1 || 'google/gemini-2.0-flash-exp:free'
+          ? aiCfg?.openRouterModel1 || 'openrouter/free'
           : targetSlot === 'openrouter2'
           ? aiCfg?.openRouterModel2 || 'meta-llama/llama-3.3-70b-instruct:free'
           : aiCfg?.geminiModel || 'gemini-2.5-flash');

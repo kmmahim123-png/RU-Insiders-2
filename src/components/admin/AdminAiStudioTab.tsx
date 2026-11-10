@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Bot,
   Cpu,
@@ -19,12 +19,15 @@ import {
   PlugZap,
   AlertCircle,
   CheckCircle2,
+  RefreshCw,
+  X,
 } from 'lucide-react';
 import { AiConfig, AiSlotKey, AiTrainingDoc } from '@/types';
 
 const OPENROUTER_FREE_MODELS = [
-  { id: 'google/gemini-2.0-flash-exp:free', label: 'Google Gemini 2.0 Flash (Free)' },
+  { id: 'openrouter/free', label: 'OpenRouter Free Auto-Router (সবসময় সক্রিয় ফ্রি)' },
   { id: 'meta-llama/llama-3.3-70b-instruct:free', label: 'Meta Llama 3.3 70B Instruct (Free)' },
+  { id: 'google/gemini-2.0-flash-exp:free', label: 'Google Gemini 2.0 Flash (Free)' },
   { id: 'qwen/qwen-2.5-72b-instruct:free', label: 'Qwen 2.5 72B Instruct (Free)' },
   { id: 'deepseek/deepseek-chat-v3-0324:free', label: 'DeepSeek V3 Chat (Free)' },
   { id: 'mistralai/mistral-small-3.1-24b-instruct:free', label: 'Mistral Small 3.1 24B (Free)' },
@@ -42,6 +45,8 @@ interface SlotMeta {
   slot: AiSlotKey;
   title: string;
   subtitle: string;
+  nameField: 'openRouterName1' | 'openRouterName2' | 'geminiName';
+  defaultName: string;
   keyField: 'openRouterKey1' | 'openRouterKey2' | 'geminiApiKey';
   modelField: 'openRouterModel1' | 'openRouterModel2' | 'geminiModel';
   enabledField: 'openRouterEnabled1' | 'openRouterEnabled2' | 'geminiEnabled';
@@ -54,7 +59,9 @@ const SLOT_CONFIGS: SlotMeta[] = [
   {
     slot: 'openrouter1',
     title: 'স্লট ১: OpenRouter API #1 (Primary)',
-    subtitle: 'OpenRouter থেকে ফ্রি (:free) অথবা যেকোনো মডেল সিলেক্ট করুন',
+    subtitle: 'OpenRouter-এর ফ্রি মডেল বাছাই করুন অথবা নিজের মতো মডেলের নাম লিখুন',
+    nameField: 'openRouterName1',
+    defaultName: 'OpenRouter #1 (Primary)',
     keyField: 'openRouterKey1',
     modelField: 'openRouterModel1',
     enabledField: 'openRouterEnabled1',
@@ -65,7 +72,9 @@ const SLOT_CONFIGS: SlotMeta[] = [
   {
     slot: 'openrouter2',
     title: 'স্লট ২: OpenRouter API #2 (Backup)',
-    subtitle: '১ম স্লটে লিমিট শেষ হলে স্বয়ংক্রিয়ভাবে ২য় OpenRouter Key-তে সুইচ করবে',
+    subtitle: '১ম স্লটে লিমিট শেষ হলে স্বয়ংক্রিয়ভাবে ২য় OpenRouter Key ও মডেলে সুইচ করবে',
+    nameField: 'openRouterName2',
+    defaultName: 'OpenRouter #2 (Backup)',
     keyField: 'openRouterKey2',
     modelField: 'openRouterModel2',
     enabledField: 'openRouterEnabled2',
@@ -77,6 +86,8 @@ const SLOT_CONFIGS: SlotMeta[] = [
     slot: 'gemini',
     title: 'স্লট ৩: Google Gemini Direct API (Failover)',
     subtitle: 'AI Studio (aistudio.google.com) থেকে নেওয়া Gemini API Key ও মডেল',
+    nameField: 'geminiName',
+    defaultName: 'Google Gemini Direct',
     keyField: 'geminiApiKey',
     modelField: 'geminiModel',
     enabledField: 'geminiEnabled',
@@ -105,12 +116,15 @@ interface AdminAiStudioTabProps {
 }
 
 const DEFAULT_AI_CONFIG: AiConfig = {
+  openRouterName1: 'OpenRouter #1 (Primary)',
   openRouterKey1: '',
-  openRouterModel1: 'google/gemini-2.0-flash-exp:free',
+  openRouterModel1: 'openrouter/free',
   openRouterEnabled1: true,
+  openRouterName2: 'OpenRouter #2 (Backup)',
   openRouterKey2: '',
   openRouterModel2: 'meta-llama/llama-3.3-70b-instruct:free',
   openRouterEnabled2: true,
+  geminiName: 'Google Gemini Direct',
   geminiApiKey: '',
   geminiModel: 'gemini-2.5-flash',
   geminiEnabled: true,
@@ -156,6 +170,34 @@ export default function AdminAiStudioTab({
   const [testingSlot, setTestingSlot] = useState<AiSlotKey | null>(null);
   const [testResults, setTestResults] = useState<Record<string, { ok: boolean; msg: string }>>({});
   const [saving, setSaving] = useState(false);
+  const [liveOpenRouterModels, setLiveOpenRouterModels] = useState<{ id: string; label: string }[]>(OPENROUTER_FREE_MODELS);
+  const [loadingOrModels, setLoadingOrModels] = useState(false);
+  const modelInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  const fetchOpenRouterFreeModels = async () => {
+    setLoadingOrModels(true);
+    try {
+      const res = await fetch('https://openrouter.ai/api/v1/models');
+      const data = await res.json();
+      const rows = Array.isArray(data?.data) ? data.data : [];
+      const freeList = rows
+        .filter((m: any) => typeof m?.id === 'string' && (m.id.endsWith(':free') || m.id === 'openrouter/free'))
+        .map((m: any) => ({
+          id: m.id as string,
+          label: `${m.name || m.id} (Free)`,
+        }));
+      const mergedMap = new Map<string, { id: string; label: string }>();
+      for (const item of [...OPENROUTER_FREE_MODELS, ...freeList]) {
+        if (!mergedMap.has(item.id)) mergedMap.set(item.id, item);
+      }
+      setLiveOpenRouterModels(Array.from(mergedMap.values()));
+      showToast(`✓ OpenRouter থেকে ${mergedMap.size}টি ফ্রি মডেলের তালিকা লোড হয়েছে!`);
+    } catch {
+      showToast('OpenRouter লাইভ তালিকা লোড করা যায়নি — নিচে সরাসরি যেকোনো মডেলের নাম লিখে ব্যবহার করতে পারবেন।');
+    } finally {
+      setLoadingOrModels(false);
+    }
+  };
 
   // New training doc draft
   const [newDocTitle, setNewDocTitle] = useState('');
@@ -305,21 +347,49 @@ export default function AdminAiStudioTab({
       </div>
 
       {/* 3-Slot Failover API & Model Selector Cards */}
+      <datalist id="openrouter-models-list">
+        {liveOpenRouterModels.map((p) => (
+          <option key={p.id} value={p.id}>
+            {p.label}
+          </option>
+        ))}
+      </datalist>
+      <datalist id="gemini-models-list">
+        {GEMINI_DIRECT_MODELS.map((p) => (
+          <option key={p.id} value={p.id}>
+            {p.label}
+          </option>
+        ))}
+      </datalist>
+
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
             <KeyRound className="w-4 h-4 text-indigo-600" />
             <span>৩টি API স্লট ও অগ্রাধিকার ক্রম (Failover Priority) — সবসময় পরিবর্তনযোগ্য</span>
           </h3>
-          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
-            ক্রম: {orderedSlotMeta.map((s, i) => `${i + 1}. ${s.slot}`).join(' → ')}
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={fetchOpenRouterFreeModels}
+              disabled={loadingOrModels}
+              className="text-[11px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-full flex items-center gap-1.5 transition disabled:opacity-60"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loadingOrModels ? 'animate-spin' : ''}`} />
+              <span>{loadingOrModels ? 'লোড হচ্ছে...' : 'OpenRouter লাইভ ফ্রি মডেল লোড করুন'}</span>
+            </button>
+            <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+              ক্রম: {orderedSlotMeta.map((s, i) => `${i + 1}. ${s.slot}`).join(' → ')}
+            </span>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-4">
           {orderedSlotMeta.map((meta, idx) => {
-            const keyVal = config[meta.keyField] || '';
-            const modelVal = config[meta.modelField] || meta.presets[0].id;
+            const presets = meta.slot === 'gemini' ? GEMINI_DIRECT_MODELS : liveOpenRouterModels;
+            const slotNameVal = config[meta.nameField] ?? meta.defaultName;
+            const keyVal = config[meta.keyField] ?? '';
+            const modelVal = config[meta.modelField] ?? presets[0].id;
             const enabledVal = config[meta.enabledField] !== false;
             const isRevealed = Boolean(revealedKeys[meta.slot]);
             const testResult = testResults[meta.slot];
@@ -337,7 +407,9 @@ export default function AdminAiStudioTab({
                       অগ্রাধিকার #{idx + 1}
                     </span>
                     <div>
-                      <h4 className="text-sm font-black text-slate-900">{meta.title}</h4>
+                      <h4 className="text-sm font-black text-slate-900">
+                        {slotNameVal.trim() || meta.title}
+                      </h4>
                       <p className="text-[11px] text-slate-500">{meta.subtitle}</p>
                     </div>
                   </div>
@@ -373,9 +445,23 @@ export default function AdminAiStudioTab({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {/* API Key Input */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {/* Custom Slot / Key Name Input */}
                   <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-700">
+                      স্লট / প্রোভাইডারের নাম (ইচ্ছামতো লিখুন)
+                    </label>
+                    <input
+                      type="text"
+                      value={slotNameVal}
+                      onChange={(e) => setConfig({ ...config, [meta.nameField]: e.target.value })}
+                      placeholder={meta.defaultName}
+                      className="w-full text-xs font-bold text-slate-900 bg-white border border-slate-200 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+
+                  {/* API Key Input */}
+                  <div className="space-y-1 md:col-span-2">
                     <label className="text-xs font-bold text-slate-700">
                       API Key (যেকোনো সময় এডিট/বদল করতে পারবেন)
                     </label>
@@ -385,7 +471,7 @@ export default function AdminAiStudioTab({
                         value={keyVal}
                         onChange={(e) => setConfig({ ...config, [meta.keyField]: e.target.value })}
                         placeholder={meta.placeholderKey}
-                        className="flex-1 text-xs font-mono border border-slate-200 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="flex-1 text-xs font-mono text-slate-900 bg-white border border-slate-200 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       />
                       <button
                         type="button"
@@ -397,37 +483,65 @@ export default function AdminAiStudioTab({
                       </button>
                     </div>
                   </div>
+                </div>
 
-                  {/* Model Dropdown + Custom Model ID */}
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
-                      <span>মডেল নির্বাচন (অথবা নিচে কাস্টম ID লিখুন)</span>
-                      <Cpu className="w-3.5 h-3.5 text-slate-400" />
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      <select
-                        value={meta.presets.some((p) => p.id === modelVal) ? modelVal : '__custom__'}
-                        onChange={(e) => {
-                          if (e.target.value !== '__custom__') {
-                            setConfig({ ...config, [meta.modelField]: e.target.value });
-                          }
-                        }}
-                        className="text-xs font-bold border border-slate-200 rounded-xl p-2.5 bg-white"
-                      >
-                        {meta.presets.map((p) => (
-                          <option key={p.id} value={p.id}>
-                            {p.label}
-                          </option>
-                        ))}
-                        <option value="__custom__">কাস্টম মডেল ID...</option>
-                      </select>
+                {/* Model Name Typing + Dropdown Preset Picker */}
+                <div className="space-y-1.5 bg-slate-50/80 border border-slate-200/80 rounded-2xl p-3">
+                  <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
+                    <span>মডেলের নাম লিখুন অথবা তালিকা থেকে বাছাই করুন (OpenRouter / Gemini Model Name)</span>
+                    <Cpu className="w-3.5 h-3.5 text-indigo-600" />
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <select
+                      value={presets.some((p) => p.id === modelVal) ? modelVal : '__custom__'}
+                      onChange={(e) => {
+                        const chosen = e.target.value;
+                        if (chosen === '__custom__') {
+                          setConfig({ ...config, [meta.modelField]: '' });
+                          setTimeout(() => modelInputRefs.current[meta.slot]?.focus(), 20);
+                        } else {
+                          setConfig({ ...config, [meta.modelField]: chosen });
+                        }
+                      }}
+                      className="text-xs font-bold text-slate-900 border border-slate-200 rounded-xl p-2.5 bg-white"
+                    >
+                      {presets.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.label}
+                        </option>
+                      ))}
+                      <option value="__custom__">✏️ নিজের মতো মডেলের নাম লিখুন (Custom Model Name)</option>
+                    </select>
+
+                    <div className="relative flex items-center">
                       <input
+                        ref={(el) => {
+                          modelInputRefs.current[meta.slot] = el;
+                        }}
                         type="text"
+                        list={meta.slot === 'gemini' ? 'gemini-models-list' : 'openrouter-models-list'}
                         value={modelVal}
                         onChange={(e) => setConfig({ ...config, [meta.modelField]: e.target.value })}
-                        placeholder="কাস্টম মডেল আইডি"
-                        className="text-xs font-mono border border-slate-200 rounded-xl p-2.5"
+                        placeholder={
+                          meta.slot === 'gemini'
+                            ? 'মডেল নাম লিখুন: যেমন gemini-2.5-flash'
+                            : 'মডেল নাম লিখুন: যেমন openrouter/free বা meta-llama/llama-3.3-70b-instruct:free'
+                        }
+                        className="w-full text-xs font-mono text-slate-900 border border-indigo-200 bg-white rounded-xl p-2.5 pr-8 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       />
+                      {modelVal && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setConfig({ ...config, [meta.modelField]: '' });
+                            setTimeout(() => modelInputRefs.current[meta.slot]?.focus(), 20);
+                          }}
+                          className="absolute right-2 p-1 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50"
+                          title="মুছে নিজের মডেল নাম লিখুন"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
