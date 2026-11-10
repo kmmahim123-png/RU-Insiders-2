@@ -164,6 +164,9 @@ export interface AiConfig {
   trainingDocs?: AiTrainingDoc[];
   mcpEnabled?: boolean;
   mcpSecretToken?: string;
+  decisionRouterEnabled?: boolean;
+  decisionRouterModel?: string;
+  decisionRouterApiKey?: string;
 }
 
 export interface ClubApplication {

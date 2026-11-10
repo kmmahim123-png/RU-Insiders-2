@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readDb, DatabaseSchema } from '@/lib/db';
 import { AI_MCP_TOOLS, executeAiTool, buildLiveWebsiteSnapshot } from '@/lib/aiTools';
+import { routeChatIntentWithJev, testJevDecisionEngine } from '@/lib/jevDecision';
 import { AiConfig, AiSlotKey } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -379,7 +380,24 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 2. Public Visitor Chat with Automatic 3-Slot Failover + MCP Tools
+    // 1.5 Admin live test for OpenRouter Decisions API (`typesafe/jev-1.14`)
+    if (action === 'TEST_DECISION') {
+      const cleanPass = (password || '').trim();
+      if (cleanPass !== db.settings.superAdminPassword) {
+        return NextResponse.json({ ok: false, error: 'শুধুমাত্র সুপার অ্যাডমিন টেস্ট করতে পারবেন।' }, { status: 401 });
+      }
+      try {
+        const resOut = await testJevDecisionEngine(aiCfg, apiKey, model);
+        return NextResponse.json({ ok: true, ...resOut });
+      } catch (decErr: any) {
+        return NextResponse.json(
+          { ok: false, error: decErr?.message || 'Decision API টেস্ট ব্যর্থ হয়েছে' },
+          { status: 400 }
+        );
+      }
+    }
+
+    // 2. Public Visitor Chat with Automatic 3-Slot Failover + MCP Tools + Optional Jev Pre-Router
     const chatMessages: ChatMessage[] = Array.isArray(messages) ? messages.slice(-10) : [];
     if (chatMessages.length === 0) {
       return NextResponse.json({ ok: false, error: 'মেসেজ লিখুন।' }, { status: 400 });
@@ -395,7 +413,15 @@ export async function POST(req: NextRequest) {
       }, { status: 503 });
     }
 
-    const systemPrompt = buildSystemInstruction(db);
+    const lastUserMessage = [...chatMessages].reverse().find((m) => m.role === 'user')?.content || '';
+    const decisionRoute = await routeChatIntentWithJev(lastUserMessage, aiCfg);
+
+    let systemPrompt = buildSystemInstruction(db);
+    if (decisionRoute?.used && decisionRoute.prefetchedTool && decisionRoute.prefetchedData) {
+      systemPrompt += `\n\n=== Jev ডিসিশন প্রি-রাউটার ফলাফল (উদ্দেশ্য: ${decisionRoute.intent}, কনফিডেন্স: ${Math.round(
+        decisionRoute.confidence * 100
+      )}%, প্রি-ফেচ টুল: ${decisionRoute.prefetchedTool}) ===\n${JSON.stringify(decisionRoute.prefetchedData)}\n(এই সরাসরি ডেটা ব্যবহার করে ভিজিটরকে দ্রুত ও নির্ভুল বাংলায় উত্তর দাও।)`;
+    }
 
     const failures: string[] = [];
     for (const s of orderedSlots) {
@@ -414,14 +440,27 @@ export async function POST(req: NextRequest) {
             ? await runGeminiSlot(keyForSlot, s.model, systemPrompt, chatMessages)
             : await runOpenRouterSlot(keyForSlot, s.model, systemPrompt, chatMessages);
 
+        const combinedTools = decisionRoute?.prefetchedTool
+          ? Array.from(new Set([decisionRoute.prefetchedTool, ...out.usedTools]))
+          : out.usedTools;
+
         return NextResponse.json({
           ok: true,
           reply: out.reply,
-          usedTools: out.usedTools,
+          usedTools: combinedTools,
           createdOrderId: out.createdOrderId || null,
           providerLabel: s.label,
           modelUsed: s.model,
           failoverCount: failures.length,
+          decisionRoute: decisionRoute?.used
+            ? {
+                model: decisionRoute.model,
+                intent: decisionRoute.intent,
+                confidence: decisionRoute.confidence,
+                isUrgent: decisionRoute.isUrgent,
+                latencyMs: decisionRoute.latencyMs,
+              }
+            : null,
         });
       } catch (slotErr: any) {
         failures.push(`${s.label} (${s.model}): ${slotErr?.message || 'failed'}`);

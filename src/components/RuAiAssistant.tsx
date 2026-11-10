@@ -25,6 +25,13 @@ interface AiChatMsg {
   modelUsed?: string;
   usedTools?: string[];
   createdOrderId?: string | null;
+  decisionRoute?: {
+    model: string;
+    intent: string;
+    confidence: number;
+    isUrgent?: boolean;
+    latencyMs?: number;
+  } | null;
 }
 
 const QUICK_PROMPTS = [
@@ -87,6 +94,7 @@ export default function RuAiAssistant({ mode = 'floating' }: { mode?: 'embedded'
             modelUsed: data.modelUsed,
             usedTools: data.usedTools,
             createdOrderId: data.createdOrderId,
+            decisionRoute: data.decisionRoute || null,
           },
         ]);
       } else {
@@ -200,6 +208,11 @@ export default function RuAiAssistant({ mode = 'floating' }: { mode?: 'embedded'
             {m.role === 'assistant' && m.providerLabel && (
               <div className="flex flex-wrap items-center gap-1 mt-1 px-1 text-[10px] text-slate-400 font-semibold">
                 <span>{m.providerLabel}</span>
+                {m.decisionRoute && (
+                  <span className="bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded font-bold">
+                    ⚡ Jev: {m.decisionRoute.intent} ({Math.round((m.decisionRoute.confidence || 0) * 100)}%)
+                  </span>
+                )}
                 {m.usedTools && m.usedTools.length > 0 && (
                   <span className="bg-slate-200/70 text-slate-600 px-1.5 py-0.2 rounded">
                     Tools: {Array.from(new Set(m.usedTools)).join(', ')}

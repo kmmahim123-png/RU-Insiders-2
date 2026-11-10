@@ -139,6 +139,9 @@ const DEFAULT_AI_CONFIG: AiConfig = {
   trainingDocs: [],
   mcpEnabled: true,
   mcpSecretToken: '',
+  decisionRouterEnabled: false,
+  decisionRouterModel: 'typesafe/jev-1.14',
+  decisionRouterApiKey: '',
 };
 
 /** Admin AI & MCP Studio managing 3 hot-swappable API failover slots, training docs, and MCP access. */
@@ -226,6 +229,40 @@ export default function AdminAiStudioTab({
 
   const [mcpEndpointUrl, setMcpEndpointUrl] = useState('https://ruinsider-2.vercel.app/api/mcp');
   const [copiedMcp, setCopiedMcp] = useState(false);
+  const [testingDecision, setTestingDecision] = useState(false);
+  const [decisionTestResult, setDecisionTestResult] = useState<{ ok: boolean; msg: string } | null>(null);
+
+  const handleTestDecisionRouter = async () => {
+    setTestingDecision(true);
+    setDecisionTestResult(null);
+    try {
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'TEST_DECISION',
+          password,
+          apiKey: config.decisionRouterApiKey,
+          model: config.decisionRouterModel || 'typesafe/jev-1.14',
+        }),
+      });
+      const data = await safeParseApiResponse(res);
+      if (data.ok) {
+        setDecisionTestResult({
+          ok: true,
+          msg: `সফল! (${data.latencyMs}ms • ${data.model}) — Intent: "${data.intent}" (${Math.round(
+            (data.confidence || 0) * 100
+          )}% confidence)`,
+        });
+      } else {
+        setDecisionTestResult({ ok: false, msg: data.error || 'Decision Router টেস্ট ব্যর্থ হয়েছে' });
+      }
+    } catch (err: any) {
+      setDecisionTestResult({ ok: false, msg: err.message || 'নেটওয়ার্ক ত্রুটি' });
+    } finally {
+      setTestingDecision(false);
+    }
+  };
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -589,6 +626,84 @@ export default function AdminAiStudioTab({
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Optional TypeSafe Jev Decision Pre-Router Card */}
+      <div className="bg-white rounded-3xl border border-amber-200 p-5 sm:p-6 shadow-xs space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div className="flex items-center gap-2">
+            <Zap className="w-5 h-5 text-amber-500" />
+            <div>
+              <h3 className="text-base font-black text-slate-900">
+                ঐচ্ছিক স্মার্ট ডিসিশন প্রি-রাউটার (TypeSafe Jev Decision Model)
+              </h3>
+              <p className="text-xs text-slate-500">
+                এটি চ্যাটের উত্তর লিখবে না — বরং OpenRouter Decisions API দিয়ে সেকেন্ডের ভগ্নাংশে রক্তদান, অর্ডার নাকি শিক্ষকের তথ্য চাওয়া হয়েছে তা ধরে মূল চ্যাট মডেলের কাজ স্মুথ করবে।
+              </p>
+            </div>
+          </div>
+
+          <label className="flex items-center gap-2 text-xs font-bold text-slate-800 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl cursor-pointer">
+            <input
+              type="checkbox"
+              checked={Boolean(config.decisionRouterEnabled)}
+              onChange={(e) => setConfig({ ...config, decisionRouterEnabled: e.target.checked })}
+              className="rounded text-amber-600"
+            />
+            <span>Jev ডিসিশন রাউটার চালু করুন</span>
+          </label>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-700">Decision Model ID</label>
+            <input
+              type="text"
+              value={config.decisionRouterModel ?? 'typesafe/jev-1.14'}
+              onChange={(e) => setConfig({ ...config, decisionRouterModel: e.target.value })}
+              placeholder="typesafe/jev-1.14"
+              className="w-full text-xs font-mono font-bold text-slate-900 bg-white border border-slate-200 rounded-xl p-2.5"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-700">
+              OpenRouter API Key (খালি রাখলে উপরের স্লট #১ ব্যবহার হবে)
+            </label>
+            <input
+              type="password"
+              value={config.decisionRouterApiKey ?? ''}
+              onChange={(e) => setConfig({ ...config, decisionRouterApiKey: e.target.value })}
+              placeholder="খালি রাখলে স্লট #১-এর OpenRouter Key অটো ব্যবহার হবে"
+              className="w-full text-xs font-mono text-slate-900 bg-white border border-slate-200 rounded-xl p-2.5"
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={handleTestDecisionRouter}
+            disabled={testingDecision}
+            className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 disabled:opacity-50 transition"
+          >
+            <Zap className="w-3.5 h-3.5" />
+            <span>{testingDecision ? 'টেস্ট হচ্ছে...' : '⚡ Jev Decision টেস্ট করুন'}</span>
+          </button>
+
+          {decisionTestResult && (
+            <div
+              className={`text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 ${
+                decisionTestResult.ok
+                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                  : 'bg-red-50 text-red-700 border border-red-200'
+              }`}
+            >
+              {decisionTestResult.ok ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
+              <span>{decisionTestResult.msg}</span>
+            </div>
+          )}
         </div>
       </div>
 
