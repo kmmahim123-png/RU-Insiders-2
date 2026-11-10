@@ -654,7 +654,7 @@ export default function AdminPage() {
   };
 
   // Order Status Update
-  const handleUpdateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
+  const handleUpdateOrderStatus = async (orderId: string, newStatus: Order['status'], cancellationReason?: string) => {
     const currentPass = password.trim() || (typeof window !== 'undefined' ? sessionStorage.getItem('ru_admin_pass') || '' : '');
     try {
       const res = await fetch('/api/store', {
@@ -663,7 +663,7 @@ export default function AdminPage() {
         body: JSON.stringify({
           action: 'UPDATE_ORDER_STATUS',
           password: currentPass,
-          payload: { orderId, status: newStatus },
+          payload: { orderId, status: newStatus, ...(cancellationReason ? { cancellationReason } : {}) },
         }),
       });
       const data = await safeParseApiResponse(res);
@@ -1895,34 +1895,110 @@ export default function AdminPage() {
                           <td className="p-3 text-center">
                             <span
                               className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-                                order.status === 'Delivered'
+                                order.status === 'delivered' || order.status === 'Delivered'
                                   ? 'bg-emerald-100 text-emerald-800'
-                                  : order.status === 'Out for Delivery'
-                                  ? 'bg-blue-100 text-blue-800'
-                                  : order.status === 'Confirmed'
+                                  : order.status === 'with_rider' || order.status === 'Out for Delivery'
                                   ? 'bg-indigo-100 text-indigo-800'
-                                  : order.status === 'Cancelled'
+                                  : order.status === 'ready' || order.status === 'Confirmed'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : order.status === 'cancelled' || order.status === 'Cancelled'
                                   ? 'bg-red-100 text-red-800'
                                   : 'bg-amber-100 text-amber-800'
                               }`}
                             >
-                              {order.status}
+                              {order.status === 'intake' || order.status === 'Pending'
+                                ? '১. ইনটেক'
+                                : order.status === 'ready' || order.status === 'Confirmed'
+                                ? '২. রেডি'
+                                : order.status === 'with_rider' || order.status === 'Out for Delivery'
+                                ? '৩. রাইডারের কাছে'
+                                : order.status === 'delivered' || order.status === 'Delivered'
+                                ? '৪. ডেলিভারড'
+                                : '৫. ক্যান্সেল'}
                             </span>
+                            {order.steadfastTrackingCode && (
+                              <span className="block text-[9px] font-mono text-indigo-700 mt-1">
+                                📦 {order.steadfastTrackingCode}
+                              </span>
+                            )}
                           </td>
-                          <td className="p-3 text-right">
+                          <td className="p-3 text-right space-y-1.5">
                             <select
-                              value={order.status}
-                              onChange={(e) =>
-                                handleUpdateOrderStatus(order.orderId, e.target.value as Order['status'])
+                              value={
+                                order.status === 'Pending'
+                                  ? 'intake'
+                                  : order.status === 'Confirmed'
+                                  ? 'ready'
+                                  : order.status === 'Out for Delivery'
+                                  ? 'with_rider'
+                                  : order.status === 'Delivered'
+                                  ? 'delivered'
+                                  : order.status === 'Cancelled'
+                                  ? 'cancelled'
+                                  : order.status
                               }
-                              className="text-[11px] font-bold border border-slate-200 rounded-lg p-1 bg-white"
+                              onChange={(e) => {
+                                const nextSt = e.target.value as Order['status'];
+                                let reason = '';
+                                if (nextSt === 'cancelled') {
+                                  reason = prompt('অর্ডার বাতিলের কারণ লিখুন (ঐচ্ছিক):') || 'অ্যাডমিন কর্তৃক বাতিল';
+                                }
+                                handleUpdateOrderStatus(order.orderId, nextSt, reason);
+                              }}
+                              className="text-[11px] font-bold border border-slate-200 rounded-lg p-1 bg-white block ml-auto"
                             >
-                              <option value="Pending">Pending</option>
-                              <option value="Confirmed">Confirmed</option>
-                              <option value="Out for Delivery">Out for Delivery</option>
-                              <option value="Delivered">Delivered</option>
-                              <option value="Cancelled">Cancelled</option>
+                              <option value="intake">১. ইনটেক</option>
+                              <option value="ready">২. রেডি</option>
+                              <option value="with_rider">৩. রাইডারকে দিলাম</option>
+                              <option value="delivered">৪. ডেলিভারড</option>
+                              <option value="cancelled">৫. ক্যান্সেল</option>
                             </select>
+
+                            <div className="flex items-center justify-end gap-1">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const msg = `🛵 ডেলিভারি রিকোয়েস্ট! #${order.orderId}\nগ্রাহক: ${order.customerName} (${order.phone})\nঠিকানা: ${order.addressDetails}\nমোট (COD): ৳${order.totalAmount}\nআইটেম: ${order.items.map((i) => `${i.nameBn}x${i.quantity}`).join(', ')}`;
+                                  navigator.clipboard.writeText(msg);
+                                  if (settings?.deliveryWhatsAppGroupUrl && settings.deliveryWhatsAppGroupUrl !== 'https://chat.whatsapp.com/') {
+                                    window.open(settings.deliveryWhatsAppGroupUrl, '_blank');
+                                  }
+                                  showToast('✅ রাইডার গ্রুপ মেসেজ কপি হয়েছে!');
+                                }}
+                                className="px-2 py-0.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded text-[10px] font-bold"
+                                title="রাইডার WhatsApp গ্রুপ মেসেজ কপি করুন"
+                              >
+                                🛵 রাইডার গ্রুপ
+                              </button>
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  const currentPass = password.trim() || (typeof window !== 'undefined' ? sessionStorage.getItem('ru_admin_pass') || '' : '');
+                                  const res = await fetch('/api/steadfast', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                      action: 'CREATE_ORDER',
+                                      password: currentPass,
+                                      orderId: order.orderId,
+                                    }),
+                                  });
+                                  const d = await res.json();
+                                  if (d.ok) {
+                                    showToast(`✅ Steadfast বুকিং সফল! কোড: ${d.consignment?.tracking_code}`);
+                                    if (d.order) {
+                                      setOrders((prev) => prev.map((o) => (o.orderId === order.orderId ? d.order : o)));
+                                    }
+                                  } else {
+                                    alert(d.error || 'Steadfast API ত্রুটি');
+                                  }
+                                }}
+                                className="px-2 py-0.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 rounded text-[10px] font-bold"
+                                title="Steadfast Courier-এ পাঠান"
+                              >
+                                📦 Steadfast
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -2773,7 +2849,29 @@ export default function AdminPage() {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const targetUrl = typeof window !== 'undefined' ? `${window.location.origin}/merchant` : 'https://ruinsider-2.vercel.app/merchant';
+                      const htmlLauncher = `<!DOCTYPE html><html lang="bn"><head><meta charset="utf-8"><title>RU Merchant Hub App</title><meta http-equiv="refresh" content="0;url=${targetUrl}"></head><body style="font-family:sans-serif;text-align:center;padding:40px;background:#064e3b;color:#fff;"><h2>RU Merchant Hub লোড হচ্ছে...</h2><p>অটোমেটিক চালু না হলে <a href="${targetUrl}" style="color:#fbbf24;">এখানে ক্লিক করুন</a>।</p><script>window.location.replace("${targetUrl}");</script></body></html>`;
+                      const blob = new Blob([htmlLauncher], { type: 'text/html;charset=utf-8' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = 'RU-Merchant-Dashboard-App.html';
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                      showToast('✅ স্বতন্ত্র মার্চেন্ট ড্যাশবোর্ড লঞ্চার (.html) ডাউনলোড হয়েছে!');
+                    }}
+                    className="bg-amber-400 hover:bg-amber-300 text-slate-950 px-4 py-2.5 rounded-2xl text-xs font-black flex items-center gap-1.5 shadow transition cursor-pointer"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>মার্চেন্ট অ্যাপ ডাউনলোড (.html)</span>
+                  </button>
+
                   <Link
                     href="/merchant"
                     target="_blank"
@@ -3282,6 +3380,71 @@ CREATE POLICY "Allow public read uploads" ON storage.objects FOR SELECT USING (b
                           </button>
                         </div>
                       ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Logistics & Steadfast Courier & Delivery Rider WhatsApp Group */}
+                <div className="pt-4 border-t border-slate-100 space-y-4">
+                  <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                    <span>🛵 ডেলিভারি রাইডার WhatsApp গ্রুপ ও Steadfast Courier API সেটিংস</span>
+                  </h4>
+
+                  <div className="p-4 bg-emerald-50/70 border border-emerald-200 rounded-2xl space-y-2">
+                    <label className="text-xs font-bold text-emerald-950 block">
+                      অফিশিয়াল ডেলিভারি রাইডার WhatsApp গ্রুপ লিংক (সব মার্চেন্ট ও অ্যাডমিনের জন্য):
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://chat.whatsapp.com/..."
+                      value={settings.deliveryWhatsAppGroupUrl || ''}
+                      onChange={(e) => setSettings({ ...settings, deliveryWhatsAppGroupUrl: e.target.value })}
+                      className="w-full text-xs sm:text-sm border border-emerald-200 rounded-xl p-2.5 bg-white font-semibold"
+                    />
+                    <p className="text-[11px] text-emerald-800">
+                      এই গ্রুপে সমস্ত রাইডাররা যুক্ত থাকবে — অর্ডার রেডি হলে মার্চেন্ট এখানে পোস্ট করলে আগ্রহী রাইডার ডেলিভারি করবে।
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-blue-50/70 border border-blue-200 rounded-2xl space-y-2">
+                    <label className="text-xs font-bold text-blue-950 block">
+                      কেন্দ্রীয় Meta / Facebook Pixel ID (সকল স্টোরফ্রন্ট পেজে ফায়ার হবে):
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="যেমন: 987654321098765"
+                      value={settings.defaultFacebookPixelId || ''}
+                      onChange={(e) => setSettings({ ...settings, defaultFacebookPixelId: e.target.value })}
+                      className="w-full text-xs sm:text-sm border border-blue-200 rounded-xl p-2.5 bg-white font-mono font-bold"
+                    />
+                    <p className="text-[11px] text-blue-800">
+                      এখানে পিক্সেল আইডি বসালে ওয়েবসাইটের প্রতিটি ভিজিট (PageView), ViewContent, AddToCart, InitiateCheckout এবং Purchase ইভেন্ট স্বয়ংক্রিয়ভাবে ট্র্যাক হবে (এবং প্রতিটি মার্চেন্টের নিজস্ব পিক্সেলও পাশাপাশি ফায়ার হবে)।
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-indigo-50/70 border border-indigo-200 rounded-2xl space-y-3">
+                    <h5 className="text-xs font-black text-indigo-950">কেন্দ্রীয় Steadfast Courier API Credentials (portal.packzy.com):</h5>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-700">Steadfast Api-Key</label>
+                        <input
+                          type="text"
+                          placeholder="Central Api-Key"
+                          value={settings.steadfastApiKey || ''}
+                          onChange={(e) => setSettings({ ...settings, steadfastApiKey: e.target.value })}
+                          className="w-full text-xs border border-indigo-200 rounded-xl p-2.5 bg-white font-mono"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-700">Steadfast Secret-Key</label>
+                        <input
+                          type="password"
+                          placeholder="Central Secret-Key"
+                          value={settings.steadfastSecretKey || ''}
+                          onChange={(e) => setSettings({ ...settings, steadfastSecretKey: e.target.value })}
+                          className="w-full text-xs border border-indigo-200 rounded-xl p-2.5 bg-white font-mono"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>

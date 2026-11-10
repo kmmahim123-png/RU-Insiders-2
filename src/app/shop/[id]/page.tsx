@@ -16,6 +16,7 @@ import {
   X,
   CreditCard,
 } from 'lucide-react';
+import { trackMetaEvent } from '@/lib/metaPixel';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -31,6 +32,7 @@ export default function ProductDetailPage() {
   const [added, setAdded] = useState(false);
   const [showSizeChart, setShowSizeChart] = useState(false);
   const [whatsappNumber, setWhatsappNumber] = useState('8801700000000');
+  const [defaultPixelId, setDefaultPixelId] = useState('');
 
   useEffect(() => {
     fetch('/api/store')
@@ -39,12 +41,32 @@ export default function ProductDetailPage() {
         if (data.settings?.whatsappNumber) {
           setWhatsappNumber(data.settings.whatsappNumber);
         }
+        const sitePixel = data.settings?.defaultFacebookPixelId || '';
+        if (sitePixel) setDefaultPixelId(sitePixel);
+
         if (data.products) {
           const found = data.products.find((p: Product) => p.id === productId);
           if (found) {
             setProduct(found);
             if (found.sizes?.length) setSelectedSize(found.sizes[0]);
             if (found.weightOptions?.length) setSelectedWeight(found.weightOptions[0]);
+
+            // Fire Meta ViewContent event for product merchant pixel & default site pixel
+            const viewPrice =
+              found.productType === 'food_weight' && found.weightOptions?.length
+                ? found.weightOptions[0].price
+                : found.price;
+            trackMetaEvent(
+              'ViewContent',
+              {
+                content_ids: [found.id],
+                content_name: found.nameBn,
+                content_type: 'product',
+                value: viewPrice,
+                currency: 'BDT',
+              },
+              [found.facebookPixelId, sitePixel]
+            );
           }
         }
       })
@@ -106,11 +128,26 @@ export default function ProductDetailPage() {
           selectedOption: currentOptionLabel,
           unitPrice: currentPrice,
           quantity: quantity,
+          merchantId: product.merchantId,
+          merchantName: product.merchantName,
+          facebookPixelId: product.facebookPixelId,
         });
       }
 
       localStorage.setItem('ru_cart_items', JSON.stringify(cart));
       window.dispatchEvent(new Event('ru_cart_updated'));
+
+      trackMetaEvent(
+        'AddToCart',
+        {
+          content_ids: [product.id],
+          content_name: product.nameBn,
+          content_type: 'product',
+          value: currentPrice * quantity,
+          currency: 'BDT',
+        },
+        [product.facebookPixelId, defaultPixelId]
+      );
 
       setAdded(true);
       setTimeout(() => setAdded(false), 2000);

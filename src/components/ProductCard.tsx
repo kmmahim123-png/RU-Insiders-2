@@ -6,6 +6,7 @@ import { Product } from '@/types';
 import { ShoppingBag, Check, Eye } from 'lucide-react';
 import CardTilt from '@/components/CardTilt';
 import { triggerFlyToCart } from '@/components/CartDrawer';
+import { trackMetaEvent } from '@/lib/metaPixel';
 
 interface ProductCardProps {
   product: Product;
@@ -46,11 +47,29 @@ export default function ProductCard({ product }: ProductCardProps) {
           selectedOption: defaultOption,
           unitPrice: defaultPrice,
           quantity: 1,
+          merchantId: product.merchantId,
+          merchantName: product.merchantName,
+          facebookPixelId: product.facebookPixelId,
         });
       }
 
       localStorage.setItem('ru_cart_items', JSON.stringify(cart));
       window.dispatchEvent(new Event('ru_cart_updated'));
+
+      // Fire Meta AddToCart event for merchant pixel if configured
+      if (product.facebookPixelId) {
+        trackMetaEvent(
+          'AddToCart',
+          {
+            content_ids: [product.id],
+            content_name: product.nameBn,
+            content_type: 'product',
+            value: defaultPrice,
+            currency: 'BDT',
+          },
+          [product.facebookPixelId]
+        );
+      }
 
       // Flying particle animation to cart icon
       triggerFlyToCart(

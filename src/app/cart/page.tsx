@@ -17,6 +17,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import { Order, OrderItem } from '@/types';
+import { trackMetaEvent } from '@/lib/metaPixel';
 
 export default function CartAndCheckoutPage() {
   const [cartItems, setCartItems] = useState<OrderItem[]>([]);
@@ -34,10 +35,13 @@ export default function CartAndCheckoutPage() {
     nationwide: 100,
   });
   const [whatsappNumber, setWhatsappNumber] = useState('8801700000000');
+  const [defaultPixelId, setDefaultPixelId] = useState('');
 
   useEffect(() => {
+    let loadedItems: OrderItem[] = [];
     try {
       const saved = JSON.parse(localStorage.getItem('ru_cart_items') || '[]');
+      loadedItems = saved;
       setCartItems(saved);
 
       const savedUser = JSON.parse(localStorage.getItem('ru_user_session') || 'null');
@@ -49,6 +53,23 @@ export default function CartAndCheckoutPage() {
       .then((data) => {
         if (data.settings?.deliveryCharges) setDeliveryCharges(data.settings.deliveryCharges);
         if (data.settings?.whatsappNumber) setWhatsappNumber(data.settings.whatsappNumber);
+        const sitePixel = data.settings?.defaultFacebookPixelId || '';
+        if (sitePixel) setDefaultPixelId(sitePixel);
+
+        if (loadedItems.length > 0) {
+          const itemPixels = loadedItems.map((i) => i.facebookPixelId).filter(Boolean);
+          const cartSubtotal = loadedItems.reduce((sum, i) => sum + (i.unitPrice || 0) * (i.quantity || 1), 0);
+          trackMetaEvent(
+            'InitiateCheckout',
+            {
+              content_ids: loadedItems.map((i) => i.productId),
+              num_items: loadedItems.reduce((sum, i) => sum + (i.quantity || 1), 0),
+              value: cartSubtotal,
+              currency: 'BDT',
+            },
+            [...itemPixels, sitePixel]
+          );
+        }
       })
       .catch(() => {});
   }, []);
@@ -120,6 +141,20 @@ export default function CartAndCheckoutPage() {
 
       const data = await res.json();
       if (data.ok && data.order) {
+        // Fire Meta Pixel Purchase Conversion per merchant pixel & central site pixel
+        const purchasePixels = cartItems.map((i) => i.facebookPixelId).filter(Boolean);
+        trackMetaEvent(
+          'Purchase',
+          {
+            content_ids: cartItems.map((i) => i.productId),
+            content_type: 'product',
+            num_items: cartItems.reduce((s, i) => s + (i.quantity || 1), 0),
+            value: data.order.totalAmount,
+            currency: 'BDT',
+          },
+          [...purchasePixels, defaultPixelId]
+        );
+
         setPlacedOrder(data.order);
         // Clear Cart
         localStorage.removeItem('ru_cart_items');
@@ -283,14 +318,19 @@ export default function CartAndCheckoutPage() {
           </div>
 
           {/* Payment Method & Terms */}
-          <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 text-xs text-amber-950 font-medium flex items-center justify-between">
-            <div>
-              <span className="font-extrabold block">পরিশোধের মাধ্যম: ১০০% ক্যাশ অন ডেলিভারি (COD)</span>
-              <span>পণ্য হাতে পেয়ে চেক করে ডেলিভারিম্যানকে টাকা বুঝিয়ে দিন।</span>
+          <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 text-xs text-amber-950 font-medium space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <span className="font-extrabold block">পরিশোধের মাধ্যম: ১০০% ক্যাশ অন ডেলিভারি (COD)</span>
+                <span>পণ্য হাতে পেয়ে চেক করে ডেলিভারিম্যানকে টাকা বুঝিয়ে দিন।</span>
+              </div>
+              <span className="bg-amber-400 text-slate-950 text-[10px] font-black px-2.5 py-1 rounded-full uppercase shrink-0">
+                1. Intake
+              </span>
             </div>
-            <span className="bg-amber-400 text-slate-950 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
-              Pending COD
-            </span>
+            <p className="text-[11px] text-amber-900 pt-1.5 border-t border-amber-200/70">
+              📌 <strong>বাতিল নীতি:</strong> অর্ডার করার পর কাস্টমার নিজে সরাসরি ক্যান্সেল করতে পারবেন না; বাতিল বা পরিবর্তন করতে চাইলে আগে আমাদের WhatsApp-এ মেসেজ করে জানাতে হবে।
+            </p>
           </div>
 
           {/* Print Button */}

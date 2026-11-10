@@ -4,8 +4,61 @@ import { supabase, checkSupabaseStatus } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const db = await readDb();
+  const merchantParam = req.nextUrl.searchParams.get('merchant');
+  const formatParam = req.nextUrl.searchParams.get('format');
+
+  // Enrich product pixel IDs from their owning merchant dynamically
+  const enrichedProducts = db.products.map((p) => {
+    const owner = (db.merchants || []).find((m) => m.id === p.merchantId);
+    const resolvedPixel = owner?.facebookPixelId || p.facebookPixelId || '';
+    return resolvedPixel ? { ...p, facebookPixelId: resolvedPixel } : p;
+  });
+
+  const filteredProducts = merchantParam
+    ? enrichedProducts.filter((p) => p.merchantId === merchantParam)
+    : enrichedProducts;
+
+  // Support Meta Commerce Manager / Google Merchant CSV Feed export (?format=csv)
+  if (formatParam === 'csv') {
+    const origin = req.nextUrl.origin || 'https://ruinsider-2.vercel.app';
+    const headers = [
+      'id',
+      'title',
+      'description',
+      'availability',
+      'condition',
+      'price',
+      'link',
+      'image_link',
+      'brand',
+      'google_product_category',
+    ];
+    const escapeCsv = (val: string) => `"${String(val || '').replace(/"/g, '""')}"`;
+    const rows = filteredProducts.map((p) => [
+      escapeCsv(p.id),
+      escapeCsv(p.nameBn),
+      escapeCsv(p.shortSummary || p.nameBn),
+      p.inStock ? 'in stock' : 'out of stock',
+      'new',
+      `${p.price} BDT`,
+      `${origin}/shop/${p.id}`,
+      p.images?.[0]?.startsWith('http') ? p.images[0] : `${origin}${p.images?.[0] || '/logo.png'}`,
+      escapeCsv(p.merchantName || 'RU Insiders'),
+      escapeCsv(p.category || 'Apparel & Accessories'),
+    ]);
+    const csvBody = '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    return new NextResponse(csvBody, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename="ru-insiders-${merchantParam || 'all'}-catalog.csv"`,
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+      },
+    });
+  }
+
   // Never leak passwords to public client
   const safeClubs = db.clubs.map(({ password, ...rest }) => rest);
 
@@ -66,19 +119,20 @@ export async function GET() {
   // Safe merchants view for public catalog
   const publicMerchants = (db.merchants || [])
     .filter((m) => m.status === 'active')
-    .map(({ password, payoutPhone, ...rest }) => rest);
+    .map(({ password, payoutPhone, steadfastApiKey, steadfastSecretKey, ...rest }) => rest);
 
   return NextResponse.json(
     {
       settings: {
         whatsappNumber: db.settings.whatsappNumber,
+        deliveryWhatsAppGroupUrl: db.settings.deliveryWhatsAppGroupUrl || '',
         deliveryCharges: db.settings.deliveryCharges,
         categories: db.settings.categories,
         breakingNews: activeBreakingNews,
         breakingNewsItems: activeBreakingItems,
         defaultFacebookPixelId: db.settings.defaultFacebookPixelId || '',
       },
-      products: db.products,
+      products: filteredProducts,
       merchants: publicMerchants,
       mapSpots: db.mapSpots,
       clubs: safeClubs,
@@ -197,7 +251,15 @@ export async function POST(req: NextRequest) {
         subtotal: calculatedSubtotal,
         deliveryCharge,
         totalAmount: calculatedSubtotal + deliveryCharge,
-        status: 'Pending' as const,
+        status: 'intake' as const,
+        statusHistory: [
+          {
+            status: 'intake',
+            timestamp: new Date().toISOString(),
+            note: 'কাস্টমার অর্ডার সাবমিট করেছেন (১. ইনটেক)',
+            actor: 'customer',
+          },
+        ],
         createdAt: new Date().toISOString(),
       };
 
@@ -362,17 +424,48 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, merchant: newMerchant });
     }
 
-    // 7.8. Merchant Direct Login
+    // 7.8. Merchant Direct Login (supports merchant credentials OR Super Admin password for master hub access & download)
     if (action === 'MERCHANT_LOGIN') {
       const { identifier, password: merchantPass } = payload || {};
       const cleanId = (identifier || '').trim().toLowerCase();
       const cleanP = (merchantPass || '').trim();
 
+      // Allow Super Admin password to open Master Merchant Studio + App Download
+      if (cleanP && cleanP === db.settings.superAdminPassword) {
+        return NextResponse.json({
+          ok: true,
+          isAdminSession: true,
+          merchant: {
+            id: 'admin-master',
+            shopName: 'RU Insiders মাস্টার মার্চেন্ট',
+            ownerName: 'সুপার অ্যাডমিন',
+            phone: db.settings.whatsappNumber || '8801700000000',
+            email: '',
+            password: cleanP,
+            status: 'active' as const,
+            category: 'কেন্দ্রীয় স্টোর',
+            address: 'রাজশাহী বিশ্ববিদ্যালয় ক্যাম্পাস',
+            payoutPhone: db.settings.whatsappNumber || '',
+            payoutMethod: 'bkash' as const,
+            facebookPixelId: db.settings.defaultFacebookPixelId || '',
+            deliveryWhatsAppGroupUrl: db.settings.deliveryWhatsAppGroupUrl || '',
+            steadfastApiKey: db.settings.steadfastApiKey || '',
+            steadfastSecretKey: db.settings.steadfastSecretKey || '',
+            commissionRate: 0,
+            totalSales: 0,
+            totalOrders: db.orders.length,
+            createdAt: new Date().toISOString(),
+          },
+          products: db.products,
+          orders: db.orders,
+        });
+      }
+
       const foundMerchant = (db.merchants || []).find(
         (m) =>
-          ((m.phone && m.phone.replace(/\D/g, '').includes(cleanId.replace(/\D/g, ''))) ||
-            (m.email && m.email.toLowerCase() === cleanId) ||
-            m.password === cleanP) &&
+          ((m.phone && cleanId.replace(/\D/g, '') && m.phone.replace(/\D/g, '').includes(cleanId.replace(/\D/g, ''))) ||
+            (m.email && cleanId && m.email.toLowerCase() === cleanId) ||
+            (cleanId === '' && m.password === cleanP)) &&
           m.password === cleanP
       );
 
@@ -453,6 +546,44 @@ export async function POST(req: NextRequest) {
       const merchantId = matchedMerchant ? matchedMerchant.id : payload.merchantId;
       const updates = payload.updates || {};
 
+      // If Super Admin updates Master Hub profile settings directly from /merchant
+      if (isSuper && merchantId === 'admin-master') {
+        const updatedDb = await writeDb((state) => ({
+          ...state,
+          settings: {
+            ...state.settings,
+            ...(updates.facebookPixelId !== undefined ? { defaultFacebookPixelId: updates.facebookPixelId } : {}),
+            ...(updates.deliveryWhatsAppGroupUrl !== undefined ? { deliveryWhatsAppGroupUrl: updates.deliveryWhatsAppGroupUrl } : {}),
+            ...(updates.steadfastApiKey !== undefined ? { steadfastApiKey: updates.steadfastApiKey } : {}),
+            ...(updates.steadfastSecretKey !== undefined ? { steadfastSecretKey: updates.steadfastSecretKey } : {}),
+          },
+        }));
+        return NextResponse.json({
+          ok: true,
+          merchant: {
+            id: 'admin-master',
+            shopName: 'RU Insiders মাস্টার মার্চেন্ট',
+            ownerName: 'সুপার অ্যাডমিন',
+            phone: updatedDb.settings.whatsappNumber || '8801700000000',
+            email: '',
+            password: cleanPass,
+            status: 'active' as const,
+            category: 'কেন্দ্রীয় স্টোর',
+            address: 'রাজশাহী বিশ্ববিদ্যালয় ক্যাম্পাস',
+            payoutPhone: updatedDb.settings.whatsappNumber || '',
+            payoutMethod: 'bkash' as const,
+            facebookPixelId: updatedDb.settings.defaultFacebookPixelId || '',
+            deliveryWhatsAppGroupUrl: updatedDb.settings.deliveryWhatsAppGroupUrl || '',
+            steadfastApiKey: updatedDb.settings.steadfastApiKey || '',
+            steadfastSecretKey: updatedDb.settings.steadfastSecretKey || '',
+            commissionRate: 0,
+            totalSales: 0,
+            totalOrders: updatedDb.orders.length,
+            createdAt: new Date().toISOString(),
+          },
+        });
+      }
+
       const updatedDb = await writeDb((state) => ({
         ...state,
         merchants: (state.merchants || []).map((m) =>
@@ -463,12 +594,79 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, merchant: found });
     }
 
-    if (action === 'UPDATE_ORDER_STATUS' && (isSuper || isProdMgr)) {
+    if (action === 'UPDATE_ORDER_STATUS' && (isSuper || isProdMgr || matchedMerchant)) {
+      const {
+        orderId,
+        status,
+        cancellationReason,
+        assignedRiderName,
+        assignedRiderPhone,
+        dispatchedVia,
+        note,
+      } = payload || {};
+
+      if (!orderId || !status) {
+        return NextResponse.json({ ok: false, error: 'অর্ডার আইডি এবং স্ট্যাটাস প্রয়োজন।' }, { status: 400 });
+      }
+
+      const targetOrder = db.orders.find((o) => o.orderId === orderId);
+      if (!targetOrder) {
+        return NextResponse.json({ ok: false, error: 'অর্ডারটি পাওয়া যায়নি।' }, { status: 404 });
+      }
+
+      if (matchedMerchant) {
+        const hasAccess = (targetOrder.items || []).some((it) => it.merchantId === matchedMerchant.id);
+        if (!hasAccess) {
+          return NextResponse.json({ ok: false, error: 'এই অর্ডারের স্ট্যাটাস পরিবর্তনের অনুমতি আপনার নেই।' }, { status: 403 });
+        }
+      }
+
+      const actorName = matchedMerchant
+        ? `${matchedMerchant.shopName} (মার্চেন্ট)`
+        : isSuper
+        ? 'সুপার অ্যাডমিন'
+        : 'প্রোডাক্ট ম্যানেজার';
+
+      const isCancelling = status === 'cancelled' || status === 'Cancelled';
+
       const updatedDb = await writeDb((state) => ({
         ...state,
-        orders: state.orders.map((o) => (o.orderId === payload.orderId ? { ...o, status: payload.status } : o)),
+        orders: state.orders.map((o) => {
+          if (o.orderId === orderId) {
+            const currentHistory = o.statusHistory || [];
+            return {
+              ...o,
+              status,
+              ...(isCancelling
+                ? {
+                    cancellationReason: cancellationReason || 'অর্ডার বাতিল করা হয়েছে',
+                    cancelledBy: actorName,
+                    cancelledAt: new Date().toISOString(),
+                  }
+                : {}),
+              ...(assignedRiderName !== undefined ? { assignedRiderName } : {}),
+              ...(assignedRiderPhone !== undefined ? { assignedRiderPhone } : {}),
+              ...(dispatchedVia !== undefined ? { dispatchedVia } : {}),
+              statusHistory: [
+                ...currentHistory,
+                {
+                  status,
+                  timestamp: new Date().toISOString(),
+                  note: note || (isCancelling ? `বাতিলের কারণ: ${cancellationReason || 'উল্লেখ করা হয়নি'}` : undefined),
+                  actor: actorName,
+                },
+              ],
+            };
+          }
+          return o;
+        }),
       }));
-      return NextResponse.json({ ok: true, orders: updatedDb.orders });
+
+      const returnedOrders = matchedMerchant
+        ? updatedDb.orders.filter((o) => (o.items || []).some((it) => it.merchantId === matchedMerchant.id))
+        : updatedDb.orders;
+
+      return NextResponse.json({ ok: true, orders: returnedOrders });
     }
 
     // Club Application Status Update

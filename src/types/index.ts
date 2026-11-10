@@ -46,7 +46,20 @@ export interface OrderItem {
   quantity: number;
   merchantId?: string; // মার্চেন্ট ট্র্যাকিং
   merchantName?: string;
+  facebookPixelId?: string; // মেটা পিক্সেল কনভার্শন ট্র্যাকিং
 }
+
+export type OrderWorkflowStatus =
+  | 'intake'
+  | 'ready'
+  | 'with_rider'
+  | 'delivered'
+  | 'cancelled'
+  | 'Pending'
+  | 'Confirmed'
+  | 'Out for Delivery'
+  | 'Delivered'
+  | 'Cancelled';
 
 export interface Order {
   orderId: string;
@@ -58,7 +71,17 @@ export interface Order {
   subtotal: number;
   deliveryCharge: number;
   totalAmount: number;
-  status: 'Pending' | 'Confirmed' | 'Out for Delivery' | 'Delivered' | 'Cancelled';
+  status: OrderWorkflowStatus;
+  cancellationReason?: string;
+  cancelledBy?: string;
+  cancelledAt?: string;
+  steadfastConsignmentId?: string | number;
+  steadfastTrackingCode?: string;
+  steadfastStatus?: string;
+  assignedRiderName?: string;
+  assignedRiderPhone?: string;
+  dispatchedVia?: 'whatsapp_group' | 'steadfast' | 'manual';
+  statusHistory?: { status: string; timestamp: string; note?: string; actor?: string }[];
   createdAt: string;
 }
 
@@ -176,6 +199,9 @@ export interface Merchant {
   payoutPhone?: string;
   payoutMethod?: 'bkash' | 'nagad' | 'rocket' | 'bank';
   facebookPixelId?: string;
+  deliveryWhatsAppGroupUrl?: string; // রাইডার ডেলিভারি হোয়াটসঅ্যাপ গ্রুপ লিংক
+  steadfastApiKey?: string; // Steadfast Courier Api-Key
+  steadfastSecretKey?: string; // Steadfast Courier Secret-Key
   commissionRate?: number; // percentage (e.g. 0, 5, 10)
   totalSales?: number;
   totalOrders?: number;
@@ -186,6 +212,9 @@ export interface SiteSettings {
   superAdminPassword: string;
   productManagerPassword: string;
   whatsappNumber: string; // মেইন অফিশিয়াল WhatsApp নাম্বার (যেমন: 8801700000000)
+  deliveryWhatsAppGroupUrl?: string; // অফিসিয়াল রাইডার ডেলিভারি হোয়াটসঅ্যাপ গ্রুপ লিংক
+  steadfastApiKey?: string; // কেন্দ্রীয় Steadfast Courier Api-Key
+  steadfastSecretKey?: string; // কেন্দ্রীয় Steadfast Courier Secret-Key
   deliveryCharges: {
     campus: number;
     city: number;

@@ -30,8 +30,15 @@ import {
   X,
   Layers,
   Sparkles,
+  Truck,
+  Phone,
+  Send,
+  Settings,
+  XCircle,
+  Clock,
 } from 'lucide-react';
 import { Product, Order, Merchant } from '@/types';
+import { trackMetaEvent } from '@/lib/metaPixel';
 
 export default function MerchantPortalPage() {
   // Auth state
@@ -59,9 +66,30 @@ export default function MerchantPortalPage() {
   // Dashboard Data
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'orders' | 'marketing' | 'download'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'orders' | 'logistics' | 'marketing' | 'download'>('overview');
   const [copiedFeed, setCopiedFeed] = useState(false);
   const [copiedPixel, setCopiedPixel] = useState(false);
+  const [centralRiderGroupUrl, setCentralRiderGroupUrl] = useState<string>('https://chat.whatsapp.com/');
+
+  // Orders Workflow & Dispatch State
+  const [orderFilterStatus, setOrderFilterStatus] = useState<string>('all');
+  const [dispatchModalOrder, setDispatchModalOrder] = useState<Order | null>(null);
+  const [riderNameInput, setRiderNameInput] = useState('');
+  const [riderPhoneInput, setRiderPhoneInput] = useState('');
+  const [copiedRiderMsg, setCopiedRiderMsg] = useState(false);
+
+  const [cancelModalOrder, setCancelModalOrder] = useState<Order | null>(null);
+  const [cancelReasonInput, setCancelReasonInput] = useState('');
+
+  // Steadfast State
+  const [steadfastLoadingOrder, setSteadfastLoadingOrder] = useState<string | null>(null);
+  const [steadfastBalance, setSteadfastBalance] = useState<number | null>(null);
+  const [checkingBalance, setCheckingBalance] = useState(false);
+  const [logisticsForm, setLogisticsForm] = useState({
+    deliveryWhatsAppGroupUrl: '',
+    steadfastApiKey: '',
+    steadfastSecretKey: '',
+  });
 
   // Product Add / Edit Modal
   const [showProductModal, setShowProductModal] = useState(false);
@@ -109,23 +137,62 @@ export default function MerchantPortalPage() {
         const parsed = JSON.parse(saved);
         if (parsed?.id) {
           setMerchant(parsed);
-          loadMerchantData(parsed.id);
+          setLogisticsForm({
+            deliveryWhatsAppGroupUrl: parsed.deliveryWhatsAppGroupUrl || '',
+            steadfastApiKey: parsed.steadfastApiKey || '',
+            steadfastSecretKey: parsed.steadfastSecretKey || '',
+          });
+          loadMerchantData(parsed.id, parsed.phone || parsed.email, parsed.password);
         }
+      } else {
+        fetch('/api/store')
+          .then((r) => r.json())
+          .then((d) => {
+            if (d.settings?.deliveryWhatsAppGroupUrl) {
+              setCentralRiderGroupUrl(d.settings.deliveryWhatsAppGroupUrl);
+            }
+          })
+          .catch(() => {});
       }
     } catch {}
   }, []);
 
   // Load merchant's specific products and orders from server
-  const loadMerchantData = async (merchantId: string) => {
+  const loadMerchantData = async (merchantId: string, identifier?: string, password?: string) => {
     try {
-      const res = await fetch('/api/store');
-      const data = await res.json();
-      if (data.products) {
-        setProducts(data.products.filter((p: Product) => p.merchantId === merchantId));
+      // Load public site settings (central WhatsApp group link)
+      const pubRes = await fetch('/api/store');
+      const pubData = await pubRes.json();
+      if (pubData.settings?.deliveryWhatsAppGroupUrl) {
+        setCentralRiderGroupUrl(pubData.settings.deliveryWhatsAppGroupUrl);
       }
-      // Note: Orders contain merchant items
-      if (data.orders) {
-        setOrders(data.orders.filter((o: Order) => (o.items || []).some((it) => it.merchantId === merchantId)));
+
+      if (password) {
+        const loginRes = await fetch('/api/store', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'MERCHANT_LOGIN',
+            payload: { identifier: identifier || '', password },
+          }),
+        });
+        const data = await loginRes.json();
+        if (data.ok && data.merchant) {
+          setMerchant(data.merchant);
+          setProducts(data.products || []);
+          setOrders(data.orders || []);
+          setLogisticsForm({
+            deliveryWhatsAppGroupUrl: data.merchant.deliveryWhatsAppGroupUrl || '',
+            steadfastApiKey: data.merchant.steadfastApiKey || '',
+            steadfastSecretKey: data.merchant.steadfastSecretKey || '',
+          });
+          localStorage.setItem('ru_merchant_session', JSON.stringify(data.merchant));
+          return;
+        }
+      }
+
+      if (pubData.products) {
+        setProducts(pubData.products.filter((p: Product) => p.merchantId === merchantId));
       }
     } catch (err) {
       console.error('Failed to load merchant data', err);
@@ -156,6 +223,11 @@ export default function MerchantPortalPage() {
         setMerchant(data.merchant);
         setProducts(data.products || []);
         setOrders(data.orders || []);
+        setLogisticsForm({
+          deliveryWhatsAppGroupUrl: data.merchant.deliveryWhatsAppGroupUrl || '',
+          steadfastApiKey: data.merchant.steadfastApiKey || '',
+          steadfastSecretKey: data.merchant.steadfastSecretKey || '',
+        });
         localStorage.setItem('ru_merchant_session', JSON.stringify(data.merchant));
       } else {
         setAuthError(data.error || 'লগইন ব্যর্থ হয়েছে! মোবাইল নম্বর ও পাসওয়ার্ড যাচাই করুন।');
@@ -301,7 +373,7 @@ export default function MerchantPortalPage() {
         setShowProductModal(false);
         setEditingProduct(null);
         resetProdForm();
-        loadMerchantData(merchant.id);
+        loadMerchantData(merchant.id, merchant.phone, merchant.password);
         alert('পণ্যটি সফলভাবে শপে যুক্ত ও আপডেট হয়েছে!');
       } else {
         alert(data.error || 'পণ্য সংরক্ষণ করা সম্ভব হয়নি');
@@ -309,6 +381,205 @@ export default function MerchantPortalPage() {
     } catch {
       alert('সার্ভার সমস্যা');
     }
+  };
+
+  // Workflow Status Helper
+  const normalizeStage = (status: string): 'intake' | 'ready' | 'with_rider' | 'delivered' | 'cancelled' => {
+    switch (status) {
+      case 'intake':
+      case 'Pending':
+        return 'intake';
+      case 'ready':
+      case 'Confirmed':
+        return 'ready';
+      case 'with_rider':
+      case 'Out for Delivery':
+        return 'with_rider';
+      case 'delivered':
+      case 'Delivered':
+        return 'delivered';
+      case 'cancelled':
+      case 'Cancelled':
+        return 'cancelled';
+      default:
+        return 'intake';
+    }
+  };
+
+  // Update Order Workflow Status (1 intake -> 2 ready -> 3 with_rider -> 4 delivered -> 5 cancelled from ANY stage)
+  const handleUpdateOrderStatus = async (
+    orderId: string,
+    status: 'intake' | 'ready' | 'with_rider' | 'delivered' | 'cancelled',
+    extra?: {
+      cancellationReason?: string;
+      assignedRiderName?: string;
+      assignedRiderPhone?: string;
+      dispatchedVia?: 'whatsapp_group' | 'steadfast' | 'manual';
+      note?: string;
+    }
+  ) => {
+    if (!merchant) return;
+    try {
+      const res = await fetch('/api/store', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'UPDATE_ORDER_STATUS',
+          password: merchant.password,
+          payload: {
+            orderId,
+            status,
+            ...extra,
+          },
+        }),
+      });
+      const data = await res.json();
+      if (data.ok && data.orders) {
+        setOrders(data.orders);
+      } else {
+        alert(data.error || 'অর্ডার স্ট্যাটাস আপডেট করা যায়নি');
+      }
+    } catch {
+      alert('সার্ভারের সাথে যোগাযোগ করা যায়নি');
+    }
+  };
+
+  // Send Order to Steadfast Courier API
+  const handleSendToSteadfast = async (order: Order) => {
+    if (!merchant) return;
+    if (!confirm(`আপনি কি অর্ডার #${order.orderId} (${order.customerName}) Steadfast Courier-এ পাঠাতে চান?`)) return;
+
+    setSteadfastLoadingOrder(order.orderId);
+    try {
+      const res = await fetch('/api/steadfast', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'CREATE_ORDER',
+          password: merchant.password,
+          orderId: order.orderId,
+          merchantId: merchant.id,
+        }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        alert(`✅ Steadfast-এ সফলভাবে পাঠানো হয়েছে!\nট্র্যাকিং কোড: ${data.consignment?.tracking_code}`);
+        loadMerchantData(merchant.id, merchant.phone, merchant.password);
+      } else {
+        alert(`❌ ব্যর্থ: ${data.error || 'Steadfast API ত্রুটি'}`);
+      }
+    } catch {
+      alert('Steadfast API সংযোগে সমস্যা হয়েছে।');
+    } finally {
+      setSteadfastLoadingOrder(null);
+    }
+  };
+
+  // Sync Status from Steadfast Courier
+  const handleCheckSteadfastStatus = async (order: Order) => {
+    if (!merchant || !order.steadfastTrackingCode) return;
+    setSteadfastLoadingOrder(order.orderId);
+    try {
+      const res = await fetch('/api/steadfast', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'CHECK_STATUS',
+          password: merchant.password,
+          orderId: order.orderId,
+          merchantId: merchant.id,
+          trackingCode: order.steadfastTrackingCode,
+        }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        alert(`📦 Steadfast লাইভ স্ট্যাটাস (${order.steadfastTrackingCode}): ${data.deliveryStatus}`);
+        loadMerchantData(merchant.id, merchant.phone, merchant.password);
+      } else {
+        alert(data.error || 'স্ট্যাটাস চেক করা যায়নি');
+      }
+    } catch {
+      alert('সার্ভার সমস্যা');
+    } finally {
+      setSteadfastLoadingOrder(null);
+    }
+  };
+
+  // Check Steadfast Balance
+  const handleCheckSteadfastBalance = async () => {
+    if (!merchant) return;
+    setCheckingBalance(true);
+    try {
+      const res = await fetch('/api/steadfast', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'CHECK_BALANCE',
+          password: merchant.password,
+          merchantId: merchant.id,
+        }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setSteadfastBalance(data.balance);
+        alert(`✅ Steadfast সংযোগ সচল! বর্তমান ব্যালেন্স: ৳${data.balance} (${data.source})`);
+      } else {
+        alert(data.error || 'Steadfast API কানেক্ট করা যায়নি');
+      }
+    } catch {
+      alert('সার্ভার সমস্যা');
+    } finally {
+      setCheckingBalance(false);
+    }
+  };
+
+  // Save Merchant Courier & Rider Settings
+  const handleSaveLogisticsSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!merchant) return;
+    try {
+      const res = await fetch('/api/store', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'MERCHANT_UPDATE_PROFILE',
+          password: merchant.password,
+          payload: {
+            merchantId: merchant.id,
+            updates: {
+              deliveryWhatsAppGroupUrl: logisticsForm.deliveryWhatsAppGroupUrl.trim(),
+              steadfastApiKey: logisticsForm.steadfastApiKey.trim(),
+              steadfastSecretKey: logisticsForm.steadfastSecretKey.trim(),
+            },
+          },
+        }),
+      });
+      const data = await res.json();
+      if (data.ok && data.merchant) {
+        setMerchant(data.merchant);
+        localStorage.setItem('ru_merchant_session', JSON.stringify(data.merchant));
+        alert('✅ কুরিয়ার (Steadfast) ও রাইডার WhatsApp গ্রুপ সেটিংস সেভ হয়েছে!');
+      } else {
+        alert(data.error || 'সেটিংস সেভ করা যায়নি');
+      }
+    } catch {
+      alert('সার্ভার সমস্যা');
+    }
+  };
+
+  // Build formatted WhatsApp Rider Group Broadcast text
+  const buildRiderGroupMessage = (ord: Order) => {
+    const myItems = merchant?.id === 'admin-master'
+      ? (ord.items || [])
+      : (ord.items || []).filter((it) => it.merchantId === merchant?.id);
+    const itemsText = myItems.map((it) => `• ${it.nameBn} (${it.selectedOption}) × ${it.quantity}`).join('\n');
+    const zoneBn =
+      ord.deliveryZone === 'campus'
+        ? 'মতিহার ক্যাম্পাস'
+        : ord.deliveryZone === 'city'
+        ? 'রাজশাহী সিটি'
+        : 'কুরিয়ার/সারাদেশ';
+    return `🛵 *নতুন ডেলিভারি রিকোয়েস্ট!* (RU Insiders)\n📦 অর্ডার আইডি: #${ord.orderId}\n🏪 মার্চেন্ট শপ: ${merchant?.shopName}\n📍 পিকআপ ঠিকানা: ${merchant?.address || 'রাবি ক্যাম্পাস'} (${merchant?.phone})\n---------------------------------\n👤 কাস্টমারের নাম: ${ord.customerName}\n📞 কাস্টমার ফোন: ${ord.phone}\n📍 ডেলিভারি ঠিকানা: ${ord.addressDetails} (${zoneBn})\n💰 কালেকশন / COD: ৳${ord.totalAmount}\n🛍️ পণ্যসমূহ:\n${itemsText}\n---------------------------------\nযেই রাইডার ভাই ডেলিভারি করতে আগ্রহী, দ্রুত এই মেসেজে রিপ্লাই দিয়ে অর্ডারটি পিকআপ করুন!`;
   };
 
   // 6. Delete Product
@@ -455,7 +726,9 @@ export default function MerchantPortalPage() {
 
   // Calculations
   const totalMerchantSales = orders.reduce((sum, order) => {
-    const myItems = (order.items || []).filter((it) => it.merchantId === merchant?.id);
+    const myItems = merchant?.id === 'admin-master'
+      ? (order.items || [])
+      : (order.items || []).filter((it) => it.merchantId === merchant?.id);
     return sum + myItems.reduce((acc, it) => acc + it.unitPrice * it.quantity, 0);
   }, 0);
 
@@ -574,11 +847,10 @@ export default function MerchantPortalPage() {
             {authMode === 'login' ? (
               <form onSubmit={handleLogin} className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-700">মোবাইল নম্বর অথবা ইমেইল</label>
+                  <label className="text-xs font-bold text-slate-700">মোবাইল নম্বর / ইমেইল (অ্যাডমিন হলে ফাঁকা রাখতে পারেন)</label>
                   <input
                     type="text"
-                    required
-                    placeholder="যেমন: 01711223344 বা email@gmail.com"
+                    placeholder="যেমন: 01711223344 (বা অ্যাডমিন হলে ফাঁকা রাখুন)"
                     value={loginIdentifier}
                     onChange={(e) => setLoginIdentifier(e.target.value)}
                     className="w-full text-xs sm:text-sm p-3.5 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 font-bold"
@@ -869,7 +1141,20 @@ export default function MerchantPortalPage() {
                 }`}
               >
                 <Package className="w-4 h-4" />
-                <span>গ্রাহকদের অর্ডার ({orders.length})</span>
+                <span>অর্ডার প্রসেস ({orders.length})</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('logistics')}
+                className={`py-2 px-4 rounded-xl shrink-0 transition flex items-center gap-1.5 ${
+                  activeTab === 'logistics'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <Truck className="w-4 h-4 text-indigo-500" />
+                <span>রাইডার গ্রুপ ও Steadfast API</span>
               </button>
 
               <button
@@ -1003,100 +1288,420 @@ export default function MerchantPortalPage() {
             )}
 
             {/* ========================================================================= */}
-            {/* TAB 2: ORDERS MANAGEMENT */}
+            {/* TAB 2: ORDERS WORKFLOW MANAGEMENT (1 INTAKE -> 2 READY -> 3 RIDER -> 4 DELIVERED -> 5 CANCEL) */}
             {/* ========================================================================= */}
             {activeTab === 'orders' && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 className="text-base font-black text-slate-900">
-                    আপনার পণ্যের জন্য আসা অর্ডারসমূহ ({orders.length}টি)
+                    ৫-ধাপের অর্ডার প্রসেস ও ডেলিভারি ম্যানেজমেন্ট ({orders.length}টি)
                   </h3>
-                  <button
-                    type="button"
-                    onClick={downloadReportCsv}
-                    className="text-xs font-bold text-emerald-700 hover:underline flex items-center gap-1"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>CSV ডাউনলোড</span>
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => loadMerchantData(merchant.id, merchant.phone, merchant.password)}
+                      className="text-xs font-bold text-slate-600 hover:text-emerald-700 flex items-center gap-1"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>রিফ্রেশ</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={downloadReportCsv}
+                      className="text-xs font-bold text-emerald-700 hover:underline flex items-center gap-1"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>CSV ডাউনলোড</span>
+                    </button>
+                  </div>
                 </div>
 
-                {orders.length === 0 ? (
+                {/* 5-Stage Filter Tabs */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs font-bold">
+                  {[
+                    { id: 'all', label: `সব অর্ডার (${orders.length})` },
+                    { id: 'intake', label: `১. ইনটেক (${orders.filter((o) => normalizeStage(o.status) === 'intake').length})` },
+                    { id: 'ready', label: `২. রেডি (${orders.filter((o) => normalizeStage(o.status) === 'ready').length})` },
+                    { id: 'with_rider', label: `৩. রাইডারের কাছে (${orders.filter((o) => normalizeStage(o.status) === 'with_rider').length})` },
+                    { id: 'delivered', label: `৪. ডেলিভারড (${orders.filter((o) => normalizeStage(o.status) === 'delivered').length})` },
+                    { id: 'cancelled', label: `৫. ক্যান্সেল (${orders.filter((o) => normalizeStage(o.status) === 'cancelled').length})` },
+                  ].map((f) => (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => setOrderFilterStatus(f.id)}
+                      className={`px-3 py-1.5 rounded-xl shrink-0 border transition ${
+                        orderFilterStatus === f.id
+                          ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+                          : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+
+                {orders.filter((o) => orderFilterStatus === 'all' || normalizeStage(o.status) === orderFilterStatus).length === 0 ? (
                   <div className="bg-white rounded-3xl p-10 border border-slate-200 text-center space-y-2">
-                    <p className="text-sm font-bold text-slate-700">কোনো অর্ডার পাওয়া যায়নি</p>
-                    <p className="text-xs text-slate-400">গ্রাহকরা আপনার পণ্য অর্ডার করলেই এখানে বিস্তারিত প্রদর্শিত হবে।</p>
+                    <p className="text-sm font-bold text-slate-700">এই ধাপে কোনো অর্ডার পাওয়া যায়নি</p>
+                    <p className="text-xs text-slate-400">গ্রাহকরা আপনার পণ্য অর্ডার করলেই এখানে ৫-ধাপের প্রসেস দেখাবে।</p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
-                    {orders.map((ord) => {
-                      const myItems = (ord.items || []).filter((it) => it.merchantId === merchant.id);
-                      const mySubtotal = myItems.reduce((acc, it) => acc + it.unitPrice * it.quantity, 0);
+                  <div className="space-y-4">
+                    {orders
+                      .filter((o) => orderFilterStatus === 'all' || normalizeStage(o.status) === orderFilterStatus)
+                      .map((ord) => {
+                        const myItems = merchant.id === 'admin-master'
+                          ? (ord.items || [])
+                          : (ord.items || []).filter((it) => it.merchantId === merchant.id);
+                        const mySubtotal = myItems.reduce((acc, it) => acc + it.unitPrice * it.quantity, 0);
+                        const stage = normalizeStage(ord.status);
+                        const activeStepNum =
+                          stage === 'intake' ? 1 : stage === 'ready' ? 2 : stage === 'with_rider' ? 3 : stage === 'delivered' ? 4 : 0;
 
-                      return (
-                        <div
-                          key={ord.orderId}
-                          className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs space-y-3"
-                        >
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span className="font-black text-sm text-slate-900">{ord.orderId}</span>
-                                <span
-                                  className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
-                                    ord.status === 'Delivered'
-                                      ? 'bg-emerald-100 text-emerald-800'
-                                      : ord.status === 'Confirmed'
-                                      ? 'bg-blue-100 text-blue-800'
-                                      : 'bg-amber-100 text-amber-800'
-                                  }`}
-                                >
-                                  {ord.status}
-                                </span>
-                              </div>
-                              <p className="text-xs text-slate-500">
-                                {new Date(ord.createdAt).toLocaleString('bn-BD')} • গ্রাহক: {ord.customerName} ({ord.phone})
-                              </p>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                              <a
-                                href={`https://wa.me/88${ord.phone.replace(/\D/g, '')}?text=${encodeURIComponent(
-                                  `আসসালামু আলাইকুম ${ord.customerName}! RU Insiders এর ${merchant.shopName} থেকে আপনার অর্ডার #${ord.orderId} নিশ্চিত করার জন্য যোগাযোগ করছি।`
-                                )}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 shadow-xs transition"
-                              >
-                                <MessageCircle className="w-3.5 h-3.5" />
-                                <span>WhatsApp মেসেজ</span>
-                              </a>
-                            </div>
-                          </div>
-
-                          {/* Items List */}
-                          <div className="space-y-2">
-                            {myItems.map((item, idx) => (
-                              <div key={idx} className="flex items-center justify-between text-xs font-bold text-slate-800">
-                                <div className="flex items-center gap-2">
-                                  <img src={item.image} alt="Item" className="w-8 h-8 rounded-lg object-cover" />
-                                  <span>
-                                    {item.nameBn} ({item.selectedOption}) × {item.quantity}
+                        return (
+                          <div
+                            key={ord.orderId}
+                            className={`bg-white rounded-3xl p-5 border-2 shadow-xs space-y-4 ${
+                              stage === 'cancelled'
+                                ? 'border-red-200 bg-red-50/20'
+                                : stage === 'delivered'
+                                ? 'border-emerald-200'
+                                : 'border-slate-200'
+                            }`}
+                          >
+                            {/* Header: Order ID + Direct Contact with Customer */}
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                              <div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span className="font-black text-sm text-slate-900 font-mono">{ord.orderId}</span>
+                                  <span
+                                    className={`text-[11px] font-black px-2.5 py-0.5 rounded-full border ${
+                                      stage === 'delivered'
+                                        ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                                        : stage === 'with_rider'
+                                        ? 'bg-indigo-100 text-indigo-800 border-indigo-300'
+                                        : stage === 'ready'
+                                        ? 'bg-blue-100 text-blue-800 border-blue-300'
+                                        : stage === 'cancelled'
+                                        ? 'bg-red-100 text-red-800 border-red-300'
+                                        : 'bg-amber-100 text-amber-800 border-amber-300'
+                                    }`}
+                                  >
+                                    {stage === 'intake'
+                                      ? '১. ইনটেক (নতুন অর্ডার)'
+                                      : stage === 'ready'
+                                      ? '২. অর্ডার রেডি হলো'
+                                      : stage === 'with_rider'
+                                      ? '৩. রাইডারকে দিলাম'
+                                      : stage === 'delivered'
+                                      ? '৪. ডেলিভারড সম্পন্ন'
+                                      : '৫. ক্যান্সেল করা হয়েছে'}
                                   </span>
                                 </div>
-                                <span>৳{item.unitPrice * item.quantity}</span>
+                                <p className="text-xs text-slate-500 mt-1">
+                                  {new Date(ord.createdAt).toLocaleString('bn-BD')} • গ্রাহক: <strong className="text-slate-800">{ord.customerName}</strong> ({ord.phone})
+                                </p>
                               </div>
-                            ))}
-                          </div>
 
-                          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-                            <span className="text-slate-500">ডেলিভারি ঠিকানা: {ord.addressDetails} ({ord.deliveryZone})</span>
-                            <span className="font-black text-emerald-700 text-sm">আপনার মোট: ৳{mySubtotal}</span>
+                              {/* Direct Customer Contact Buttons */}
+                              <div className="flex flex-wrap items-center gap-2">
+                                <a
+                                  href={`tel:${ord.phone}`}
+                                  className="bg-slate-100 hover:bg-slate-200 text-slate-800 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition"
+                                >
+                                  <Phone className="w-3.5 h-3.5 text-slate-600" />
+                                  <span>কল করুন</span>
+                                </a>
+                                <a
+                                  href={`https://wa.me/88${ord.phone.replace(/\D/g, '')}?text=${encodeURIComponent(
+                                    `আসসালামু আলাইকুম ${ord.customerName}! আমি RU Insiders এর ${merchant.shopName} থেকে আপনার অর্ডার #${ord.orderId} নিয়ে সরাসরি যোগাযোগ করছি।`
+                                  )}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 shadow-xs transition"
+                                >
+                                  <MessageCircle className="w-3.5 h-3.5" />
+                                  <span>কাস্টমারকে WhatsApp</span>
+                                </a>
+                              </div>
+                            </div>
+
+                            {/* Visual 4-Step Progress Pipeline */}
+                            {stage !== 'cancelled' ? (
+                              <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
+                                {[
+                                  { num: 1, title: '১. ইনটেক', sub: 'অর্ডার জমা' },
+                                  { num: 2, title: '২. রেডি', sub: 'প্যাকিং শেষ' },
+                                  { num: 3, title: '৩. রাইডার', sub: 'ডেলিভারিতে' },
+                                  { num: 4, title: '৪. ডেলিভারড', sub: 'সম্পন্ন' },
+                                ].map((step) => {
+                                  const done = activeStepNum >= step.num;
+                                  const current = activeStepNum === step.num;
+                                  return (
+                                    <div
+                                      key={step.num}
+                                      className={`p-2 rounded-xl border text-center transition ${
+                                        current
+                                          ? 'bg-emerald-50 border-emerald-500 ring-1 ring-emerald-400'
+                                          : done
+                                          ? 'bg-emerald-50/50 border-emerald-200 text-emerald-800'
+                                          : 'bg-slate-50 border-slate-200 opacity-50'
+                                      }`}
+                                    >
+                                      <p className="text-[11px] font-black text-slate-900">{step.title}</p>
+                                      <p className="text-[10px] text-slate-500 hidden sm:block">{step.sub}</p>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            ) : (
+                              <div className="p-3 bg-red-50 border border-red-200 rounded-2xl text-xs text-red-900 flex items-center justify-between gap-2">
+                                <span className="font-bold flex items-center gap-1.5">
+                                  <XCircle className="w-4 h-4 text-red-600 shrink-0" />
+                                  অর্ডার বাতিল করা হয়েছে {ord.cancellationReason ? `— কারণ: ${ord.cancellationReason}` : ''}
+                                </span>
+                                {ord.cancelledBy && <span className="text-[10px] text-red-700 font-bold">বাতিলকারী: {ord.cancelledBy}</span>}
+                              </div>
+                            )}
+
+                            {/* Steadfast / Assigned Rider Badge */}
+                            {(ord.steadfastTrackingCode || ord.assignedRiderName) && (
+                              <div className="p-3 rounded-2xl bg-indigo-50/70 border border-indigo-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+                                {ord.steadfastTrackingCode ? (
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <Truck className="w-4 h-4 text-indigo-600" />
+                                    <span className="font-bold text-indigo-950">
+                                      Steadfast ট্র্যাকিং: <span className="font-mono bg-white px-2 py-0.5 rounded border border-indigo-200">{ord.steadfastTrackingCode}</span>
+                                    </span>
+                                    {ord.steadfastStatus && (
+                                      <span className="text-[11px] bg-indigo-200 text-indigo-900 px-2 py-0.5 rounded-full font-bold">
+                                        {ord.steadfastStatus}
+                                      </span>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span className="font-bold text-indigo-950">
+                                    🛵 রাইডার: {ord.assignedRiderName} {ord.assignedRiderPhone ? `(${ord.assignedRiderPhone})` : ''}
+                                  </span>
+                                )}
+
+                                {ord.steadfastTrackingCode && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleCheckSteadfastStatus(ord)}
+                                    disabled={steadfastLoadingOrder === ord.orderId}
+                                    className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[11px] font-bold transition disabled:opacity-50"
+                                  >
+                                    {steadfastLoadingOrder === ord.orderId ? 'চেক হচ্ছে...' : '🔄 স্ট্যাটাস সিঙ্ক'}
+                                  </button>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Items List */}
+                            <div className="space-y-2 bg-slate-50/80 p-3 rounded-2xl border border-slate-100">
+                              {myItems.map((item, idx) => (
+                                <div key={idx} className="flex items-center justify-between text-xs font-bold text-slate-800">
+                                  <div className="flex items-center gap-2">
+                                    <img src={item.image} alt="Item" className="w-8 h-8 rounded-lg object-cover border" />
+                                    <span>
+                                      {item.nameBn} ({item.selectedOption}) × {item.quantity}
+                                    </span>
+                                  </div>
+                                  <span>৳{item.unitPrice * item.quantity}</span>
+                                </div>
+                              ))}
+                              <div className="pt-2 border-t border-slate-200/70 flex flex-wrap items-center justify-between gap-2 text-xs">
+                                <span className="text-slate-600">
+                                  ঠিকানা: <strong>{ord.addressDetails}</strong> ({ord.deliveryZone === 'campus' ? 'রাবি ক্যাম্পাস' : ord.deliveryZone === 'city' ? 'রাজশাহী সিটি' : 'সারাদেশ কুরিয়ার'})
+                                </span>
+                                <span className="font-black text-emerald-700 text-sm">মোট বকেয়া (COD): ৳{ord.totalAmount} (আপনার অংশ: ৳{mySubtotal})</span>
+                              </div>
+                            </div>
+
+                            {/* Workflow Action Controls */}
+                            <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                {stage === 'intake' && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleUpdateOrderStatus(ord.orderId, 'ready', { note: 'মার্চেন্ট পণ্য প্রস্তুত করেছে' })}
+                                    className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+                                  >
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                    <span>২. অর্ডার রেডি হলো ✓</span>
+                                  </button>
+                                )}
+
+                                {(stage === 'intake' || stage === 'ready') && (
+                                  <>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setDispatchModalOrder(ord);
+                                        setRiderNameInput('');
+                                        setRiderPhoneInput('');
+                                      }}
+                                      className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+                                    >
+                                      <Send className="w-3.5 h-3.5" />
+                                      <span>🛵 রাইডার WhatsApp গ্রুপে দিন</span>
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      onClick={() => handleSendToSteadfast(ord)}
+                                      disabled={steadfastLoadingOrder === ord.orderId}
+                                      className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-xs transition cursor-pointer disabled:opacity-50"
+                                    >
+                                      <Truck className="w-3.5 h-3.5" />
+                                      <span>{steadfastLoadingOrder === ord.orderId ? 'পাঠানো হচ্ছে...' : '📦 Steadfast API-তে পাঠান'}</span>
+                                    </button>
+                                  </>
+                                )}
+
+                                {stage === 'with_rider' && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleUpdateOrderStatus(ord.orderId, 'delivered', { note: 'ডেলিভারি সম্পন্ন হয়েছে' })}
+                                    className="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+                                  >
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                    <span>✅ ৪. ডেলিভারড সম্পন্ন মার্ক করুন</span>
+                                  </button>
+                                )}
+                              </div>
+
+                              {/* 5. Cancel Button — Available from ANY stage (except already cancelled) */}
+                              {stage !== 'cancelled' && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setCancelModalOrder(ord);
+                                    setCancelReasonInput('');
+                                  }}
+                                  className="px-3 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-bold flex items-center gap-1 transition cursor-pointer"
+                                >
+                                  <XCircle className="w-3.5 h-3.5" />
+                                  <span>৫. অর্ডার ক্যান্সেল</span>
+                                </button>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* ========================================================================= */}
+            {/* TAB 2.5: LOGISTICS — WHATSAPP RIDER GROUP & STEADFAST COURIER API */}
+            {/* ========================================================================= */}
+            {activeTab === 'logistics' && (
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-indigo-600 font-bold text-xs">
+                    <Truck className="w-4 h-4" />
+                    <span>Campus Rider Group & Steadfast Courier Integration</span>
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-black text-slate-900">
+                    ডেলিভারি রাইডার হোয়াটসঅ্যাপ গ্রুপ ও Steadfast API সেটিংস
+                  </h3>
+                  <p className="text-xs text-slate-500 max-w-2xl">
+                    মতিহার ক্যাম্পাসে দ্রুত ডেলিভারির জন্য রাইডারদের অফিসিয়াল হোয়াটসঅ্যাপ গ্রুপ যুক্ত করুন অথবা সারাদেশে কুরিয়ার করতে সরাসরি Steadfast Courier-এর API Key সেট করুন।
+                  </p>
+                </div>
+
+                <form onSubmit={handleSaveLogisticsSettings} className="space-y-5">
+                  {/* Rider WhatsApp Group Section */}
+                  <div className="bg-emerald-50/70 p-5 rounded-2xl border border-emerald-200 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs sm:text-sm font-black text-emerald-950 flex items-center gap-1.5">
+                        <MessageCircle className="w-4 h-4 text-emerald-600" />
+                        <span>ডেলিভারি রাইডার হোয়াটসঅ্যাপ গ্রুপ লিংক</span>
+                      </h4>
+                      {centralRiderGroupUrl && centralRiderGroupUrl !== 'https://chat.whatsapp.com/' && (
+                        <a
+                          href={centralRiderGroupUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-[11px] font-bold text-emerald-700 underline flex items-center gap-1"
+                        >
+                          অফিশিয়াল গ্রুপ দেখুন <ExternalLink className="w-3 h-3" />
+                        </a>
+                      )}
+                    </div>
+                    <input
+                      type="url"
+                      placeholder="যেমন: https://chat.whatsapp.com/আপনার-গ্রুপ-লিংক (ফাঁকা রাখলে কেন্দ্রীয় গ্রুপ ব্যবহার হবে)"
+                      value={logisticsForm.deliveryWhatsAppGroupUrl}
+                      onChange={(e) => setLogisticsForm({ ...logisticsForm, deliveryWhatsAppGroupUrl: e.target.value })}
+                      className="w-full text-xs sm:text-sm p-3 border border-emerald-200 rounded-2xl bg-white font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                    <p className="text-[11px] text-emerald-800">
+                      💡 অর্ডার রেডি হলে <strong>&ldquo;🛵 রাইডার WhatsApp গ্রুপে দিন&rdquo;</strong> বাটনে ক্লিক করলে অটোমেটিক রাইডার মেসেজ তৈরি হয়ে কপি ও গ্রুপ ওপেন হবে — যে রাইডার ভাই আগ্রহী সে মেসেজে রিপ্লাই দিয়ে প্রোডাক্ট পিকআপ করবে!
+                    </p>
+                  </div>
+
+                  {/* Steadfast API Section */}
+                  <div className="bg-indigo-50/60 p-5 rounded-2xl border border-indigo-200 space-y-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <h4 className="text-xs sm:text-sm font-black text-indigo-950 flex items-center gap-1.5">
+                        <Truck className="w-4 h-4 text-indigo-600" />
+                        <span>Steadfast Courier API Credentials (portal.packzy.com)</span>
+                      </h4>
+                      <button
+                        type="button"
+                        onClick={handleCheckSteadfastBalance}
+                        disabled={checkingBalance}
+                        className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer disabled:opacity-50"
+                      >
+                        {checkingBalance ? 'যাচাই হচ্ছে...' : '💰 ব্যালেন্স ও কানেকশন চেক'}
+                      </button>
+                    </div>
+
+                    {steadfastBalance !== null && (
+                      <div className="p-3 bg-white rounded-xl border border-indigo-200 text-xs font-black text-indigo-800">
+                        ✅ কানেকশন সফল! আপনার Steadfast বর্তমান ব্যালেন্স: ৳{steadfastBalance}
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-800">Steadfast Api-Key:</label>
+                        <input
+                          type="text"
+                          placeholder="আপনার Steadfast Api-Key লিখুন"
+                          value={logisticsForm.steadfastApiKey}
+                          onChange={(e) => setLogisticsForm({ ...logisticsForm, steadfastApiKey: e.target.value })}
+                          className="w-full text-xs p-3 border border-indigo-200 rounded-2xl bg-white font-mono"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-800">Steadfast Secret-Key:</label>
+                        <input
+                          type="password"
+                          placeholder="আপনার Steadfast Secret-Key লিখুন"
+                          value={logisticsForm.steadfastSecretKey}
+                          onChange={(e) => setLogisticsForm({ ...logisticsForm, steadfastSecretKey: e.target.value })}
+                          className="w-full text-xs p-3 border border-indigo-200 rounded-2xl bg-white font-mono"
+                        />
+                      </div>
+                    </div>
+                    <p className="text-[11px] text-indigo-800">
+                      নোট: নিজস্ব API Key না বসালে, অর্ডার পাঠানোর সময় অ্যাডমিনের কেন্দ্রীয় Steadfast অ্যাকাউন্ট (যদি সেট থাকে) ব্যবহারের সুযোগ থাকবে।
+                    </p>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full sm:w-auto px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-xs sm:text-sm shadow-md transition cursor-pointer"
+                  >
+                    সেটিংস সংরক্ষণ করুন
+                  </button>
+                </form>
               </div>
             )}
 
@@ -1171,37 +1776,56 @@ export default function MerchantPortalPage() {
                   </div>
                 </div>
 
-                {/* Product Catalog Feed URL */}
-                <div className="p-5 rounded-2xl bg-blue-50 border border-blue-200 space-y-2">
+                {/* Product Catalog Feed URL (JSON & Meta CSV) */}
+                <div className="p-5 rounded-2xl bg-blue-50 border border-blue-200 space-y-3">
                   <h4 className="text-xs font-black text-blue-900 flex items-center gap-1.5">
                     <Share2 className="w-4 h-4" />
-                    <span>Facebook Catalog & Instagram Shop ফিড লিংক:</span>
+                    <span>Facebook Catalog & Instagram Shop ফিড লিংক (CSV & JSON):</span>
                   </h4>
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
                       readOnly
-                      value={typeof window !== 'undefined' ? `${window.location.origin}/api/store?merchant=${merchant.id}` : ''}
+                      value={
+                        typeof window !== 'undefined'
+                          ? `${window.location.origin}/api/store?${merchant.id === 'admin-master' ? '' : `merchant=${merchant.id}&`}format=csv`
+                          : ''
+                      }
                       className="flex-1 text-xs p-2.5 bg-white border border-blue-200 rounded-xl font-mono text-slate-700"
                     />
                     <button
                       type="button"
                       onClick={() => {
                         if (typeof window !== 'undefined') {
-                          navigator.clipboard.writeText(`${window.location.origin}/api/store?merchant=${merchant.id}`);
+                          const feedUrl = `${window.location.origin}/api/store?${merchant.id === 'admin-master' ? '' : `merchant=${merchant.id}&`}format=csv`;
+                          navigator.clipboard.writeText(feedUrl);
                           setCopiedFeed(true);
                           setTimeout(() => setCopiedFeed(false), 2000);
                         }
                       }}
-                      className="px-3.5 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 shrink-0"
+                      className="px-3.5 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 shrink-0 cursor-pointer"
                     >
                       {copiedFeed ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                      <span>{copiedFeed ? 'কপি হয়েছে' : 'কপি করুন'}</span>
+                      <span>{copiedFeed ? 'CSV ফিড কপি হয়েছে' : 'CSV ফিড কপি'}</span>
                     </button>
                   </div>
-                  <p className="text-[11px] text-blue-700">
-                    এই লিংকটি ফেসবুক ক্যাটালগ ম্যানেজারে ডাটা সোর্স হিসেবে বসিয়ে অটোমেটিক ডাইনামিক অ্যাডস চালাতে পারবেন।
-                  </p>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-[11px] text-blue-700">
+                      এই CSV লিংকটি Meta Commerce Manager → Data Sources-এ Scheduled Feed হিসেবে বসিয়ে ডাইনামিক অ্যাডস চালাতে পারবেন।
+                    </p>
+                    {merchant.facebookPixelId && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          trackMetaEvent('PageView', { source: 'merchant_studio_test' }, [merchant.facebookPixelId]);
+                          alert(`✅ Meta Pixel (${merchant.facebookPixelId}) টেস্ট PageView ইভেন্ট ফায়ার করা হয়েছে! Meta Pixel Helper এক্সটেনশনে যাচাই করতে পারবেন।`);
+                        }}
+                        className="px-3 py-1.5 bg-white hover:bg-blue-100 text-blue-800 border border-blue-300 rounded-xl text-[11px] font-bold transition cursor-pointer"
+                      >
+                        ⚡ টেস্ট Pixel ইভেন্ট পাঠান
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -1229,21 +1853,44 @@ export default function MerchantPortalPage() {
                         <Smartphone className="w-6 h-6" />
                       </div>
                       <h4 className="text-base font-black text-slate-900">
-                        মার্চেন্ট মোবাইল / ডেস্কটপ অ্যাপ ইনস্টল
+                        মার্চেন্ট মোবাইল / ডেস্কটপ স্বতন্ত্র অ্যাপ ইনস্টল
                       </h4>
                       <p className="text-xs text-slate-600 leading-relaxed">
-                        ব্রাউজারের ঝামেলা ছাড়াই ফোন বা কম্পিউটারের হোমস্ক্রিনে একটি ক্লিক করলেই আপনার মার্চেন্ট স্টুডিও ওপেন হবে।
+                        এটি মেইন শপ অ্যাপ থেকে সম্পূর্ণ আলাদা <strong>&ldquo;RU Merchant&rdquo;</strong> ড্যাশবোর্ড অ্যাপ! শুধুমাত্র আপনার পাসওয়ার্ড দিয়ে লগইন করলেই ডাউনলোড ও ইনস্টল অপশন চালু হয়।
                       </p>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={handleInstallApp}
-                      className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <Download className="w-4 h-4" />
-                      <span>{isAppInstalled ? 'অ্যাপটি ইতিমধ্যে ইনস্টল করা আছে' : 'মার্চেন্ট অ্যাপ ইনস্টল করুন'}</span>
-                    </button>
+                    <div className="space-y-2">
+                      <button
+                        type="button"
+                        onClick={handleInstallApp}
+                        className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
+                      >
+                        <Download className="w-4 h-4" />
+                        <span>{isAppInstalled ? 'মার্চেন্ট অ্যাপ ইনস্টল করা আছে' : 'স্বতন্ত্র মার্চেন্ট অ্যাপ ইনস্টল করুন'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const targetUrl = typeof window !== 'undefined' ? `${window.location.origin}/merchant` : 'https://ruinsider-2.vercel.app/merchant';
+                          const htmlLauncher = `<!DOCTYPE html><html lang="bn"><head><meta charset="utf-8"><title>RU Merchant Hub - ${merchant.shopName}</title><meta http-equiv="refresh" content="0;url=${targetUrl}"></head><body style="font-family:sans-serif;text-align:center;padding:40px;background:#064e3b;color:#fff;"><h2>RU Merchant Hub লোড হচ্ছে...</h2><p>স্বয়ংক্রিয়ভাবে চালু না হলে <a href="${targetUrl}" style="color:#fbbf24;">এখানে ক্লিক করুন</a>।</p><script>window.location.replace("${targetUrl}");</script></body></html>`;
+                          const blob = new Blob([htmlLauncher], { type: 'text/html;charset=utf-8' });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `RU-Merchant-${merchant.shopName.replace(/\s+/g, '_')}.html`;
+                          document.body.appendChild(a);
+                          a.click();
+                          document.body.removeChild(a);
+                          URL.revokeObjectURL(url);
+                        }}
+                        className="w-full py-2.5 bg-white hover:bg-emerald-100 text-emerald-900 border border-emerald-300 rounded-2xl font-bold text-xs shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <Download className="w-3.5 h-3.5 text-emerald-700" />
+                        <span>ড্যাশবোর্ড লঞ্চার ফাইল ডাউনলোড (.html)</span>
+                      </button>
+                    </div>
                   </div>
 
                   {/* Excel / CSV Report Card */}
@@ -1432,6 +2079,197 @@ export default function MerchantPortalPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ===================================================================== */}
+      {/* RIDER WHATSAPP GROUP DISPATCH MODAL                                   */}
+      {/* ===================================================================== */}
+      {dispatchModalOrder && merchant && (
+        <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-lg border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-5 bg-emerald-950 text-white flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-black flex items-center gap-2">
+                  <span>🛵 ডেলিভারি রাইডার WhatsApp গ্রুপে পোস্ট করুন</span>
+                </h3>
+                <p className="text-[11px] text-emerald-300 mt-0.5">
+                  অর্ডার #{dispatchModalOrder.orderId} • আগ্রহী রাইডার ভাই এই মেসেজ দেখে পিকআপ করবেন
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDispatchModalOrder(null)}
+                className="p-1.5 rounded-full hover:bg-white/10 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-5 overflow-y-auto space-y-4 text-xs">
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700 block">রাইডার গ্রুপে পাঠানোর রেডি মেসেজ:</label>
+                <textarea
+                  readOnly
+                  rows={8}
+                  value={buildRiderGroupMessage(dispatchModalOrder)}
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-[11px] text-slate-800"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-emerald-50/60 p-3.5 rounded-2xl border border-emerald-200">
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-800 block">আগ্রহী রাইডারের নাম (ঐচ্ছিক):</label>
+                  <input
+                    type="text"
+                    placeholder="যেমন: রাসেল ভাই (রাইডার)"
+                    value={riderNameInput}
+                    onChange={(e) => setRiderNameInput(e.target.value)}
+                    className="w-full p-2.5 bg-white border border-emerald-200 rounded-xl font-bold"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-800 block">রাইডারের ফোন (ঐচ্ছিক):</label>
+                  <input
+                    type="tel"
+                    placeholder="017XXXXXXXX"
+                    value={riderPhoneInput}
+                    onChange={(e) => setRiderPhoneInput(e.target.value)}
+                    className="w-full p-2.5 bg-white border border-emerald-200 rounded-xl font-bold"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(buildRiderGroupMessage(dispatchModalOrder));
+                    setCopiedRiderMsg(true);
+                    setTimeout(() => setCopiedRiderMsg(false), 2000);
+                  }}
+                  className="px-4 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold flex items-center gap-1.5 transition cursor-pointer"
+                >
+                  {copiedRiderMsg ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                  <span>{copiedRiderMsg ? 'মেসেজ কপি হয়েছে!' : 'মেসেজ কপি করুন'}</span>
+                </button>
+
+                {(merchant.deliveryWhatsAppGroupUrl || centralRiderGroupUrl) && (
+                  <a
+                    href={merchant.deliveryWhatsAppGroupUrl || centralRiderGroupUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={() => {
+                      navigator.clipboard.writeText(buildRiderGroupMessage(dispatchModalOrder));
+                    }}
+                    className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center gap-1.5 shadow transition"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>কপি ও WhatsApp গ্রুপ ওপেন করুন</span>
+                  </a>
+                )}
+
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(buildRiderGroupMessage(dispatchModalOrder))}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-4 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center gap-1.5 shadow transition"
+                >
+                  <Share2 className="w-4 h-4" />
+                  <span>WhatsApp-এ সরাসরি শেয়ার</span>
+                </a>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setDispatchModalOrder(null)}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition"
+              >
+                বন্ধ করুন
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  await handleUpdateOrderStatus(dispatchModalOrder.orderId, 'with_rider', {
+                    assignedRiderName: riderNameInput.trim() || 'WhatsApp Rider Group',
+                    assignedRiderPhone: riderPhoneInput.trim(),
+                    dispatchedVia: 'whatsapp_group',
+                    note: 'ডেলিভারি রাইডার গ্রুপের মাধ্যমে রাইডারকে হস্তান্তর করা হয়েছে',
+                  });
+                  setDispatchModalOrder(null);
+                }}
+                className="px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-black shadow transition cursor-pointer"
+              >
+                ✅ ৩. রাইডারকে দিলাম (মার্ক করুন)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===================================================================== */}
+      {/* CANCEL ORDER MODAL (ALLOWED FROM ANY STAGE)                           */}
+      {/* ===================================================================== */}
+      {cancelModalOrder && (
+        <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-md border border-red-200 shadow-2xl overflow-hidden">
+            <div className="p-5 bg-red-600 text-white flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-black">❌ অর্ডার ক্যান্সেল করুন</h3>
+                <p className="text-[11px] text-red-100 mt-0.5">
+                  অর্ডার #{cancelModalOrder.orderId} ({cancelModalOrder.customerName})
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCancelModalOrder(null)}
+                className="p-1.5 rounded-full hover:bg-white/10 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4 text-xs">
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl text-amber-950 font-medium">
+                নোট: যেকোনো ধাপ থেকেই অর্ডার ক্যান্সেল করা যাবে। সাধারণত কাস্টমার হোয়াটসঅ্যাপে মেসেজ করে জানালে বা প্রোডাক্ট সংক্রান্ত জরুরি প্রয়োজনে মার্চেন্ট/অ্যাডমিন অর্ডার ক্যান্সেল করবেন।
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-800 block">ক্যান্সেলের কারণ লিখুন:</label>
+                <textarea
+                  rows={3}
+                  placeholder="যেমন: কাস্টমার হোয়াটসঅ্যাপে মেসেজ দিয়ে বাতিল করার অনুরোধ করেছেন / স্টক শেষ..."
+                  value={cancelReasonInput}
+                  onChange={(e) => setCancelReasonInput(e.target.value)}
+                  className="w-full p-3 border border-slate-200 rounded-2xl font-medium focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setCancelModalOrder(null)}
+                  className="px-4 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition"
+                >
+                  ফিরে যান
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await handleUpdateOrderStatus(cancelModalOrder.orderId, 'cancelled', {
+                      cancellationReason: cancelReasonInput.trim() || 'কাস্টমারের অনুরোধ / মার্চেন্ট কর্তৃক বাতিল',
+                    });
+                    setCancelModalOrder(null);
+                  }}
+                  className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black shadow transition cursor-pointer"
+                >
+                  নিশ্চিত ক্যান্সেল করুন
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

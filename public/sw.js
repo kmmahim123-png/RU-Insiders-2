@@ -1,14 +1,17 @@
 // RU Insiders Offline Service Worker
-const CACHE_NAME = 'ru-insiders-cache-v1';
+const CACHE_NAME = 'ru-insiders-cache-v2';
 const OFFLINE_URLS = [
   '/',
   '/map',
   '/shop',
+  '/merchant',
+  '/track',
   '/academics',
   '/clubs',
   '/inside-ru',
   '/logo.png',
-  '/manifest.json'
+  '/manifest.json',
+  '/merchant-manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
@@ -41,12 +44,20 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
-  // Network-First for API routes to always get fresh data
-  if (url.pathname.startsWith('/api/')) {
+  // Network-First for API routes & Page Navigations so fresh deploys appear immediately
+  if (url.pathname.startsWith('/api/') || event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request).catch(() => {
-        return caches.match(event.request);
-      })
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const clone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, clone);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match(event.request))
     );
     return;
   }

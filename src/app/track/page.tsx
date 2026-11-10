@@ -67,14 +67,18 @@ function TrackOrderContent() {
     }
   };
 
-  const getStepIndex = (status: Order['status']) => {
+  const getStepIndex = (status: string) => {
     switch (status) {
+      case 'intake':
       case 'Pending':
         return 0;
+      case 'ready':
       case 'Confirmed':
         return 1;
+      case 'with_rider':
       case 'Out for Delivery':
         return 2;
+      case 'delivered':
       case 'Delivered':
         return 3;
       default:
@@ -82,11 +86,33 @@ function TrackOrderContent() {
     }
   };
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'intake':
+      case 'Pending':
+        return { label: '১. ইনটেক (গৃহীত)', color: 'bg-amber-100 text-amber-800 border-amber-300' };
+      case 'ready':
+      case 'Confirmed':
+        return { label: '২. অর্ডার রেডি', color: 'bg-blue-100 text-blue-800 border-blue-300' };
+      case 'with_rider':
+      case 'Out for Delivery':
+        return { label: '৩. রাইডারকে দেওয়া হয়েছে', color: 'bg-purple-100 text-purple-800 border-purple-300' };
+      case 'delivered':
+      case 'Delivered':
+        return { label: '৪. ডেলিভারড সম্পন্ন', color: 'bg-emerald-100 text-emerald-800 border-emerald-300' };
+      case 'cancelled':
+      case 'Cancelled':
+        return { label: '৫. বাতিল / ক্যান্সেল', color: 'bg-red-100 text-red-800 border-red-300' };
+      default:
+        return { label: status, color: 'bg-slate-100 text-slate-800 border-slate-300' };
+    }
+  };
+
   const steps = [
-    { title: 'অর্ডার গৃহিত', desc: 'অর্ডার সফলভাবে সিস্টেমে যুক্ত হয়েছে' },
-    { title: 'কনফার্মড', desc: 'প্রস্তুতি চলছে ও প্যাকেজিং সম্পন্ন' },
-    { title: 'ডেলিভারিতে আছে', desc: 'ডেলিভারিম্যান ক্যাম্পাসে বা কুরিয়ারে' },
-    { title: 'ডেলিভারি সম্পন্ন', desc: 'পণ্য গ্রাহকের হাতে বুঝিয়ে দেওয়া হয়েছে' },
+    { title: '১. ইনটেক', desc: 'অর্ডার সফলভাবে সিস্টেমে যুক্ত হয়েছে' },
+    { title: '২. অর্ডার রেডি', desc: 'প্রস্তুতি চলছে ও প্যাকেজিং সম্পন্ন' },
+    { title: '৩. রাইডারকে প্রদান', desc: 'রাইডার বা কুরিয়ারে হস্তান্তর করা হয়েছে' },
+    { title: '৪. ডেলিভারি সম্পন্ন', desc: 'পণ্য গ্রাহকের হাতে বুঝিয়ে দেওয়া হয়েছে' },
   ];
 
   return (
@@ -154,7 +180,9 @@ function TrackOrderContent() {
           ) : (
             orders.map((order) => {
               const currentStep = getStepIndex(order.status);
-              const isCancelled = order.status === 'Cancelled';
+              const isCancelled = order.status === 'cancelled' || order.status === 'Cancelled';
+              const isDelivered = order.status === 'delivered' || order.status === 'Delivered';
+              const badge = getStatusBadge(order.status);
 
               return (
                 <div
@@ -164,20 +192,12 @@ function TrackOrderContent() {
                   {/* Order Head Meta */}
                   <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100">
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <span className="text-base sm:text-lg font-black text-slate-900 font-mono">
                           {order.orderId}
                         </span>
-                        <span
-                          className={`text-xs font-black px-3 py-0.5 rounded-full ${
-                            order.status === 'Delivered'
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : order.status === 'Cancelled'
-                              ? 'bg-red-100 text-red-800'
-                              : 'bg-blue-100 text-blue-800'
-                          }`}
-                        >
-                          {order.status}
+                        <span className={`text-xs font-black px-3 py-0.5 rounded-full border ${badge.color}`}>
+                          {badge.label}
                         </span>
                       </div>
                       <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
@@ -198,7 +218,7 @@ function TrackOrderContent() {
 
                   {/* Status Timeline */}
                   {!isCancelled ? (
-                    <div className="py-2">
+                    <div className="py-2 space-y-4">
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 relative">
                         {steps.map((st, sIdx) => {
                           const isDone = sIdx <= currentStep;
@@ -229,11 +249,75 @@ function TrackOrderContent() {
                           );
                         })}
                       </div>
+
+                      {/* Steadfast Courier Tracking Box */}
+                      {order.steadfastTrackingCode && (
+                        <div className="p-3.5 rounded-2xl bg-indigo-50 border border-indigo-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+                          <div>
+                            <span className="font-extrabold text-indigo-950 flex items-center gap-1.5">
+                              <Truck className="w-4 h-4 text-indigo-600" />
+                              Steadfast Courier ট্র্যাকিং কোড: <span className="font-mono bg-white px-2 py-0.5 rounded border border-indigo-200">{order.steadfastTrackingCode}</span>
+                            </span>
+                            {order.steadfastStatus && (
+                              <span className="text-[11px] text-indigo-700 block mt-0.5">
+                                কুরিয়ার স্ট্যাটাস: {order.steadfastStatus}
+                              </span>
+                            )}
+                          </div>
+                          <a
+                            href={`https://portal.packzy.com/tracking?tracking_code=${encodeURIComponent(order.steadfastTrackingCode)}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition"
+                          >
+                            লাইভ কুরিয়ার ট্র্যাক ➔
+                          </a>
+                        </div>
+                      )}
+
+                      {/* Assigned Campus Rider Box */}
+                      {order.assignedRiderName && (
+                        <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+                          <span className="font-bold text-emerald-950 flex items-center gap-1.5">
+                            🛵 ডেলিভারি রাইডার: <span className="font-black">{order.assignedRiderName}</span>
+                            {order.assignedRiderPhone && ` (${order.assignedRiderPhone})`}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Cancellation Policy Banner (No self-cancel for customers) */}
+                      {!isDelivered && (
+                        <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div className="text-xs text-amber-950 space-y-0.5">
+                            <p className="font-extrabold">📌 অর্ডার পরিবর্তন বা ক্যান্সেল করতে চান?</p>
+                            <p className="text-[11px] text-amber-800">
+                              গ্রাহক নিজে সরাসরি অর্ডার ক্যান্সেল করতে পারবেন না। বাতিল করতে চাইলে অনুগ্রহ করে আগে আমাদের মেসেজ করে জানান।
+                            </p>
+                          </div>
+                          <a
+                            href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
+                              `আসসালামু আলাইকুম! আমি আমার অর্ডার #${order.orderId} ক্যান্সেল / পরিবর্তন করতে চাচ্ছি।\nনাম: ${order.customerName}\nফোন: ${order.phone}`
+                            )}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="shrink-0 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-sm transition"
+                          >
+                            <MessageCircle className="w-3.5 h-3.5" /> ক্যান্সেলের জন্য মেসেজ দিন
+                          </a>
+                        </div>
+                      )}
                     </div>
                   ) : (
-                    <div className="p-4 bg-red-50 text-red-800 rounded-2xl text-xs font-bold flex items-center gap-2">
-                      <XCircle className="w-5 h-5 text-red-600 shrink-0" />
-                      <span>এই অর্ডারটি বাতিল করা হয়েছে। বিস্তারিত জানতে সাপোর্টে মেসেজ দিন।</span>
+                    <div className="p-4 bg-red-50 border border-red-200 text-red-900 rounded-2xl text-xs space-y-1">
+                      <div className="font-black flex items-center gap-2">
+                        <XCircle className="w-5 h-5 text-red-600 shrink-0" />
+                        <span>এই অর্ডারটি বাতিল (Cancelled) করা হয়েছে।</span>
+                      </div>
+                      {order.cancellationReason && (
+                        <p className="text-[11px] text-red-800 pl-7">
+                          কারণ: {order.cancellationReason}
+                        </p>
+                      )}
                     </div>
                   )}
 
