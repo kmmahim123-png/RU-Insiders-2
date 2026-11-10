@@ -1,266 +1,268 @@
 {
-  "settings": {
-    "superAdminPassword": "ru-admin-2026",
-    "productManagerPassword": "ru-shop-2026",
-    "whatsappNumber": "8801325661777",
-    "deliveryCharges": {
-      "campus": 0,
-      "city": 40,
-      "nationwide": 100
-    },
-    "categories": [
-      "হুডি ও শীতকালীন পোশাক",
-      "ড্রপ শোল্ডার ও টি-শার্ট",
-      "স্পোর্টস জার্সি",
-      "খেজুরের গুড় ও ঐতিহ্যবাহী খাবার",
-      "নাড়ু ও হোমমেড ফুড",
-      "ক্যাম্পাস গিফট ও স্যুভেনির"
-    ],
-    "breakingNews": [
-      "🔥 রাবি অফিশিয়াল উইন্টার হুডি ও রাজশাহীর খাঁটি খেজুরের গুড়ের প্রি-অর্ডার চলছে! মতিহার ক্যাম্পাসে ফ্রি ডেলিভারি।",
-      "🎓 রাবির ৪২টি স্পট ও রাজশাহী জেলার ২২টি অঞ্চল কতটুকু ঘুরলেন? এখনই ম্যাপে টিক দিয়ে নিজের ভ্রমণ সনদ ডাউনলোড করুন!",
-      "✍️ Inside RU পোর্টালে আপনার গল্প, কবিতা বা গবেষণাপত্র জমা দিন এবং জিতে নিন আকর্ষণীয় গিফট হ্যাম্পার।"
-    ]
-  },
-  "products": [
+  "clubs": [
     {
-      "id": "prod-1794154030298",
-      "nameBn": "tt",
-      "category": "হুডি ও শীতকালীন পোশাক",
-      "productType": "food_weight",
-      "price": 100,
-      "images": [
-        "/uploads/ru-1794154065708-z3z4s.jpg"
+      "id": "rucs",
+      "nameBn": "রাবি ক্যারিয়ার ক্লাব (RUCS)",
+      "password": "rucs-2026",
+      "shortName": "RUCS",
+      "categoryBn": "ক্যারিয়ার ও দক্ষতা",
+      "descriptionBn": "শিক্ষার্থীদের কর্পোরেট দক্ষতা, সিভি রাইটিং ও জব ফেয়ার আয়োজনকারী সংগঠন।"
+    },
+    {
+      "id": "rudeu",
+      "nameBn": "রাবি ডিবেটিং ইউনিয়ন (RUDEU)",
+      "password": "rudeu-2026",
+      "shortName": "RUDEU",
+      "categoryBn": "বিতর্ক ও যুক্তি",
+      "descriptionBn": "যুক্তিনির্ভর সমাজ গঠনে জাতীয় ও আন্তর্জাতিক পর্যায়ে বিতর্ক চর্চার প্ল্যাটফর্ম।"
+    },
+    {
+      "id": "rusc",
+      "nameBn": "রাবি সায়েন্স ক্লাব (RUSC)",
+      "password": "rusc-2026",
+      "shortName": "RUSC",
+      "categoryBn": "বিজ্ঞান ও গবেষণা",
+      "descriptionBn": "বিজ্ঞান অলিম্পিয়াড, প্রজেক্ট প্রদর্শনী ও গবেষণা সেমিনার আয়োজনকারী ক্লাব।"
+    },
+    {
+      "id": "rups",
+      "nameBn": "রাবি ফটোগ্রাফি সোসাইটি (RUPS)",
+      "password": "rups-2026",
+      "shortName": "RUPS",
+      "categoryBn": "ফটোগ্রাফি ও আর্ট",
+      "descriptionBn": "মতিহারের প্রকৃতি ও ক্যাম্পাস জীবনের মুহূর্ত ক্যামেরায় ধারণকারীদের সংগঠন।"
+    },
+    {
+      "id": "badhan",
+      "nameBn": "বাঁধন (স্বেচ্ছায় রক্তদাতাদের সংগঠন)",
+      "password": "badhan-2026",
+      "shortName": "বাঁধন",
+      "categoryBn": "মানবসেবা",
+      "descriptionBn": "একের রক্ত অন্যের জীবন — জরুরি মুহূর্তে বিনামূল্যে রক্তদান ও ব্লাড গ্রুপিং সংগঠন।"
+    },
+    {
+      "id": "rover",
+      "nameBn": "রাবি রোভার স্কাউট গ্রুপ",
+      "password": "rover-2026",
+      "shortName": "Rover Scout",
+      "categoryBn": "শৃঙ্খলা ও সেবা",
+      "descriptionBn": "ভর্তি পরীক্ষা ও ক্যাম্পাসের যেকোনো মানবিক কাজে অগ্রণী স্বেচ্ছাসেবী দল।"
+    },
+    {
+      "id": "rongobhumi",
+      "nameBn": "রঙ্গভূমি ও কেন্দ্রীয় সাংস্কৃতিক জোট",
+      "password": "rongobhumi-2026",
+      "shortName": "রঙ্গভূমি",
+      "categoryBn": "থিয়েটার ও সংস্কৃতি",
+      "descriptionBn": "মঞ্চনাটক, আবৃত্তি ও সংগীত চর্চার ঐতিহ্যবাহী সাংস্কৃতিক সংগঠন।"
+    },
+    {
+      "id": "ieee",
+      "nameBn": "IEEE Rajshahi University Student Branch",
+      "password": "ieee-2026",
+      "shortName": "IEEE RU",
+      "categoryBn": "প্রযুক্তি ও রোবটিক্স",
+      "descriptionBn": "প্রযুক্তি, রোবটিক্স, এআই ও আন্তর্জাতিক রিসার্চ পেপার প্রকাশনার স্টুডেন্ট ব্রাঞ্চ।"
+    }
+  ],
+  "alumni": [
+    {
+      "id": "alum-1",
+      "name": "ড. তানভীর হাসান",
+      "batch": "৫২তম ব্যাচ",
+      "email": "tanvir.ru.alumni@gmail.com",
+      "country": "Germany (DAAD Scholar)",
+      "faculty": "প্রকৌশল অনুষদ",
+      "approved": true,
+      "linkedin": "https://linkedin.com",
+      "whatsapp": "8801700000000",
+      "department": "কম্পিউটার সায়েন্স অ্যান্ড ইঞ্জিনিয়ারিং (CSE)",
+      "currentRole": "Senior Software Engineer",
+      "organization": "Google (Munich, Germany)"
+    },
+    {
+      "id": "alum-2",
+      "name": "ব্যারিস্টার ফারহানা ইয়াসমিন",
+      "batch": "৫০তম ব্যাচ",
+      "email": "farhana.law@ru.ac.bd",
+      "country": "Bangladesh (LLM, UK Chevening)",
+      "faculty": "আইন অনুষদ",
+      "approved": true,
+      "whatsapp": "8801700000000",
+      "department": "আইন বিভাগ (Law)",
+      "currentRole": "অ্যাডভোকেট ও সহকারী অ্যাটর্নি জেনারেল",
+      "organization": "বাংলাদেশ সুপ্রিম কোর্ট (হাইকোর্ট বিভাগ)"
+    }
+  ],
+  "orders": [
+    {
+      "items": [
+        {
+          "image": "/mockups/hoodie-front.jpg",
+          "nameBn": "প্রিমিয়াম আরইউ ক্রেস্ট হুডি (নেভি ব্লু)",
+          "quantity": 1,
+          "productId": "prod-hoodie-1",
+          "unitPrice": 850,
+          "selectedOption": "XL"
+        }
       ],
-      "shortSummary": "",
+      "phone": "01712345678",
+      "status": "with_rider",
+      "orderId": "RUI-562601",
+      "subtotal": 850,
+      "createdAt": "2026-11-08T11:06:18.936Z",
+      "totalAmount": 850,
+      "customerName": "মহিম আহমেদ",
+      "deliveryZone": "campus",
+      "statusHistory": [
+        {
+          "actor": "প্রোডাক্ট ম্যানেজার",
+          "status": "with_rider",
+          "timestamp": "2026-11-10T05:21:45.995Z"
+        }
+      ],
+      "addressDetails": "শহীদ হবিবুর রহমান হল, রুম ২০৪, রাবি",
+      "deliveryCharge": 0
+    }
+  ],
+  "articles": [
+    {
+      "id": "art-1794270725247",
+      "likes": 35,
+      "title": "ভর্তি পরীক্ষা শুরু হতে যাচ্ছে ",
+      "images": [
+        "https://skqtcsoovtnxxbhtracp.supabase.co/storage/v1/object/public/uploads/ru-1794270786408-qs662.webp"
+      ],
+      "status": "Published",
+      "summary": "",
+      "category": "ব্রেকিং নিউজ",
+      "createdAt": "2026-11-10T00:32:05.247Z",
+      "authorName": "সেন্ট্রাল ডেস্ক",
+      "department": "RU Insiders",
+      "isBreaking": true,
       "detailSections": [
         {
           "id": "sec-1",
-          "title": "বিবরণ ও ফেব্রিক কোয়ালিটি",
-          "content": ""
+          "title": "ভর্তি পরীক্ষার পিছাবে না",
+          "content": "আবেগ শেষ তারিখ ৩০ নভেম্বর । পরবর্তীতে কোন সুযোগ থাকবে না"
         }
       ],
-      "sizes": [
-        "S",
-        "M",
-        "L",
-        "XL",
-        "XXL"
-      ],
-      "weightOptions": [],
-      "inStock": true,
-      "featured": false,
-      "createdAt": "2026-11-08T16:07:10.298Z"
+      "whatsappNumber": "8801534102652"
     },
     {
-      "id": "prod-hoodie-1",
-      "nameBn": "প্রিমিয়াম আরইউ ক্রেস্ট হুডি (নেভি ব্লু)",
-      "category": "হুডি ও শীতকালীন পোশাক",
-      "productType": "apparel",
-      "price": 850,
+      "id": "art-breaking-1",
+      "likes": 89,
+      "title": "রাবি ক্যাম্পাসে শীতকালীন অফিশিয়াল হুডি ও খাঁটি খেজুরের গুড়ের প্রি-অর্ডার শুরু",
       "images": [
-        "/campus/paris-road-rain.jpg"
+        "/campus/paris-road-rain.jpg",
+        "/mockups/hoodie-front.jpg"
       ],
-      "shortSummary": "৩২০ জিএসএম ফ্লিস কটন, বুকে রাবি ক্রেস্ট এমব্রয়ডারি করা প্রিমিয়াম শীতকালীন হুডি।",
+      "status": "Published",
+      "summary": "মতিহার ক্যাম্পাসের শিক্ষার্থীদের জন্য ফ্রি ডেলিভারি সহ অফিশিয়াল উইন্টার কালেকশন ও খাঁটি খেজুরের গুড় এখন পাওয়া যাচ্ছে।",
+      "category": "ব্রেকিং নিউজ",
+      "createdAt": "2026-11-08T15:32:44.596Z",
+      "authorName": "সেন্ট্রাল ডেস্ক",
+      "department": "RU Insiders অফিশিয়াল",
+      "isBreaking": true,
       "detailSections": [
         {
-          "id": "d1",
-          "title": "ফ্যাব্রিক ও কোয়ালিটি",
-          "content": "১০০% এক্সপোর্ট কোয়ালিটি ৩২০ জিএসএম ব্রাশড ফ্লিস ফেব্রিক। শীতের জন্য অত্যন্ত আরামদায়ক ও টেকসই।"
+          "id": "bn-1",
+          "title": "অফিশিয়াল লঞ্চ ও অফার",
+          "content": "রাজশাহী বিশ্ববিদ্যালয়ের শিক্ষার্থীদের জন্য ৩২০ জিএসএম ফ্লিস কটন প্রিমিয়াম হুডি এবং চারঘাটের গাছিদের থেকে সংগৃহীত ১০০% নির্ভেজাল খেজুরের গুড়ের ডেলিভারি শুরু হয়েছে।"
         },
         {
-          "id": "d2",
-          "title": "কাস্টমাইজেশন ও বাল্ক অর্ডার",
-          "content": "ডিপার্টমেন্ট বা ব্যাচের সবার জন্য নিজের নাম ও লোগো বসাতে চাইলে নিচের WhatsApp বাটনে ক্লিক করে মেসেজ দিন।"
+          "id": "bn-2",
+          "title": "ক্যাম্পাসে ফ্রি ডেলিভারি",
+          "content": "ক্যাম্পাসের সকল আবাসিক হল এবং ডরমেটরিতে সম্পূর্ণ ফ্রি হোম ডেলিভারি প্রদান করা হচ্ছে। কোনো অগ্রিম পেমেন্ট ছাড়াই ১০০% ক্যাশ অন ডেলিভারিতে অর্ডার গ্রহণ করা হচ্ছে।"
         }
       ],
-      "sizes": [
-        "S",
-        "M",
-        "L",
-        "XL",
-        "XXL"
-      ],
-      "inStock": true,
-      "featured": true,
-      "createdAt": "2026-11-08T11:04:53.338Z",
-      "merchantId": "m-motihar-crafts",
-      "merchantName": "?????? ??????? ??????? ??????"
+      "whatsappNumber": "8801700000000"
     },
     {
-      "id": "prod-dropshoulder-1",
-      "nameBn": "প্যারিস রোড মোটিফ ড্রপ শোল্ডার টি-শার্ট",
-      "category": "ড্রপ শোল্ডার ও টি-শার্ট",
-      "productType": "apparel",
-      "price": 450,
+      "id": "art-1",
+      "likes": 49,
+      "title": "বৃষ্টিভেজা প্যারিস রোড ও টুকিটাকি চত্বরের সেই সোনালী বিকেল",
       "images": [
-        "/mockups/dropshoulder-front.jpg"
-      ],
-      "shortSummary": "২২০ জিএসএম কম্বড কটন ওভারসাইজড ড্রপ শোল্ডার টি-শার্ট।",
-      "detailSections": [
-        {
-          "id": "d1",
-          "title": "ডিজাইন ও প্রিন্ট",
-          "content": "প্যারিস রোড ও সাবাশ বাংলাদেশের নান্দনিক ডিটিএফ প্রিন্ট যা ধোয়ার পরেও নষ্ট হয় না।"
-        }
-      ],
-      "sizes": [
-        "M",
-        "L",
-        "XL",
-        "XXL"
-      ],
-      "inStock": true,
-      "featured": true,
-      "createdAt": "2026-11-08T11:04:53.340Z",
-      "merchantId": "m-motihar-crafts",
-      "merchantName": "?????? ??????? ??????? ??????"
-    },
-    {
-      "id": "prod-jersey-1",
-      "nameBn": "রাবি আন্তঃবিভাগ স্পোর্টস জার্সি (রেড-গোল্ড এডিশন)",
-      "category": "স্পোর্টস জার্সি",
-      "productType": "apparel",
-      "price": 390,
-      "images": [
-        "/mockups/jersey-front.jpg"
-      ],
-      "shortSummary": "ড্রাই-ফিট ব্রিদেবল ফেব্রিক, আন্তঃবিভাগ টুর্নামেন্ট ও ফুটবল-ক্রিকেটের অফিশিয়াল জার্সি।",
-      "detailSections": [
-        {
-          "id": "j1",
-          "title": "ফ্যাব্রিক টেকনোলজি",
-          "content": "ড্রাই-ফিট মাইক্রো পলিয়েস্টার যা ঘাম দ্রুত শোষণ করে শরীর শীতল ও আরামদায়ক রাখে।"
-        },
-        {
-          "id": "j2",
-          "title": "নাম ও নম্বর কাস্টমাইজেশন",
-          "content": "জার্সির পেছনে নিজের নাম ও প্রিয় নম্বর প্রিন্ট করতে WhatsApp বাটনে ক্লিক করে মেসেজ দিন।"
-        }
-      ],
-      "sizes": [
-        "M",
-        "L",
-        "XL",
-        "XXL"
-      ],
-      "inStock": true,
-      "featured": true,
-      "createdAt": "2026-11-08T11:04:53.340Z",
-      "merchantId": "m-motihar-crafts",
-      "merchantName": "?????? ??????? ??????? ??????"
-    },
-    {
-      "id": "prod-gur-1",
-      "nameBn": "রাজশাহীর খাঁটি পাটালি ও ঝোলা খেজুরের গুড়",
-      "category": "খেজুরের গুড় ও ঐতিহ্যবাহী খাবার",
-      "productType": "food_weight",
-      "price": 380,
-      "images": [
+        "/campus/paris-road-rain.jpg",
         "/campus/ru-spot.jpg"
       ],
-      "shortSummary": "রাজশাহী ও চারঘাটের গাছিদের কাছ থেকে সরাসরি সংগৃহীত ১০০% কেমিক্যাল ও চিনিমুক্ত খাঁটি খেজুরের গুড়।",
+      "status": "Published",
+      "summary": "ক্লাস শেষে বন্ধুদের সাথে টুকিটাকি চত্বরের মাটির কাপে চা আর বৃষ্টিস্নাত প্যারিস রোড ধরে হেঁটে যাওয়ার অনুভূতি চির অম্লান।",
+      "category": "গল্প ও স্মৃতিচারণ",
+      "createdAt": "2026-11-08T11:04:53.340Z",
+      "authorName": "মাহিম আহমেদ",
+      "department": "কম্পিউটার সায়েন্স অ্যান্ড ইঞ্জিনিয়ারিং (CSE)",
       "detailSections": [
         {
-          "id": "g1",
-          "title": "গুড়ের বিশেষত্ব ও বিশুদ্ধতা",
-          "content": "কোনো প্রকার হাইড্রোজ, ফিটকিরি বা চিনি মেশানো হয়নি। ভোরবেলা রস জ্বাল দিয়ে তৈরি সুঘ্রাণযুক্ত দানা পাটালি ও লালি গুড়।"
+          "id": "a1",
+          "title": "টুকিটাকির আড্ডা",
+          "content": "সকাল আটটার ক্লাস শেষে যখন সবাই ক্লান্ত হয়ে টুকিটাকি চত্বরে জড়ো হই, তখন এক কাপ আদা চা আর সিঙ্গারা যেন সমস্ত ক্লান্তি ভুলিয়ে দেয়।"
         },
         {
-          "id": "g2",
-          "title": "সারা বাংলাদেশে নিরাপদ প্যাকেজিং",
-          "content": "ফুড-গ্রেড এয়ারটাইট বক্সে বিশেষ প্যাকিং করে সারা বাংলাদেশে ক্যাশ অন ডেলিভারিতে পাঠানো হয়।"
+          "id": "a2",
+          "title": "গগনশিরীষের ছায়া",
+          "content": "বিকেলের রোদ যখন গগনশিরীষের পাতার ফাঁক গলে পিচঢালা পথে পড়ে, তখন মনে হয় পৃথিবীর সবচেয়ে সুন্দর ক্যাম্পাস আমাদের এই মতিহার।"
         }
       ],
-      "weightOptions": [
-        {
-          "label": "১ কেজি পাটালি গুড়",
-          "price": 380
-        },
-        {
-          "label": "২ কেজি কম্বো প্যাক",
-          "price": 740
-        },
-        {
-          "label": "৫ কেজি ফ্যামিলি বক্স",
-          "price": 1800
-        }
-      ],
-      "inStock": true,
-      "featured": true,
-      "createdAt": "2026-11-08T11:04:53.340Z",
-      "merchantId": "m-varendra-foods",
-      "merchantName": "???????? ????? ??? ? ???? ?????"
+      "whatsappNumber": "8801700000000"
     },
     {
-      "id": "prod-naru-1",
-      "nameBn": "হোমমেড গুড়ের নারিকেল নাড়ু ও তিলের নাড়ু",
-      "category": "নাড়ু ও হোমমেড ফুড",
-      "productType": "food_weight",
-      "price": 220,
+      "id": "art-2",
+      "likes": 35,
+      "title": "শাবাশ বাংলাদেশ: স্বাধীনতার অমর ভাস্কর্যের ইতিহাস ও তাৎপর্য",
       "images": [
         "/campus/ru-roundabout.jpg"
       ],
-      "shortSummary": "ঘরোয়া পরিবেশে খাঁটি খেজুরের গুড় ও দেশি নারিকেল দিয়ে তৈরি সুস্বাদু নাড়ু।",
+      "status": "Published",
+      "summary": "শিল্পী নিতুন কুণ্ডুর অমর সৃষ্টি শাবাশ বাংলাদেশ কীভাবে রাবি শিক্ষার্থীদের অনুপ্রেরণার কেন্দ্রবিন্দু হয়ে উঠলো।",
+      "category": "ক্যাম্পাস নিউজ",
+      "createdAt": "2026-11-08T11:04:53.340Z",
+      "authorName": "রাবি প্রতিনিধি",
+      "department": "ইতিহাস বিভাগ",
       "detailSections": [
         {
-          "id": "n1",
-          "title": "উপাদান ও স্বাদ",
-          "content": "বাছাইকৃত নারিকেল, খাঁটি খেজুরের গুড়, এলাচ ও ঘিয়ের ফ্লেভারে সম্পূর্ণ স্বাস্থ্যসম্মতভাবে তৈরি। হলের শিক্ষার্থীদের জন্য স্পেশাল স্ন্যাকস!"
+          "id": "sb1",
+          "title": "ভাস্কর্যের সৃষ্টি ও উদ্বোধন",
+          "content": "১৯৯১ সালে মুক্তিযুদ্ধের শহীদদের স্মরণে রাবি কেন্দ্রীয় চত্বরে উন্মোচিত হয় এই সুবিশাল ভাস্কর্য। সুকান্ত ভট্টাচার্যের কবিতার পঙ্ক্তি খচিত এই স্মারক বাঙালির আত্মত্যাগের প্রতীক।"
         }
       ],
-      "weightOptions": [
-        {
-          "label": "৫০০ গ্রাম জার (২০-২২ পিস)",
-          "price": 220
-        },
-        {
-          "label": "১ কেজি ফ্যামিলি জার",
-          "price": 420
-        }
-      ],
-      "inStock": true,
-      "featured": true,
-      "createdAt": "2026-11-08T11:04:53.340Z",
-      "merchantId": "m-varendra-foods",
-      "merchantName": "???????? ????? ??? ? ???? ?????"
+      "whatsappNumber": "8801700000000"
     },
     {
-      "id": "prod-souvenir-1",
-      "nameBn": "সাবাশ বাংলাদেশ অ্যাক্রিলিক টেবিল স্যুভেনির ক্রেস্ট",
-      "category": "ক্যাম্পাস গিফট ও স্যুভেনির",
-      "productType": "standard",
-      "price": 280,
+      "id": "art-fine-arts-1",
+      "likes": 63,
+      "title": "চারুকলা চত্বরের রঙের উৎসব ও শিক্ষার্থীদের ক্যানভাসে মতিহার",
       "images": [
         "/campus/ru-roundabout.jpg",
-        "/campus/paris-road-rain.jpg"
+        "/campus/ru-spot.jpg"
       ],
-      "shortSummary": "ডেস্কটপ ও পড়ার টেবিলের জন্য নান্দনিক মেটাল গোল্ড ফিনিশ সাবাশ বাংলাদেশ স্যুভেনির।",
+      "status": "Published",
+      "summary": "চারুকলার সবুজ চত্বরে দিনভর তুলির আঁচড় আর মাটির গন্ধ—কীভাবে শিক্ষার্থীরা ক্যাম্পাসের রূপ ফুটিয়ে তোলে।",
+      "category": "চারুকলা ও সাহিত্য",
+      "createdAt": "2026-11-08T15:32:44.600Z",
+      "authorName": "অঙ্কিতা রায়",
+      "department": "চারুকলা অনুষদ (চিত্রকলা বিভাগ)",
       "detailSections": [
         {
-          "id": "s1",
-          "title": "উপাদান ও ফিনিশিং",
-          "content": "হাই-গ্রেড স্বচ্ছ অ্যাক্রিলিক বেসের ওপর লেজার এনগ্রেভড গোল্ডেন সাবাশ বাংলাদেশ মনোগ্রাম।"
+          "id": "fa-1",
+          "title": "বসন্ত ও শরতের ক্যানভাস",
+          "content": "চারুকলা অনুষদের বার্ষিক প্রদর্শনীতে শিক্ষার্থীরা রাজশাহীর পদ্মার চর, প্যারিস রোড এবং ঐতিহাসিক শহীদ মিনারের বিভিন্ন মুহূর্ত তুলে ধরেন।"
         }
       ],
-      "inStock": true,
-      "featured": true,
-      "createdAt": "2026-11-08T11:04:53.340Z",
-      "merchantId": "m-motihar-crafts",
-      "merchantName": "?????? ??????? ??????? ??????"
+      "whatsappNumber": "8801700000000"
     }
   ],
   "mapSpots": {
     "paris_road": {
-      "spotId": "paris_road",
       "stage": "ru_campus",
-      "nameBn": "ঐতিহাসিক প্যারিস রোড (গগনশিরীষ বৃক্ষবীথি)",
-      "subtitleBn": "রাজশাহী বিশ্ববিদ্যালয়ের প্রধান আকর্ষণ ও সবুজ সুড়ঙ্গ পথ",
       "images": [
         "/campus/paris-road-rain.jpg",
         "/campus/ru-admin.jpg",
         "/campus/ru-gate.jpg"
       ],
+      "nameBn": "ঐতিহাসিক প্যারিস রোড (গগনশিরীষ বৃক্ষবীথি)",
+      "spotId": "paris_road",
+      "subtitleBn": "রাজশাহী বিশ্ববিদ্যালয়ের প্রধান আকর্ষণ ও সবুজ সুড়ঙ্গ পথ",
       "detailSections": [
         {
           "id": "pr1",
@@ -275,293 +277,460 @@
       ]
     }
   },
-  "orders": [
+  "products": [
     {
-      "orderId": "RUI-562601",
-      "customerName": "মহিম আহমেদ",
-      "phone": "01712345678",
-      "deliveryZone": "campus",
-      "addressDetails": "শহীদ হবিবুর রহমান হল, রুম ২০৪, রাবি",
-      "items": [
-        {
-          "productId": "prod-hoodie-1",
-          "nameBn": "প্রিমিয়াম আরইউ ক্রেস্ট হুডি (নেভি ব্লু)",
-          "image": "/mockups/hoodie-front.jpg",
-          "selectedOption": "XL",
-          "unitPrice": 850,
-          "quantity": 1
-        }
+      "id": "prod-1794154030298",
+      "price": 100,
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL"
       ],
-      "subtotal": 850,
-      "deliveryCharge": 0,
-      "totalAmount": 850,
-      "status": "Confirmed",
-      "createdAt": "2026-11-08T11:06:18.936Z"
-    }
-  ],
-  "clubs": [
-    {
-      "id": "rucs",
-      "shortName": "RUCS",
-      "nameBn": "রাবি ক্যারিয়ার ক্লাব (RUCS)",
-      "categoryBn": "ক্যারিয়ার ও দক্ষতা",
-      "descriptionBn": "শিক্ষার্থীদের কর্পোরেট দক্ষতা, সিভি রাইটিং ও জব ফেয়ার আয়োজনকারী সংগঠন।",
-      "password": "rucs-2026"
-    },
-    {
-      "id": "rudeu",
-      "shortName": "RUDEU",
-      "nameBn": "রাবি ডিবেটিং ইউনিয়ন (RUDEU)",
-      "categoryBn": "বিতর্ক ও যুক্তি",
-      "descriptionBn": "যুক্তিনির্ভর সমাজ গঠনে জাতীয় ও আন্তর্জাতিক পর্যায়ে বিতর্ক চর্চার প্ল্যাটফর্ম।",
-      "password": "rudeu-2026"
-    },
-    {
-      "id": "rusc",
-      "shortName": "RUSC",
-      "nameBn": "রাবি সায়েন্স ক্লাব (RUSC)",
-      "categoryBn": "বিজ্ঞান ও গবেষণা",
-      "descriptionBn": "বিজ্ঞান অলিম্পিয়াড, প্রজেক্ট প্রদর্শনী ও গবেষণা সেমিনার আয়োজনকারী ক্লাব।",
-      "password": "rusc-2026"
-    },
-    {
-      "id": "rups",
-      "shortName": "RUPS",
-      "nameBn": "রাবি ফটোগ্রাফি সোসাইটি (RUPS)",
-      "categoryBn": "ফটোগ্রাফি ও আর্ট",
-      "descriptionBn": "মতিহারের প্রকৃতি ও ক্যাম্পাস জীবনের মুহূর্ত ক্যামেরায় ধারণকারীদের সংগঠন।",
-      "password": "rups-2026"
-    },
-    {
-      "id": "badhan",
-      "shortName": "বাঁধন",
-      "nameBn": "বাঁধন (স্বেচ্ছায় রক্তদাতাদের সংগঠন)",
-      "categoryBn": "মানবসেবা",
-      "descriptionBn": "একের রক্ত অন্যের জীবন — জরুরি মুহূর্তে বিনামূল্যে রক্তদান ও ব্লাড গ্রুপিং সংগঠন।",
-      "password": "badhan-2026"
-    },
-    {
-      "id": "rover",
-      "shortName": "Rover Scout",
-      "nameBn": "রাবি রোভার স্কাউট গ্রুপ",
-      "categoryBn": "শৃঙ্খলা ও সেবা",
-      "descriptionBn": "ভর্তি পরীক্ষা ও ক্যাম্পাসের যেকোনো মানবিক কাজে অগ্রণী স্বেচ্ছাসেবী দল।",
-      "password": "rover-2026"
-    },
-    {
-      "id": "rongobhumi",
-      "shortName": "রঙ্গভূমি",
-      "nameBn": "রঙ্গভূমি ও কেন্দ্রীয় সাংস্কৃতিক জোট",
-      "categoryBn": "থিয়েটার ও সংস্কৃতি",
-      "descriptionBn": "মঞ্চনাটক, আবৃত্তি ও সংগীত চর্চার ঐতিহ্যবাহী সাংস্কৃতিক সংগঠন।",
-      "password": "rongobhumi-2026"
-    },
-    {
-      "id": "ieee",
-      "shortName": "IEEE RU",
-      "nameBn": "IEEE Rajshahi University Student Branch",
-      "categoryBn": "প্রযুক্তি ও রোবটিক্স",
-      "descriptionBn": "প্রযুক্তি, রোবটিক্স, এআই ও আন্তর্জাতিক রিসার্চ পেপার প্রকাশনার স্টুডেন্ট ব্রাঞ্চ।",
-      "password": "ieee-2026"
-    }
-  ],
-  "clubApplications": [],
-  "articles": [
-    {
-      "id": "art-breaking-1",
-      "title": "রাবি ক্যাম্পাসে শীতকালীন অফিশিয়াল হুডি ও খাঁটি খেজুরের গুড়ের প্রি-অর্ডার শুরু",
-      "category": "ব্রেকিং নিউজ",
-      "authorName": "সেন্ট্রাল ডেস্ক",
-      "department": "RU Insiders অফিশিয়াল",
-      "whatsappNumber": "8801700000000",
       "images": [
-        "/campus/paris-road-rain.jpg",
-        "/mockups/hoodie-front.jpg"
+        "/uploads/ru-1794154065708-z3z4s.jpg"
       ],
-      "summary": "মতিহার ক্যাম্পাসের শিক্ষার্থীদের জন্য ফ্রি ডেলিভারি সহ অফিশিয়াল উইন্টার কালেকশন ও খাঁটি খেজুরের গুড় এখন পাওয়া যাচ্ছে।",
+      "nameBn": "tt",
+      "inStock": true,
+      "category": "হুডি ও শীতকালীন পোশাক",
+      "featured": false,
+      "createdAt": "2026-11-08T16:07:10.298Z",
+      "productType": "food_weight",
+      "shortSummary": "",
+      "weightOptions": [],
       "detailSections": [
         {
-          "id": "bn-1",
-          "title": "অফিশিয়াল লঞ্চ ও অফার",
-          "content": "রাজশাহী বিশ্ববিদ্যালয়ের শিক্ষার্থীদের জন্য ৩২০ জিএসএম ফ্লিস কটন প্রিমিয়াম হুডি এবং চারঘাটের গাছিদের থেকে সংগৃহীত ১০০% নির্ভেজাল খেজুরের গুড়ের ডেলিভারি শুরু হয়েছে।"
-        },
-        {
-          "id": "bn-2",
-          "title": "ক্যাম্পাসে ফ্রি ডেলিভারি",
-          "content": "ক্যাম্পাসের সকল আবাসিক হল এবং ডরমেটরিতে সম্পূর্ণ ফ্রি হোম ডেলিভারি প্রদান করা হচ্ছে। কোনো অগ্রিম পেমেন্ট ছাড়াই ১০০% ক্যাশ অন ডেলিভারিতে অর্ডার গ্রহণ করা হচ্ছে।"
+          "id": "sec-1",
+          "title": "বিবরণ ও ফেব্রিক কোয়ালিটি",
+          "content": ""
         }
-      ],
-      "likes": 89,
-      "status": "Published",
-      "isBreaking": true,
-      "createdAt": "2026-11-08T15:32:44.596Z"
+      ]
     },
     {
-      "id": "art-1",
-      "title": "বৃষ্টিভেজা প্যারিস রোড ও টুকিটাকি চত্বরের সেই সোনালী বিকেল",
-      "category": "গল্প ও স্মৃতিচারণ",
-      "authorName": "মাহিম আহমেদ",
-      "department": "কম্পিউটার সায়েন্স অ্যান্ড ইঞ্জিনিয়ারিং (CSE)",
-      "whatsappNumber": "8801700000000",
+      "id": "prod-hoodie-1",
+      "price": 850,
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL"
+      ],
       "images": [
-        "/campus/paris-road-rain.jpg",
+        "/campus/paris-road-rain.jpg"
+      ],
+      "nameBn": "প্রিমিয়াম আরইউ ক্রেস্ট হুডি (নেভি ব্লু)",
+      "inStock": true,
+      "category": "হুডি ও শীতকালীন পোশাক",
+      "featured": true,
+      "createdAt": "2026-11-08T11:04:53.338Z",
+      "productType": "apparel",
+      "shortSummary": "৩২০ জিএসএম ফ্লিস কটন, বুকে রাবি ক্রেস্ট এমব্রয়ডারি করা প্রিমিয়াম শীতকালীন হুডি।",
+      "detailSections": [
+        {
+          "id": "d1",
+          "title": "ফ্যাব্রিক ও কোয়ালিটি",
+          "content": "১০০% এক্সপোর্ট কোয়ালিটি ৩২০ জিএসএম ব্রাশড ফ্লিস ফেব্রিক। শীতের জন্য অত্যন্ত আরামদায়ক ও টেকসই।"
+        },
+        {
+          "id": "d2",
+          "title": "কাস্টমাইজেশন ও বাল্ক অর্ডার",
+          "content": "ডিপার্টমেন্ট বা ব্যাচের সবার জন্য নিজের নাম ও লোগো বসাতে চাইলে নিচের WhatsApp বাটনে ক্লিক করে মেসেজ দিন।"
+        }
+      ],
+      "merchantId": "m-motihar-crafts",
+      "merchantName": "মতিহার ক্রাফটস অ্যান্ড এপারেল"
+    },
+    {
+      "id": "prod-dropshoulder-1",
+      "price": 450,
+      "sizes": [
+        "M",
+        "L",
+        "XL",
+        "XXL"
+      ],
+      "images": [
+        "/mockups/dropshoulder-front.jpg"
+      ],
+      "nameBn": "প্যারিস রোড মোটিফ ড্রপ শোল্ডার টি-শার্ট",
+      "inStock": true,
+      "category": "ড্রপ শোল্ডার ও টি-শার্ট",
+      "featured": true,
+      "createdAt": "2026-11-08T11:04:53.340Z",
+      "productType": "apparel",
+      "shortSummary": "২২০ জিএসএম কম্বড কটন ওভারসাইজড ড্রপ শোল্ডার টি-শার্ট।",
+      "detailSections": [
+        {
+          "id": "d1",
+          "title": "ডিজাইন ও প্রিন্ট",
+          "content": "প্যারিস রোড ও সাবাশ বাংলাদেশের নান্দনিক ডিটিএফ প্রিন্ট যা ধোয়ার পরেও নষ্ট হয় না।"
+        }
+      ],
+      "merchantId": "m-motihar-crafts",
+      "merchantName": "মতিহার ক্রাফটস অ্যান্ড এপারেল"
+    },
+    {
+      "id": "prod-jersey-1",
+      "price": 390,
+      "sizes": [
+        "M",
+        "L",
+        "XL",
+        "XXL"
+      ],
+      "images": [
+        "/mockups/jersey-front.jpg"
+      ],
+      "nameBn": "রাবি আন্তঃবিভাগ স্পোর্টস জার্সি (রেড-গোল্ড এডিশন)",
+      "inStock": true,
+      "category": "স্পোর্টস জার্সি",
+      "featured": true,
+      "createdAt": "2026-11-08T11:04:53.340Z",
+      "productType": "apparel",
+      "shortSummary": "ড্রাই-ফিট ব্রিদেবল ফেব্রিক, আন্তঃবিভাগ টুর্নামেন্ট ও ফুটবল-ক্রিকেটের অফিশিয়াল জার্সি।",
+      "detailSections": [
+        {
+          "id": "j1",
+          "title": "ফ্যাব্রিক টেকনোলজি",
+          "content": "ড্রাই-ফিট মাইক্রো পলিয়েস্টার যা ঘাম দ্রুত শোষণ করে শরীর শীতল ও আরামদায়ক রাখে।"
+        },
+        {
+          "id": "j2",
+          "title": "নাম ও নম্বর কাস্টমাইজেশন",
+          "content": "জার্সির পেছনে নিজের নাম ও প্রিয় নম্বর প্রিন্ট করতে WhatsApp বাটনে ক্লিক করে মেসেজ দিন।"
+        }
+      ],
+      "merchantId": "m-motihar-crafts",
+      "merchantName": "মতিহার ক্রাফটস অ্যান্ড এপারেল"
+    },
+    {
+      "id": "prod-gur-1",
+      "price": 380,
+      "images": [
         "/campus/ru-spot.jpg"
       ],
-      "summary": "ক্লাস শেষে বন্ধুদের সাথে টুকিটাকি চত্বরের মাটির কাপে চা আর বৃষ্টিস্নাত প্যারিস রোড ধরে হেঁটে যাওয়ার অনুভূতি চির অম্লান।",
-      "detailSections": [
+      "nameBn": "রাজশাহীর খাঁটি পাটালি ও ঝোলা খেজুরের গুড়",
+      "inStock": true,
+      "category": "খেজুরের গুড় ও ঐতিহ্যবাহী খাবার",
+      "featured": true,
+      "createdAt": "2026-11-08T11:04:53.340Z",
+      "productType": "food_weight",
+      "shortSummary": "রাজশাহী ও চারঘাটের গাছিদের কাছ থেকে সরাসরি সংগৃহীত ১০০% কেমিক্যাল ও চিনিমুক্ত খাঁটি খেজুরের গুড়।",
+      "weightOptions": [
         {
-          "id": "a1",
-          "title": "টুকিটাকির আড্ডা",
-          "content": "সকাল আটটার ক্লাস শেষে যখন সবাই ক্লান্ত হয়ে টুকিটাকি চত্বরে জড়ো হই, তখন এক কাপ আদা চা আর সিঙ্গারা যেন সমস্ত ক্লান্তি ভুলিয়ে দেয়।"
+          "label": "১ কেজি পাটালি গুড়",
+          "price": 380
         },
         {
-          "id": "a2",
-          "title": "গগনশিরীষের ছায়া",
-          "content": "বিকেলের রোদ যখন গগনশিরীষের পাতার ফাঁক গলে পিচঢালা পথে পড়ে, তখন মনে হয় পৃথিবীর সবচেয়ে সুন্দর ক্যাম্পাস আমাদের এই মতিহার।"
+          "label": "২ কেজি কম্বো প্যাক",
+          "price": 740
+        },
+        {
+          "label": "৫ কেজি ফ্যামিলি বক্স",
+          "price": 1800
         }
       ],
-      "likes": 48,
-      "status": "Published",
-      "createdAt": "2026-11-08T11:04:53.340Z"
+      "detailSections": [
+        {
+          "id": "g1",
+          "title": "গুড়ের বিশেষত্ব ও বিশুদ্ধতা",
+          "content": "কোনো প্রকার হাইড্রোজ, ফিটকিরি বা চিনি মেশানো হয়নি। ভোরবেলা রস জ্বাল দিয়ে তৈরি সুঘ্রাণযুক্ত দানা পাটালি ও লালি গুড়।"
+        },
+        {
+          "id": "g2",
+          "title": "সারা বাংলাদেশে নিরাপদ প্যাকেজিং",
+          "content": "ফুড-গ্রেড এয়ারটাইট বক্সে বিশেষ প্যাকিং করে সারা বাংলাদেশে ক্যাশ অন ডেলিভারিতে পাঠানো হয়।"
+        }
+      ],
+      "merchantId": "m-varendra-foods",
+      "merchantName": "বরেন্দ্র খাঁটি গুড় ও রসাল খাবার"
     },
     {
-      "id": "art-2",
-      "title": "শাবাশ বাংলাদেশ: স্বাধীনতার অমর ভাস্কর্যের ইতিহাস ও তাৎপর্য",
-      "category": "ক্যাম্পাস নিউজ",
-      "authorName": "রাবি প্রতিনিধি",
-      "department": "ইতিহাস বিভাগ",
-      "whatsappNumber": "8801700000000",
+      "id": "prod-naru-1",
+      "price": 220,
       "images": [
         "/campus/ru-roundabout.jpg"
       ],
-      "summary": "শিল্পী নিতুন কুণ্ডুর অমর সৃষ্টি শাবাশ বাংলাদেশ কীভাবে রাবি শিক্ষার্থীদের অনুপ্রেরণার কেন্দ্রবিন্দু হয়ে উঠলো।",
-      "detailSections": [
+      "nameBn": "হোমমেড গুড়ের নারিকেল নাড়ু ও তিলের নাড়ু",
+      "inStock": true,
+      "category": "নাড়ু ও হোমমেড ফুড",
+      "featured": true,
+      "createdAt": "2026-11-08T11:04:53.340Z",
+      "productType": "food_weight",
+      "shortSummary": "ঘরোয়া পরিবেশে খাঁটি খেজুরের গুড় ও দেশি নারিকেল দিয়ে তৈরি সুস্বাদু নাড়ু।",
+      "weightOptions": [
         {
-          "id": "sb1",
-          "title": "ভাস্কর্যের সৃষ্টি ও উদ্বোধন",
-          "content": "১৯৯১ সালে মুক্তিযুদ্ধের শহীদদের স্মরণে রাবি কেন্দ্রীয় চত্বরে উন্মোচিত হয় এই সুবিশাল ভাস্কর্য। সুকান্ত ভট্টাচার্যের কবিতার পঙ্ক্তি খচিত এই স্মারক বাঙালির আত্মত্যাগের প্রতীক।"
+          "label": "৫০০ গ্রাম জার (২০-২২ পিস)",
+          "price": 220
+        },
+        {
+          "label": "১ কেজি ফ্যামিলি জার",
+          "price": 420
         }
       ],
-      "likes": 35,
-      "status": "Published",
-      "createdAt": "2026-11-08T11:04:53.340Z"
+      "detailSections": [
+        {
+          "id": "n1",
+          "title": "উপাদান ও স্বাদ",
+          "content": "বাছাইকৃত নারিকেল, খাঁটি খেজুরের গুড়, এলাচ ও ঘিয়ের ফ্লেভারে সম্পূর্ণ স্বাস্থ্যসম্মতভাবে তৈরি। হলের শিক্ষার্থীদের জন্য স্পেশাল স্ন্যাকস!"
+        }
+      ],
+      "merchantId": "m-varendra-foods",
+      "merchantName": "বরেন্দ্র খাঁটি গুড় ও রসাল খাবার"
     },
     {
-      "id": "art-fine-arts-1",
-      "title": "চারুকলা চত্বরের রঙের উৎসব ও শিক্ষার্থীদের ক্যানভাসে মতিহার",
-      "category": "চারুকলা ও সাহিত্য",
-      "authorName": "অঙ্কিতা রায়",
-      "department": "চারুকলা অনুষদ (চিত্রকলা বিভাগ)",
-      "whatsappNumber": "8801700000000",
+      "id": "prod-souvenir-1",
+      "price": 280,
       "images": [
         "/campus/ru-roundabout.jpg",
-        "/campus/ru-spot.jpg"
+        "/campus/paris-road-rain.jpg"
       ],
-      "summary": "চারুকলার সবুজ চত্বরে দিনভর তুলির আঁচড় আর মাটির গন্ধ—কীভাবে শিক্ষার্থীরা ক্যাম্পাসের রূপ ফুটিয়ে তোলে।",
+      "nameBn": "সাবাশ বাংলাদেশ অ্যাক্রিলিক টেবিল স্যুভেনির ক্রেস্ট",
+      "inStock": true,
+      "category": "ক্যাম্পাস গিফট ও স্যুভেনির",
+      "featured": true,
+      "createdAt": "2026-11-08T11:04:53.340Z",
+      "productType": "standard",
+      "shortSummary": "ডেস্কটপ ও পড়ার টেবিলের জন্য নান্দনিক মেটাল গোল্ড ফিনিশ সাবাশ বাংলাদেশ স্যুভেনির।",
       "detailSections": [
         {
-          "id": "fa-1",
-          "title": "বসন্ত ও শরতের ক্যানভাস",
-          "content": "চারুকলা অনুষদের বার্ষিক প্রদর্শনীতে শিক্ষার্থীরা রাজশাহীর পদ্মার চর, প্যারিস রোড এবং ঐতিহাসিক শহীদ মিনারের বিভিন্ন মুহূর্ত তুলে ধরেন।"
+          "id": "s1",
+          "title": "উপাদান ও ফিনিশিং",
+          "content": "হাই-গ্রেড স্বচ্ছ অ্যাক্রিলিক বেসের ওপর লেজার এনগ্রেভড গোল্ডেন সাবাশ বাংলাদেশ মনোগ্রাম।"
         }
       ],
-      "likes": 62,
-      "status": "Published",
-      "createdAt": "2026-11-08T15:32:44.600Z"
+      "merchantId": "m-motihar-crafts",
+      "merchantName": "মতিহার ক্রাফটস অ্যান্ড এপারেল"
     }
   ],
-  "alumni": [
-    {
-      "id": "alum-1",
-      "name": "ড. তানভীর হাসান",
-      "faculty": "প্রকৌশল অনুষদ",
-      "department": "কম্পিউটার সায়েন্স অ্যান্ড ইঞ্জিনিয়ারিং (CSE)",
-      "batch": "৫২তম ব্যাচ",
-      "currentRole": "Senior Software Engineer",
-      "organization": "Google (Munich, Germany)",
-      "country": "Germany (DAAD Scholar)",
-      "whatsapp": "8801700000000",
-      "email": "tanvir.ru.alumni@gmail.com",
-      "linkedin": "https://linkedin.com",
-      "approved": true
+  "settings": {
+    "superAdminPassword": "ru-admin-2026",
+    "productManagerPassword": "ru-shop-2026",
+    "whatsappNumber": "8801325661777",
+    "deliveryWhatsAppGroupUrl": "https://chat.whatsapp.com/",
+    "steadfastApiKey": "",
+    "steadfastSecretKey": "",
+    "deliveryCharges": {
+      "city": 40,
+      "campus": 0,
+      "nationwide": 100
     },
-    {
-      "id": "alum-2",
-      "name": "ব্যারিস্টার ফারহানা ইয়াসমিন",
-      "faculty": "আইন অনুষদ",
-      "department": "আইন বিভাগ (Law)",
-      "batch": "৫০তম ব্যাচ",
-      "currentRole": "অ্যাডভোকেট ও সহকারী অ্যাটর্নি জেনারেল",
-      "organization": "বাংলাদেশ সুপ্রিম কোর্ট (হাইকোর্ট বিভাগ)",
-      "country": "Bangladesh (LLM, UK Chevening)",
-      "whatsapp": "8801700000000",
-      "email": "farhana.law@ru.ac.bd",
-      "approved": true
+    "categories": [
+      "হুডি ও শীতকালীন পোশাক",
+      "ড্রপ শোল্ডার ও টি-শার্ট",
+      "স্পোর্টস জার্সি",
+      "খেজুরের গুড় ও ঐতিহ্যবাহী খাবার",
+      "নাড়ু ও হোমমেড ফুড",
+      "ক্যাম্পাস গিফট ও স্যুভেনির"
+    ],
+    "breakingNews": [
+      "🔥 ভর্তি পরীক্ষা শুরু হতে যাচ্ছে ",
+      "🔥 রাবি অফিশিয়াল উইন্টার হুডি ও রাজশাহীর খাঁটি খেজুরের গুড়ের প্রি-অর্ডার চলছে! মতিহার ক্যাম্পাসে ফ্রি ডেলিভারি।",
+      "🎓 রাবির ৪২টি স্পট ও রাজশাহী জেলার ২২টি অঞ্চল কতটুকু ঘুরলেন? এখনই ম্যাপে টিক দিয়ে নিজের ভ্রমণ সনদ ডাউনলোড করুন!",
+      "✍️ Inside RU পোর্টালে আপনার গল্প, কবিতা বা গবেষণাপত্র জমা দিন এবং জিতে নিন আকর্ষণীয় গিফট হ্যাম্পার।"
+    ],
+    "aiConfig": {
+      "openRouterKey1": "",
+      "openRouterModel1": "google/gemini-2.0-flash-exp:free",
+      "openRouterEnabled1": true,
+      "openRouterKey2": "",
+      "openRouterModel2": "meta-llama/llama-3.3-70b-instruct:free",
+      "openRouterEnabled2": true,
+      "geminiApiKey": "",
+      "geminiModel": "gemini-2.5-flash",
+      "geminiEnabled": true,
+      "priorityOrder": [
+        "openrouter1",
+        "openrouter2",
+        "gemini"
+      ],
+      "systemPersonaBn": "তুমি RU Insiders (রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল মার্চেন্ডাইজ স্টোর ও ক্যাম্পাস পোর্টাল)-এর স্মার্ট AI অ্যাসিস্ট্যান্ট। সবসময় ভদ্র, আন্তরিক ও নির্ভুল বাংলায় উত্তর দাও। রক্তদানের তথ্য, ডিপার্টমেন্ট ও স্যারদের কন্টাক্ট, শপের পণ্য এবং অর্ডার তৈরির জন্য সবসময় লাইভ টুলস ব্যবহার করো; কখনোই মনগড়া সংখ্যা বা ফোন নম্বর বানাবে না।",
+      "trainingDocs": [
+        {
+          "id": "tr-1",
+          "title": "অর্ডার ও ডেলিভারি নীতিমালা",
+          "category": "শপ ও ডেলিভারি",
+          "content": "RU Insiders-এ ১০০% ক্যাশ অন ডেলিভারি (COD) চালু আছে। মতিহার ক্যাম্পাস ও আবাসিক হলগুলোতে ডেলিভারি সম্পূর্ণ ফ্রি (০ টাকা), রাজশাহী সিটি এলাকায় চার্জ ৪০ টাকা এবং সারা বাংলাদেশে কুরিয়ার চার্জ ১০০ টাকা। কাস্টমার নিজে অর্ডার ক্যান্সেল করতে পারবে না — জরুরি পরিবর্তনের জন্য অফিসিয়াল WhatsApp-এ মেসেজ করতে হবে।",
+          "updatedAt": "2026-11-10T00:00:00.000Z"
+        },
+        {
+          "id": "tr-2",
+          "title": "রক্তদানের ৯০ দিন (৩ মাস) নিয়ম",
+          "category": "রক্তদান ও মানবসেবা",
+          "content": "প্রতিবার রক্তদানের পর কমপক্ষে ৯০ দিন (৩ মাস) অতিক্রান্ত হলে একজন দাতা পুনরায় রক্তদানের জন্য সুস্থ ও উপযুক্ত হন। জরুরি প্রয়োজনে রক্তদাতার সরাসরি মোবাইল নম্বরে কল করে যোগাযোগ করতে অনুরোধ করুন।",
+          "updatedAt": "2026-11-10T00:00:00.000Z"
+        }
+      ],
+      "mcpEnabled": true,
+      "mcpSecretToken": ""
+    },
+    "breakingNewsItems": [
+      {
+        "id": "bn-init-1",
+        "title": "রাবি অফিশিয়াল উইন্টার হুডি ও রাজশাহীর খাঁটি খেজুরের গুড়ের প্রি-অর্ডার শুরু! মতিহার ক্যাম্পাসে ফ্রি ডেলিভারি",
+        "imageUrl": "/mockups/hoodie-front.jpg",
+        "link": "/shop",
+        "createdAt": "2026-11-10T17:14:11.289Z",
+        "isActive": true
+      },
+      {
+        "id": "bn-init-2",
+        "title": "ঐতিহাসিক প্যারিস রোড ও রাবি ক্যাম্পাসের ৪২টি স্থাপত্য স্পট এক্সপ্লোর করুন ও নিজের সনদপত্র ডাউনলোড করুন",
+        "imageUrl": "/campus/paris-road-rain.jpg",
+        "link": "/map",
+        "createdAt": "2026-11-10T17:14:11.291Z",
+        "isActive": true
+      },
+      {
+        "id": "bn-init-3",
+        "title": "ইনসাইড রাবি নিউজ ও সাহিত্য পোর্টাল উন্মোচিত — ক্যাম্পাসের তাজা খবর ও গবেষণাপত্র পড়ুন",
+        "imageUrl": "/campus/ru-spot.jpg",
+        "link": "/inside-ru",
+        "createdAt": "2026-11-10T17:14:11.291Z",
+        "isActive": true
+      }
+    ]
+  },
+  "departments": {
+    "dept-mcj": {
+      "images": [
+        "/campus/ru-admin.jpg",
+        "/campus/paris-road-rain.jpg"
+      ],
+      "nameBn": "গণযোগাযোগ ও সাংবাদিকতা (MCJ)",
+      "seatCount": 50,
+      "overviewBn": "বাংলাদেশের মিডিয়া জগতের অগ্রদূত তৈরির কারখানা। ইনভেস্টিগেটিভ জার্নালিজম, ব্রডকাস্ট মিডিয়া, ডিজিটাল পিআর ও চলচ্চিত্র নির্মাণের অন্যতম আধুনিক বিভাগ।",
+      "departmentId": "dept-mcj",
+      "degreeOfferedBn": "বি.এস.এস. (অনার্স), এম.এস.এস.",
+      "locationBuildingBn": "শহীদুল্লাহ কলা ভবন (চতুর্থ তলা)"
     }
-  ],
+  },
+  "subscribers": [],
   "notifications": [
     {
+      "id": "notif-1794270853532",
+      "link": "/inside-ru/art-1794270725247",
+      "title": "🔥 ব্রেকিং নিউজ: ভর্তি পরীক্ষা শুরু হতে যাচ্ছে ",
+      "message": "সেন্ট্রাল ডেস্ক (ব্রেকিং নিউজ)",
+      "createdAt": "2026-11-10T00:34:13.532Z",
+      "sendChromePush": true
+    },
+    {
       "id": "notif-1794159604579",
+      "link": "/inside-ru/art-1794159567389",
       "title": "🔥 ব্রেকিং নিউজ: kjbkbkjb",
       "message": "সেন্ট্রাল ডেস্ক (ব্রেকিং নিউজ)",
-      "link": "/inside-ru/art-1794159567389",
-      "sendChromePush": true,
-      "createdAt": "2026-11-08T17:40:04.579Z"
+      "createdAt": "2026-11-08T17:40:04.579Z",
+      "sendChromePush": true
     },
     {
       "id": "notif-1794154084034",
+      "link": "/shop",
       "title": "🛍️ নতুন পণ্য: tt",
       "message": "মাত্র ৳100 টাকায় প্রি-অর্ডার করুন!",
-      "link": "/shop",
-      "sendChromePush": true,
-      "createdAt": "2026-11-08T16:08:04.034Z"
+      "createdAt": "2026-11-08T16:08:04.034Z",
+      "sendChromePush": true
     },
     {
       "id": "notif-1",
+      "link": "/shop",
       "title": "🍯 খাঁটি খেজুরের গুড় ও উইন্টার হুডি স্টকে এসেছে!",
       "message": "মতিহার ক্যাম্পাসে ফ্রি হোম ডেলিভারি এবং সারা বাংলাদেশে ক্যাশ অন ডেলিভারি চলছে।",
-      "link": "/shop",
-      "sendChromePush": true,
-      "createdAt": "2026-11-08T11:04:53.340Z"
+      "createdAt": "2026-11-08T11:04:53.340Z",
+      "sendChromePush": true
     }
   ],
-  "subscribers": [],
-  "departments": {},
+  "clubApplications": [],
   "merchants": [
     {
       "id": "m-motihar-crafts",
-      "shopName": "?????? ??????? ??????? ??????",
-      "ownerName": "????? ?? ?????",
+      "shopName": "মতিহার ক্রাফটস অ্যান্ড এপারেল",
+      "ownerName": "শাকিব আল হাসান",
       "phone": "01711223344",
       "email": "motihar.crafts@gmail.com",
       "password": "motihar-2026",
       "status": "active",
-      "category": "????? ? ????",
-      "address": "???????? ?????, ???? ?????????",
+      "category": "পোশাক ও হুডি",
+      "address": "টুকিটাকি চত্বর, রাবি ক্যাম্পাস",
       "payoutPhone": "01711223344",
       "payoutMethod": "bkash",
       "facebookPixelId": "123456789012345",
       "commissionRate": 0,
       "totalSales": 18500,
       "totalOrders": 24,
-      "createdAt": "2026-11-01T10:00:00.000Z"
+      "createdAt": "2026-11-10T17:14:11.291Z"
     },
     {
       "id": "m-varendra-foods",
-      "shopName": "???????? ????? ??? ? ???? ?????",
-      "ownerName": "??: ?????? ?????",
+      "shopName": "বরেন্দ্র খাঁটি গুড় ও রসাল খাবার",
+      "ownerName": "মো: রফিকুল ইসলাম",
       "phone": "01822334455",
       "email": "varendra.foods@gmail.com",
       "password": "varendra-2026",
       "status": "active",
-      "category": "?????????? ????? ? ???",
-      "address": "?????? ? ????, ???????",
+      "category": "ঐতিহ্যবাহী খাবার ও গুড়",
+      "address": "চারঘাট ও বাঘা, রাজশাহী",
       "payoutPhone": "01822334455",
       "payoutMethod": "bkash",
       "facebookPixelId": "",
       "commissionRate": 0,
       "totalSales": 34200,
       "totalOrders": 42,
+      "createdAt": "2026-11-10T17:14:11.291Z"
+    }
+  ],
+  "bloodDonors": [
+    {
+      "id": "bd-1",
+      "nameBn": "মোঃ তানভীর আহমেদ",
+      "bloodGroup": "B+",
+      "phone": "01712345601",
+      "departmentBn": "কম্পিউটার সায়েন্স অ্যান্ড ইঞ্জিনিয়ারিং (CSE)",
+      "hallBn": "শহীদ জিয়াউর রহমান হল",
+      "lastDonationDate": "2026-07-10",
+      "totalDonations": 4,
+      "isPublicPhone": true,
+      "note": "ক্যাম্পাসে জরুরি রক্তদানে সার্বক্ষণিক প্রস্তুত",
+      "createdAt": "2026-11-01T10:00:00.000Z"
+    },
+    {
+      "id": "bd-2",
+      "nameBn": "সাদিকুল ইসলাম নাবিল",
+      "bloodGroup": "O+",
+      "phone": "01812345602",
+      "departmentBn": "ফার্মেসি বিভাগ",
+      "hallBn": "শহীদ হবিবুর রহমান হল",
+      "lastDonationDate": "2026-06-20",
+      "totalDonations": 6,
+      "isPublicPhone": true,
+      "note": "রামেক ও ক্যাম্পাসে দ্রুত পৌঁছাতে পারব",
+      "createdAt": "2026-11-01T10:00:00.000Z"
+    },
+    {
+      "id": "bd-3",
+      "nameBn": "নুসরাত জাহান মিম",
+      "bloodGroup": "A+",
+      "phone": "01912345603",
+      "departmentBn": "বাংলা বিভাগ",
+      "hallBn": "রোকেয়া হল",
+      "lastDonationDate": "",
+      "totalDonations": 1,
+      "isPublicPhone": true,
+      "createdAt": "2026-11-01T10:00:00.000Z"
+    },
+    {
+      "id": "bd-4",
+      "nameBn": "মেহেদী হাসান রাকিব",
+      "bloodGroup": "B+",
+      "phone": "01612345604",
+      "departmentBn": "পদার্থবিজ্ঞান বিভাগ",
+      "hallBn": "মাদার বখ্শ হল",
+      "lastDonationDate": "2026-10-05",
+      "totalDonations": 2,
+      "isPublicPhone": true,
+      "note": "অক্টোবরে রক্ত দিয়েছেন (৯০ দিন পূর্ণ হতে বাকি)",
       "createdAt": "2026-11-01T10:00:00.000Z"
     }
   ]

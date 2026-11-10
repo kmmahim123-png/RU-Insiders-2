@@ -131,12 +131,24 @@ export async function GET(req: NextRequest) {
         breakingNews: activeBreakingNews,
         breakingNewsItems: activeBreakingItems,
         defaultFacebookPixelId: db.settings.defaultFacebookPixelId || '',
+        aiStatus: {
+          configured: Boolean(
+            db.settings.aiConfig?.openRouterKey1 ||
+            db.settings.aiConfig?.openRouterKey2 ||
+            db.settings.aiConfig?.geminiApiKey
+          ),
+          mcpEnabled: db.settings.aiConfig?.mcpEnabled !== false,
+        },
       },
       products: filteredProducts,
       merchants: publicMerchants,
       mapSpots: db.mapSpots,
       clubs: safeClubs,
       departments: db.departments || {},
+      bloodDonors: (db.bloodDonors || []).map((d) => ({
+        ...d,
+        phone: d.isPublicPhone !== false ? d.phone : '',
+      })),
       articles: db.articles.filter((a) => a.status === 'Published'),
       alumni: db.alumni.filter((al) => al.approved),
       notifications: db.notifications,
@@ -344,6 +356,63 @@ export async function POST(req: NextRequest) {
         alumni: [newAlumni, ...state.alumni],
       }));
       return NextResponse.json({ ok: true, alumni: newAlumni });
+    }
+
+    // 6.5. Public Blood Donor Registration & Donation Date Update
+    if (action === 'REGISTER_BLOOD_DONOR') {
+      const { nameBn, bloodGroup, phone, departmentBn, hallBn, lastDonationDate, totalDonations, note } = payload || {};
+      if (!nameBn || !bloodGroup || !phone) {
+        return NextResponse.json({ ok: false, error: 'নাম, রক্তের গ্রুপ ও মোবাইল নম্বর আবশ্যক।' }, { status: 400 });
+      }
+      const newDonor = {
+        id: `bd-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
+        nameBn: String(nameBn).trim(),
+        bloodGroup: String(bloodGroup).trim().toUpperCase() as any,
+        phone: String(phone).trim(),
+        departmentBn: String(departmentBn || 'রাজশাহী বিশ্ববিদ্যালয়').trim(),
+        hallBn: String(hallBn || '').trim(),
+        lastDonationDate: String(lastDonationDate || '').trim(),
+        totalDonations: Number(totalDonations || 0),
+        isPublicPhone: true,
+        note: String(note || '').trim(),
+        createdAt: new Date().toISOString(),
+      };
+      const updatedDb = await writeDb((state) => ({
+        ...state,
+        bloodDonors: [newDonor, ...(state.bloodDonors || [])],
+      }));
+      return NextResponse.json({ ok: true, donor: newDonor, bloodDonors: updatedDb.bloodDonors });
+    }
+
+    if (action === 'UPDATE_BLOOD_DONATION') {
+      const { phone, donorId, lastDonationDate } = payload || {};
+      const cleanPhoneDigits = String(phone || '').replace(/\D/g, '');
+      const cleanDate = String(lastDonationDate || new Date().toISOString().slice(0, 10)).trim();
+      if (!donorId && cleanPhoneDigits.length < 8) {
+        return NextResponse.json({ ok: false, error: 'সঠিক মোবাইল নম্বর বা দাতা আইডি দিন।' }, { status: 400 });
+      }
+      let matched = false;
+      const updatedDb = await writeDb((state) => ({
+        ...state,
+        bloodDonors: (state.bloodDonors || []).map((d) => {
+          const isMatch =
+            (donorId && d.id === donorId) ||
+            (cleanPhoneDigits.length >= 8 && d.phone.replace(/\D/g, '').endsWith(cleanPhoneDigits.slice(-10)));
+          if (isMatch) {
+            matched = true;
+            return {
+              ...d,
+              lastDonationDate: cleanDate,
+              totalDonations: (d.totalDonations || 0) + 1,
+            };
+          }
+          return d;
+        }),
+      }));
+      if (!matched) {
+        return NextResponse.json({ ok: false, error: 'এই নম্বরে কোনো রক্তদাতা খুঁজে পাওয়া যায়নি।' }, { status: 404 });
+      }
+      return NextResponse.json({ ok: true, bloodDonors: updatedDb.bloodDonors });
     }
 
     // 7. Notification Subscribe
@@ -986,6 +1055,51 @@ export async function POST(req: NextRequest) {
           alumni: state.alumni.filter((al) => al.id !== payload.alumniId),
         }));
         return NextResponse.json({ ok: true, alumni: updatedDb.alumni });
+      }
+
+      if (action === 'SAVE_BLOOD_DONOR') {
+        const donor = payload?.donor;
+        if (!donor?.nameBn || !donor?.bloodGroup || !donor?.phone) {
+          return NextResponse.json({ ok: false, error: 'রক্তদাতার নাম, গ্রুপ ও ফোন প্রয়োজন।' }, { status: 400 });
+        }
+        const cleanDonor = {
+          ...donor,
+          id: donor.id || `bd-${Date.now()}`,
+          isPublicPhone: donor.isPublicPhone !== false,
+          createdAt: donor.createdAt || new Date().toISOString(),
+        };
+        const updatedDb = await writeDb((state) => {
+          const list = state.bloodDonors || [];
+          const exists = list.some((d) => d.id === cleanDonor.id);
+          return {
+            ...state,
+            bloodDonors: exists ? list.map((d) => (d.id === cleanDonor.id ? cleanDonor : d)) : [cleanDonor, ...list],
+          };
+        });
+        return NextResponse.json({ ok: true, bloodDonors: updatedDb.bloodDonors });
+      }
+
+      if (action === 'DELETE_BLOOD_DONOR') {
+        const updatedDb = await writeDb((state) => ({
+          ...state,
+          bloodDonors: (state.bloodDonors || []).filter((d) => d.id !== payload?.donorId),
+        }));
+        return NextResponse.json({ ok: true, bloodDonors: updatedDb.bloodDonors });
+      }
+
+      if (action === 'SAVE_AI_CONFIG') {
+        const aiConfig = payload?.aiConfig;
+        const updatedDb = await writeDb((state) => ({
+          ...state,
+          settings: {
+            ...state.settings,
+            aiConfig: {
+              ...(state.settings.aiConfig || {}),
+              ...(aiConfig || {}),
+            },
+          },
+        }));
+        return NextResponse.json({ ok: true, settings: updatedDb.settings });
       }
 
       if (action === 'SEND_BROADCAST') {

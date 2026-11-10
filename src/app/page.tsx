@@ -16,12 +16,15 @@ import {
   CheckCircle2,
   Users,
   Compass,
+  Bot,
+  HeartPulse,
 } from 'lucide-react';
 import { Product, InsideRuArticle } from '@/types';
 import CampusStories from '@/components/CampusStories';
 import ProductCard from '@/components/ProductCard';
 import SeasonalParticles from '@/components/SeasonalParticles';
 import CampusAudioPlayer from '@/components/CampusAudioPlayer';
+import RuAiAssistant from '@/components/RuAiAssistant';
 
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -88,6 +91,14 @@ export default function HomePage() {
             </Link>
 
             <a
+              href="#ru-ai-section"
+              className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-xl border border-indigo-400/40"
+            >
+              <Bot className="w-4 h-4 text-amber-300" />
+              <span>AI দিয়ে জানুন ও অর্ডার করুন</span>
+            </a>
+
+            <a
               href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('আসসালামু আলাইকুম! আমি RU Insiders থেকে অর্ডার বা তথ্য জানতে চাই।')}`}
               target="_blank"
               rel="noreferrer"
@@ -132,6 +143,11 @@ export default function HomePage() {
           title="প্যারিস রোডের শান্ত নিসর্গ ও পাখির গান"
         />
       </div>
+
+      {/* 2.8 HOMEPAGE RU INSIDERS AI & MCP ASSISTANT */}
+      <section id="ru-ai-section" className="max-w-7xl mx-auto px-3 sm:px-6 scroll-mt-24">
+        <RuAiAssistant mode="embedded" />
+      </section>
 
       {/* 3. 3-STAGE INTERACTIVE MAP TEASER (রাবি ক্যাম্পাস ও রাজশাহী কতটুকু ঘুরলেন) */}
       <section className="max-w-7xl mx-auto px-3 sm:px-6">
@@ -288,26 +304,46 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 6. ACADEMICS & CLUBS PROMO BAR */}
+      {/* 6. ACADEMICS, BLOOD BANK & CLUBS PROMO BAR */}
       <section className="max-w-7xl mx-auto px-3 sm:px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-4 flex flex-col justify-between">
             <div className="space-y-2">
               <span className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
                 <GraduationCap className="w-5 h-5" />
               </span>
               <h3 className="text-xl font-black text-slate-900">
-                ৫৯টি বিভাগ ও ভেরিফাইড অ্যালামনাই ডিরেক্টরি
+                ৫৯টি বিভাগ, স্যার ও অ্যালামনাই ডিরেক্টরি
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                বিসিএস, টেক কোম্পানি, আন্তর্জাতিক স্কলারশিপ ও গবেষণার ক্যারিয়ার গাইডলাইন দেখুন এবং বিশ্বজুড়ে প্রতিষ্ঠিত প্রাক্তন রাবিয়ানদের সাথে যুক্ত হোন।
+                বিভাগের সম্মানিত শিক্ষকমণ্ডলীর তথ্য, বিসিএস, টেক ও আন্তর্জাতিক স্কলারশিপের ক্যারিয়ার গাইডলাইন এবং প্রাক্তন রাবিয়ানদের প্রোফাইল দেখুন।
               </p>
             </div>
             <Link
               href="/academics"
               className="text-xs sm:text-sm font-extrabold text-blue-700 hover:underline flex items-center gap-1"
             >
-              <span>বিভাগ ও অ্যালামনাই দেখুন →</span>
+              <span>বিভাগ, স্যার ও অ্যালামনাই দেখুন →</span>
+            </Link>
+          </div>
+
+          <div className="bg-gradient-to-br from-rose-50 via-white to-red-50 rounded-3xl border border-rose-200 p-6 sm:p-8 shadow-sm space-y-4 flex flex-col justify-between">
+            <div className="space-y-2">
+              <span className="w-10 h-10 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center font-bold">
+                <HeartPulse className="w-5 h-5" />
+              </span>
+              <h3 className="text-xl font-black text-slate-900">
+                রাবি ব্লাড ব্যাংক ও ৯০+ দিন এভেইলেবল ডোনার
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                শেষ রক্তদানের তারিখ থেকে স্বয়ংক্রিয়ভাবে ৯০ দিন (৩ মাস) হিসাব করে এভেইলেবল রক্তদাতার সংখ্যা ও সরাসরি ফোন নম্বর পান—AI চ্যাটেও খুঁজতে পারবেন।
+              </p>
+            </div>
+            <Link
+              href="/blood"
+              className="text-xs sm:text-sm font-extrabold text-rose-700 hover:underline flex items-center gap-1"
+            >
+              <span>রক্তদাতা খুঁজুন বা নিবন্ধন করুন →</span>
             </Link>
           </div>
 
@@ -353,7 +389,8 @@ export default function HomePage() {
                 <li><Link href="/shop" className="hover:text-white transition">শপ কালেকশন</Link></li>
                 <li><Link href="/map" className="hover:text-white transition">ইন্টারঅ্যাক্টিভ ম্যাপ</Link></li>
                 <li><Link href="/inside-ru" className="hover:text-white transition">নিউজ ও সাহিত্য</Link></li>
-                <li><Link href="/academics" className="hover:text-white transition">বিভাগ ও ক্যারিয়ার</Link></li>
+                <li><Link href="/academics" className="hover:text-white transition">বিভাগ, স্যার ও ক্যারিয়ার</Link></li>
+                <li><Link href="/blood" className="hover:text-rose-400 transition">🩸 রাবি ব্লাড ব্যাংক</Link></li>
               </ul>
             </div>
 

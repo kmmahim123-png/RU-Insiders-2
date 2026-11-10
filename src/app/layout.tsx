@@ -5,6 +5,7 @@ import SpotlightCommand from '@/components/SpotlightCommand';
 import CartDrawer from '@/components/CartDrawer';
 import PWAInstallBanner from '@/components/PWAInstallBanner';
 import MetaPixelTracker from '@/components/MetaPixelTracker';
+import RuAiAssistant from '@/components/RuAiAssistant';
 
 export const metadata: Metadata = {
   title: 'RU Insiders | রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল মার্চেন্ডাইজ স্টোর ও ক্যাম্পাস পোর্টাল',
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <CartDrawer />
         <PWAInstallBanner />
         <MetaPixelTracker />
+        <RuAiAssistant mode="floating" />
       </body>
     </html>
   );

@@ -13,6 +13,7 @@ import {
   SiteSettings,
   CustomDepartmentData,
   Merchant,
+  BloodDonor,
 } from '@/types';
 
 // Path resolution supporting both local development and Vercel serverless runtime
@@ -34,6 +35,7 @@ export interface DatabaseSchema {
   subscribers: { contact: string; createdAt: string }[];
   merchants?: Merchant[];
   departments?: Record<string, CustomDepartmentData>;
+  bloodDonors?: BloodDonor[];
 }
 
 const INITIAL_DB: DatabaseSchema = {
@@ -62,6 +64,40 @@ const INITIAL_DB: DatabaseSchema = {
       '🎓 রাবির ৪২টি স্পট ও রাজশাহী জেলার ২২টি অঞ্চল কতটুকু ঘুরলেন? এখনই ম্যাপে টিক দিয়ে নিজের ভ্রমণ সনদ ডাউনলোড করুন!',
       '✍️ Inside RU পোর্টালে আপনার গল্প, কবিতা বা গবেষণাপত্র জমা দিন এবং জিতে নিন আকর্ষণীয় গিফট হ্যাম্পার।',
     ],
+    aiConfig: {
+      openRouterKey1: '',
+      openRouterModel1: 'google/gemini-2.0-flash-exp:free',
+      openRouterEnabled1: true,
+      openRouterKey2: '',
+      openRouterModel2: 'meta-llama/llama-3.3-70b-instruct:free',
+      openRouterEnabled2: true,
+      geminiApiKey: '',
+      geminiModel: 'gemini-2.5-flash',
+      geminiEnabled: true,
+      priorityOrder: ['openrouter1', 'openrouter2', 'gemini'],
+      systemPersonaBn:
+        'তুমি RU Insiders (রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল মার্চেন্ডাইজ স্টোর ও ক্যাম্পাস পোর্টাল)-এর স্মার্ট AI অ্যাসিস্ট্যান্ট। সবসময় ভদ্র, আন্তরিক ও নির্ভুল বাংলায় উত্তর দাও। রক্তদানের তথ্য, ডিপার্টমেন্ট ও স্যারদের কন্টাক্ট, শপের পণ্য এবং অর্ডার তৈরির জন্য সবসময় লাইভ টুলস ব্যবহার করো; কখনোই মনগড়া সংখ্যা বা ফোন নম্বর বানাবে না।',
+      trainingDocs: [
+        {
+          id: 'tr-1',
+          title: 'অর্ডার ও ডেলিভারি নীতিমালা',
+          category: 'শপ ও ডেলিভারি',
+          content:
+            'RU Insiders-এ ১০০% ক্যাশ অন ডেলিভারি (COD) চালু আছে। মতিহার ক্যাম্পাস ও আবাসিক হলগুলোতে ডেলিভারি সম্পূর্ণ ফ্রি (০ টাকা), রাজশাহী সিটি এলাকায় চার্জ ৪০ টাকা এবং সারা বাংলাদেশে কুরিয়ার চার্জ ১০০ টাকা। কাস্টমার নিজে অর্ডার ক্যান্সেল করতে পারবে না — জরুরি পরিবর্তনের জন্য অফিসিয়াল WhatsApp-এ মেসেজ করতে হবে।',
+          updatedAt: '2026-11-10T00:00:00.000Z',
+        },
+        {
+          id: 'tr-2',
+          title: 'রক্তদানের ৯০ দিন (৩ মাস) নিয়ম',
+          category: 'রক্তদান ও মানবসেবা',
+          content:
+            'প্রতিবার রক্তদানের পর কমপক্ষে ৯০ দিন (৩ মাস) অতিক্রান্ত হলে একজন দাতা পুনরায় রক্তদানের জন্য সুস্থ ও উপযুক্ত হন। জরুরি প্রয়োজনে রক্তদাতার সরাসরি মোবাইল নম্বরে কল করে যোগাযোগ করতে অনুরোধ করুন।',
+          updatedAt: '2026-11-10T00:00:00.000Z',
+        },
+      ],
+      mcpEnabled: true,
+      mcpSecretToken: '',
+    },
     breakingNewsItems: [
       {
         id: 'bn-init-1',
@@ -449,6 +485,59 @@ const INITIAL_DB: DatabaseSchema = {
     },
   ],
   departments: {},
+  bloodDonors: [
+    {
+      id: 'bd-1',
+      nameBn: 'মোঃ তানভীর আহমেদ',
+      bloodGroup: 'B+',
+      phone: '01712345601',
+      departmentBn: 'কম্পিউটার সায়েন্স অ্যান্ড ইঞ্জিনিয়ারিং (CSE)',
+      hallBn: 'শহীদ জিয়াউর রহমান হল',
+      lastDonationDate: '2026-07-10',
+      totalDonations: 4,
+      isPublicPhone: true,
+      note: 'ক্যাম্পাসে জরুরি রক্তদানে সার্বক্ষণিক প্রস্তুত',
+      createdAt: '2026-11-01T10:00:00.000Z',
+    },
+    {
+      id: 'bd-2',
+      nameBn: 'সাদিকুল ইসলাম নাবিল',
+      bloodGroup: 'O+',
+      phone: '01812345602',
+      departmentBn: 'ফার্মেসি বিভাগ',
+      hallBn: 'শহীদ হবিবুর রহমান হল',
+      lastDonationDate: '2026-06-20',
+      totalDonations: 6,
+      isPublicPhone: true,
+      note: 'রামেক ও ক্যাম্পাসে দ্রুত পৌঁছাতে পারব',
+      createdAt: '2026-11-01T10:00:00.000Z',
+    },
+    {
+      id: 'bd-3',
+      nameBn: 'নুসরাত জাহান মিম',
+      bloodGroup: 'A+',
+      phone: '01912345603',
+      departmentBn: 'বাংলা বিভাগ',
+      hallBn: 'রোকেয়া হল',
+      lastDonationDate: '',
+      totalDonations: 1,
+      isPublicPhone: true,
+      createdAt: '2026-11-01T10:00:00.000Z',
+    },
+    {
+      id: 'bd-4',
+      nameBn: 'মেহেদী হাসান রাকিব',
+      bloodGroup: 'B+',
+      phone: '01612345604',
+      departmentBn: 'পদার্থবিজ্ঞান বিভাগ',
+      hallBn: 'মাদার বখ্শ হল',
+      lastDonationDate: '2026-10-05',
+      totalDonations: 2,
+      isPublicPhone: true,
+      note: 'অক্টোবরে রক্ত দিয়েছেন (৯০ দিন পূর্ণ হতে বাকি)',
+      createdAt: '2026-11-01T10:00:00.000Z',
+    },
+  ],
 };
 
 // Atomic Queue to prevent concurrent file write race conditions
@@ -491,13 +580,25 @@ function ensureDbDefaults(db: DatabaseSchema): DatabaseSchema {
       db.settings?.breakingNewsItems !== undefined
         ? db.settings.breakingNewsItems
         : INITIAL_DB.settings.breakingNewsItems,
+    aiConfig: {
+      ...INITIAL_DB.settings.aiConfig,
+      ...(db.settings?.aiConfig || {}),
+      trainingDocs:
+        db.settings?.aiConfig?.trainingDocs !== undefined
+          ? db.settings.aiConfig.trainingDocs
+          : INITIAL_DB.settings.aiConfig?.trainingDocs || [],
+    },
   };
+
+  const bloodDonors =
+    db.bloodDonors && db.bloodDonors.length > 0 ? db.bloodDonors : INITIAL_DB.bloodDonors;
 
   return {
     ...db,
     settings,
     products,
     merchants,
+    bloodDonors,
   };
 }
 

@@ -34,6 +34,11 @@ import {
   X,
   Store,
   DollarSign,
+  Bot,
+  HeartPulse,
+  Phone,
+  Mail,
+  UserPlus,
 } from 'lucide-react';
 import {
   Product,
@@ -49,12 +54,16 @@ import {
   CustomDepartmentData,
   Merchant,
   BreakingNewsItem,
+  BloodDonor,
+  FacultyMember,
 } from '@/types';
 import { RU_CAMPUS_PLACES } from '@/lib/ruCampusSvg';
 import { RAJSHAHI_PDF_REGIONS } from '@/lib/rajshahiPdfRegions';
 import { DIVISION_DISTRICT_META } from '@/lib/divisionSpotsData';
 import { RU_DEPARTMENTS, RU_FACULTIES, RuDepartment } from '@/lib/ruAcademicData';
 import { RU_CLUBS, RuClub } from '@/lib/ruClubsData';
+import AdminBloodTab from '@/components/admin/AdminBloodTab';
+import AdminAiStudioTab from '@/components/admin/AdminAiStudioTab';
 
 export default function AdminPage() {
   const [password, setPassword] = useState('');
@@ -65,10 +74,13 @@ export default function AdminPage() {
   const [loggingIn, setLoggingIn] = useState(false);
 
   // Super Admin / Shared state
-  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'map' | 'articles' | 'departments' | 'alumni' | 'clubs' | 'merchants' | 'settings'>('products');
+  const [activeTab, setActiveTab] = useState<
+    'products' | 'orders' | 'map' | 'articles' | 'departments' | 'alumni' | 'clubs' | 'merchants' | 'blood' | 'ai' | 'settings'
+  >('products');
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [merchants, setMerchants] = useState<Merchant[]>([]);
+  const [bloodDonors, setBloodDonors] = useState<BloodDonor[]>([]);
   const [mapSpots, setMapSpots] = useState<Record<string, MapSpotCustomData>>({});
   const [clubs, setClubs] = useState<ClubInfo[]>([]);
   const [departments, setDepartments] = useState<Record<string, CustomDepartmentData>>({});
@@ -87,6 +99,7 @@ export default function AdminPage() {
     seatCount: 50,
     degreeOfferedBn: 'বি.এস-সি. ইঞ্জিনিয়ারিং (CSE), এম.এস-সি. ইঞ্জিনিয়ারিং',
     images: [],
+    teachers: [],
   });
 
   // Club Management State
@@ -160,6 +173,7 @@ export default function AdminPage() {
           setArticles(db.articles || []);
           setAlumni(db.alumni || []);
           setMerchants(db.merchants || []);
+          setBloodDonors(db.bloodDonors || []);
           setSettings(db.settings || null);
           setActiveTab('products');
           if (RU_DEPARTMENTS.length > 0) {
@@ -173,6 +187,7 @@ export default function AdminPage() {
               seatCount: customD?.seatCount !== undefined ? customD.seatCount : firstD.seatCount,
               degreeOfferedBn: customD?.degreeOfferedBn !== undefined ? customD.degreeOfferedBn : firstD.degreeOfferedBn,
               images: customD?.images?.length ? customD.images : (firstD.images || ['/campus/ru-admin.jpg', '/campus/paris-road-rain.jpg']),
+              teachers: customD?.teachers || [],
             });
           }
           if (db.clubs?.length > 0) {
@@ -232,6 +247,7 @@ export default function AdminPage() {
               setArticles(db.articles || []);
               setAlumni(db.alumni || []);
               setMerchants(db.merchants || []);
+              setBloodDonors(db.bloodDonors || []);
               setSettings(db.settings || null);
               if (RU_DEPARTMENTS.length > 0) {
                 const firstD = RU_DEPARTMENTS[0];
@@ -244,6 +260,7 @@ export default function AdminPage() {
                   seatCount: customD?.seatCount !== undefined ? customD.seatCount : firstD.seatCount,
                   degreeOfferedBn: customD?.degreeOfferedBn !== undefined ? customD.degreeOfferedBn : firstD.degreeOfferedBn,
                   images: customD?.images?.length ? customD.images : (firstD.images || ['/campus/ru-admin.jpg', '/campus/paris-road-rain.jpg']),
+                  teachers: customD?.teachers || [],
                 });
               }
               if (db.clubs?.length > 0) {
@@ -852,6 +869,7 @@ export default function AdminPage() {
       seatCount: custom?.seatCount !== undefined ? custom.seatCount : base?.seatCount || 50,
       degreeOfferedBn: custom?.degreeOfferedBn !== undefined ? custom.degreeOfferedBn : base?.degreeOfferedBn || '',
       images: custom?.images?.length ? custom.images : (base?.images || ['/campus/ru-admin.jpg', '/campus/paris-road-rain.jpg']),
+      teachers: custom?.teachers || [],
     });
   };
 
@@ -1745,6 +1763,30 @@ export default function AdminPage() {
                 </button>
 
                 <button
+                  onClick={() => setActiveTab('blood')}
+                  className={`py-2 px-4 rounded-xl text-xs font-extrabold shrink-0 transition flex items-center gap-1.5 ${
+                    activeTab === 'blood'
+                      ? 'bg-rose-700 text-white shadow-sm'
+                      : 'bg-white border border-slate-200 text-slate-700 hover:bg-rose-50'
+                  }`}
+                >
+                  <HeartPulse className="w-4 h-4 text-rose-500" />
+                  <span>🩸 রক্তদান ({bloodDonors.length})</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('ai')}
+                  className={`py-2 px-4 rounded-xl text-xs font-extrabold shrink-0 transition flex items-center gap-1.5 ${
+                    activeTab === 'ai'
+                      ? 'bg-indigo-700 text-white shadow-sm'
+                      : 'bg-white border border-slate-200 text-slate-700 hover:bg-indigo-50'
+                  }`}
+                >
+                  <Bot className="w-4 h-4 text-indigo-500" />
+                  <span>🤖 AI ও MCP স্টুডিও</span>
+                </button>
+
+                <button
                   onClick={() => setActiveTab('settings')}
                   className={`py-2 px-4 rounded-xl text-xs font-extrabold shrink-0 transition flex items-center gap-1.5 ${
                     activeTab === 'settings'
@@ -2581,6 +2623,141 @@ export default function AdminPage() {
                   )}
                 </div>
               </div>
+
+              {/* Department Faculty / Teachers Directory Editor */}
+              <div className="pt-4 border-t border-slate-200 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <h3 className="text-xs font-black text-slate-900">
+                      বিভাগের সম্মানিত শিক্ষকমণ্ডলী / স্যারদের তথ্য ও নম্বর ({editDept.teachers?.length || 0} জন)
+                    </h3>
+                    <p className="text-[11px] text-slate-500">
+                      স্যারদের নাম, পদবি, মোবাইল নম্বর, ইমেইল ও রুম নম্বর যোগ করলে ওয়েবসাইট ও AI অ্যাসিস্ট্যান্ট থেকে খুঁজে পাওয়া যাবে।
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const nextTeacher: FacultyMember = {
+                        id: `t-${Date.now()}`,
+                        nameBn: '',
+                        designationBn: 'প্রফেসর',
+                        phone: '',
+                        email: '',
+                        roomBn: '',
+                        researchAreaBn: '',
+                      };
+                      setEditDept((prev) => ({
+                        ...prev,
+                        teachers: [...(prev.teachers || []), nextTeacher],
+                      }));
+                    }}
+                    className="px-3.5 py-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-xs"
+                  >
+                    <UserPlus className="w-3.5 h-3.5" />
+                    <span>+ শিক্ষক / স্যার যোগ করুন</span>
+                  </button>
+                </div>
+
+                {(editDept.teachers || []).length === 0 ? (
+                  <p className="text-xs text-slate-400 italic py-2">
+                    এই বিভাগে এখনো কোনো স্যারের তথ্য যোগ করা হয়নি। উপরের বাটনে ক্লিক করে যোগ করুন।
+                  </p>
+                ) : (
+                  <div className="space-y-2.5">
+                    {(editDept.teachers || []).map((teacher, tIdx) => {
+                      const updateTeacher = (patch: Partial<FacultyMember>) => {
+                        setEditDept((prev) => ({
+                          ...prev,
+                          teachers: (prev.teachers || []).map((item, i) =>
+                            i === tIdx ? { ...item, ...patch } : item
+                          ),
+                        }));
+                      };
+                      return (
+                        <div key={teacher.id || tIdx} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-black text-blue-700">শিক্ষক #{tIdx + 1}</span>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setEditDept((prev) => ({
+                                  ...prev,
+                                  teachers: (prev.teachers || []).filter((_, i) => i !== tIdx),
+                                }))
+                              }
+                              className="p-1 text-red-500 hover:bg-red-100 rounded-lg"
+                              title="মুছুন"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <input
+                              type="text"
+                              placeholder="স্যার / ম্যাডামের নাম * (যেমন: ড. মো. ..."
+                              value={teacher.nameBn}
+                              onChange={(e) => updateTeacher({ nameBn: e.target.value })}
+                              className="text-xs border border-slate-200 rounded-xl p-2 bg-white font-bold"
+                            />
+                            <input
+                              type="text"
+                              placeholder="পদবি (যেমন: প্রফেসর / চেয়ারম্যান)"
+                              value={teacher.designationBn}
+                              onChange={(e) => updateTeacher({ designationBn: e.target.value })}
+                              className="text-xs border border-slate-200 rounded-xl p-2 bg-white"
+                            />
+                            <div className="relative">
+                              <Phone className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+                              <input
+                                type="text"
+                                placeholder="মোবাইল নম্বর"
+                                value={teacher.phone || ''}
+                                onChange={(e) => updateTeacher({ phone: e.target.value })}
+                                className="w-full text-xs border border-slate-200 rounded-xl p-2 pl-8 bg-white font-semibold"
+                              />
+                            </div>
+                            <div className="relative">
+                              <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+                              <input
+                                type="email"
+                                placeholder="ইমেইল (ru.ac.bd)"
+                                value={teacher.email || ''}
+                                onChange={(e) => updateTeacher({ email: e.target.value })}
+                                className="w-full text-xs border border-slate-200 rounded-xl p-2 pl-8 bg-white"
+                              />
+                            </div>
+                            <input
+                              type="text"
+                              placeholder="অফিস / রুম নম্বর"
+                              value={teacher.roomBn || ''}
+                              onChange={(e) => updateTeacher({ roomBn: e.target.value })}
+                              className="text-xs border border-slate-200 rounded-xl p-2 bg-white"
+                            />
+                            <input
+                              type="text"
+                              placeholder="গবেষণার বিষয় (ঐচ্ছিক)"
+                              value={teacher.researchAreaBn || ''}
+                              onChange={(e) => updateTeacher({ researchAreaBn: e.target.value })}
+                              className="text-xs border border-slate-200 rounded-xl p-2 bg-white"
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                <div className="pt-2 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => handleSaveDepartment()}
+                    className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs flex items-center gap-2 shadow-sm transition"
+                  >
+                    <Check className="w-4 h-4" /> বিভাগ, শিক্ষক ও ছবির তথ্য সংরক্ষণ করুন
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
@@ -2961,6 +3138,34 @@ export default function AdminPage() {
                 </div>
               )}
             </div>
+          )}
+
+          {/* ============================================================================ */}
+          {/* TAB 6.5: BLOOD BANK DONOR MANAGER (Super Admin) */}
+          {/* ============================================================================ */}
+          {role === 'SUPER_ADMIN' && activeTab === 'blood' && (
+            <AdminBloodTab
+              bloodDonors={bloodDonors}
+              password={getActivePass()}
+              safeParseApiResponse={safeParseApiResponse}
+              onUpdated={(donors) => setBloodDonors(donors)}
+              showToast={showToast}
+            />
+          )}
+
+          {/* ============================================================================ */}
+          {/* TAB 6.8: AI AGENT (3-SLOT FAILOVER) & MCP STUDIO (Super Admin) */}
+          {/* ============================================================================ */}
+          {role === 'SUPER_ADMIN' && activeTab === 'ai' && (
+            <AdminAiStudioTab
+              initialAiConfig={settings?.aiConfig}
+              password={getActivePass()}
+              safeParseApiResponse={safeParseApiResponse}
+              onSaved={(aiConfig) =>
+                setSettings((prev) => (prev ? { ...prev, aiConfig } : prev))
+              }
+              showToast={showToast}
+            />
           )}
 
           {/* ============================================================================ */}

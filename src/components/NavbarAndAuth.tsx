@@ -368,10 +368,11 @@ export default function NavbarAndAuth() {
             {[
               { href: '/shop', label: 'শপ' },
               { href: '/inside-ru', label: 'নিউজ ও সাহিত্য' },
-              { href: '/academics', label: 'বিভাগ ও ক্যারিয়ার' },
+              { href: '/academics', label: 'বিভাগ ও স্যার' },
+              { href: '/blood', label: '🩸 রক্তদান' },
               { href: '/clubs', label: 'ক্লাবসমূহ' },
               { href: '/map', label: 'ম্যাপ' },
-              { href: '/track', label: 'অর্ডার ট্র্যাকিং' },
+              { href: '/track', label: 'অর্ডার' },
             ].map((item) => {
               const active = pathname.startsWith(item.href);
               return (
@@ -729,7 +730,8 @@ export default function NavbarAndAuth() {
                 { href: '/map', label: '🗺️ ৩-ধাপের ওয়াটার ম্যাপ ও সনদ' },
                 { href: '/inside-ru', label: '📰 নিউজ, সাহিত্য ও গবেষণা' },
                 { href: '/merchant', label: '🏪 মার্চেন্ট পোর্টাল (পণ্য বিক্রি করুন)' },
-                { href: '/academics', label: '🎓 বিভাগ ও অ্যালামনাই ডিরেক্টরি' },
+                { href: '/academics', label: '🎓 বিভাগ, স্যার ও অ্যালামনাই ডিরেক্টরি' },
+                { href: '/blood', label: '🩸 রাবি ব্লাড ব্যাংক (৯০+ দিন এভেইলেবল)' },
                 { href: '/clubs', label: '🏆 ক্লাবসমূহ ও মেম্বারশিপ' },
                 { href: '/track', label: '📦 অর্ডার ট্র্যাকিং' },
                 { href: '/admin', label: '🔐 অ্যাডমিন ও মার্চেন্ট লগইন' },

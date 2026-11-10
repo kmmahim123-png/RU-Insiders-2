@@ -100,6 +100,16 @@ export interface ClubInfo {
   password: string; // প্রতিটি ক্লাবের আলাদা পাসওয়ার্ড
 }
 
+export interface FacultyMember {
+  id: string;
+  nameBn: string;
+  designationBn: string; // প্রফেসর, সহযোগী অধ্যাপক, সহকারী অধ্যাপক, প্রভাষক
+  phone?: string;
+  email?: string;
+  roomBn?: string;
+  researchAreaBn?: string;
+}
+
 export interface CustomDepartmentData {
   departmentId: string;
   nameBn?: string;
@@ -108,7 +118,49 @@ export interface CustomDepartmentData {
   seatCount?: number;
   degreeOfferedBn?: string;
   images: string[]; // অনুষদ ও ভবনের একাধিক ছবি
+  teachers?: FacultyMember[]; // বিভাগের সম্মানিত শিক্ষকদের তালিকা ও কন্টাক্ট
   detailSections?: DetailBlock[];
+}
+
+export interface BloodDonor {
+  id: string;
+  nameBn: string;
+  bloodGroup: 'A+' | 'A-' | 'B+' | 'B-' | 'O+' | 'O-' | 'AB+' | 'AB-';
+  phone: string;
+  departmentBn: string;
+  hallBn?: string;
+  lastDonationDate?: string; // ISO YYYY-MM-DD (খালি মানে আগে কখনো দেননি / তাৎক্ষণিক যোগ্য)
+  totalDonations?: number;
+  isPublicPhone: boolean;
+  note?: string;
+  createdAt: string;
+}
+
+export interface AiTrainingDoc {
+  id: string;
+  title: string;
+  category: string;
+  content: string;
+  updatedAt: string;
+}
+
+export type AiSlotKey = 'openrouter1' | 'openrouter2' | 'gemini';
+
+export interface AiConfig {
+  openRouterKey1?: string;
+  openRouterModel1?: string;
+  openRouterEnabled1?: boolean;
+  openRouterKey2?: string;
+  openRouterModel2?: string;
+  openRouterEnabled2?: boolean;
+  geminiApiKey?: string;
+  geminiModel?: string;
+  geminiEnabled?: boolean;
+  priorityOrder?: AiSlotKey[];
+  systemPersonaBn?: string;
+  trainingDocs?: AiTrainingDoc[];
+  mcpEnabled?: boolean;
+  mcpSecretToken?: string;
 }
 
 export interface ClubApplication {
@@ -224,4 +276,5 @@ export interface SiteSettings {
   breakingNews: string[];
   breakingNewsItems?: BreakingNewsItem[];
   defaultFacebookPixelId?: string;
+  aiConfig?: AiConfig;
 }
