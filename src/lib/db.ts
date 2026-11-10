@@ -113,6 +113,8 @@ const INITIAL_DB: DatabaseSchema = {
       sizes: ['S', 'M', 'L', 'XL', 'XXL'],
       inStock: true,
       featured: true,
+      merchantId: 'm-motihar-crafts',
+      merchantName: 'মতিহার ক্রাফটস অ্যান্ড এপারেল',
       createdAt: new Date().toISOString(),
     },
     {
@@ -133,7 +135,9 @@ const INITIAL_DB: DatabaseSchema = {
       sizes: ['M', 'L', 'XL', 'XXL'],
       inStock: true,
       featured: true,
-      createdAt: new Date().toISOString(),
+      merchantId: 'm-motihar-crafts',
+      merchantName: 'মতিহার ক্রাফটস অ্যান্ড এপারেল',
+      createdAt: '2026-11-01T10:00:00.000Z',
     },
     {
       id: 'prod-jersey-1',
@@ -158,7 +162,9 @@ const INITIAL_DB: DatabaseSchema = {
       sizes: ['M', 'L', 'XL', 'XXL'],
       inStock: true,
       featured: true,
-      createdAt: new Date().toISOString(),
+      merchantId: 'm-motihar-crafts',
+      merchantName: 'মতিহার ক্রাফটস অ্যান্ড এপারেল',
+      createdAt: '2026-11-01T10:00:00.000Z',
     },
     {
       id: 'prod-gur-1',
@@ -187,6 +193,8 @@ const INITIAL_DB: DatabaseSchema = {
       ],
       inStock: true,
       featured: true,
+      merchantId: 'm-varendra-foods',
+      merchantName: 'বরেন্দ্র খাঁটি গুড় ও রসাল খাবার',
       createdAt: new Date().toISOString(),
     },
     {
@@ -210,6 +218,8 @@ const INITIAL_DB: DatabaseSchema = {
       ],
       inStock: true,
       featured: true,
+      merchantId: 'm-varendra-foods',
+      merchantName: 'বরেন্দ্র খাঁটি গুড় ও রসাল খাবার',
       createdAt: new Date().toISOString(),
     },
     {
@@ -229,6 +239,8 @@ const INITIAL_DB: DatabaseSchema = {
       ],
       inStock: true,
       featured: true,
+      merchantId: 'm-motihar-crafts',
+      merchantName: 'মতিহার ক্রাফটস অ্যান্ড এপারেল',
       createdAt: new Date().toISOString(),
     },
   ],
@@ -405,7 +417,7 @@ const INITIAL_DB: DatabaseSchema = {
       ownerName: 'শাকিব আল হাসান',
       phone: '01711223344',
       email: 'motihar.crafts@gmail.com',
-      password: 'merchant-2026',
+      password: 'motihar-2026',
       status: 'active',
       category: 'পোশাক ও হুডি',
       address: 'টুকিটাকি চত্বর, রাবি ক্যাম্পাস',
@@ -423,7 +435,7 @@ const INITIAL_DB: DatabaseSchema = {
       ownerName: 'মো: রফিকুল ইসলাম',
       phone: '01822334455',
       email: 'varendra.foods@gmail.com',
-      password: 'merchant-2026',
+      password: 'varendra-2026',
       status: 'active',
       category: 'ঐতিহ্যবাহী খাবার ও গুড়',
       address: 'চারঘাট ও বাঘা, রাজশাহী',
@@ -451,6 +463,44 @@ export function runAtomic<T>(task: () => Promise<T>): Promise<T> {
   return result;
 }
 
+function ensureDbDefaults(db: DatabaseSchema): DatabaseSchema {
+  const merchants = db.merchants && db.merchants.length > 0 ? db.merchants : INITIAL_DB.merchants;
+  const products = (db.products || []).map((p) => {
+    if (p.merchantId) return p;
+    if (['prod-hoodie-1', 'prod-dropshoulder-1', 'prod-jersey-1', 'prod-souvenir-1'].includes(p.id)) {
+      return {
+        ...p,
+        merchantId: 'm-motihar-crafts',
+        merchantName: 'মতিহার ক্রাফটস অ্যান্ড এপারেল',
+      };
+    }
+    if (['prod-gur-1', 'prod-naru-1'].includes(p.id)) {
+      return {
+        ...p,
+        merchantId: 'm-varendra-foods',
+        merchantName: 'বরেন্দ্র খাঁটি গুড় ও রসাল খাবার',
+      };
+    }
+    return p;
+  });
+
+  const settings = {
+    ...INITIAL_DB.settings,
+    ...(db.settings || {}),
+    breakingNewsItems:
+      db.settings?.breakingNewsItems !== undefined
+        ? db.settings.breakingNewsItems
+        : INITIAL_DB.settings.breakingNewsItems,
+  };
+
+  return {
+    ...db,
+    settings,
+    products,
+    merchants,
+  };
+}
+
 export async function readDb(): Promise<DatabaseSchema> {
   // 1. Try reading from Supabase cloud database if available
   try {
@@ -461,7 +511,7 @@ export async function readDb(): Promise<DatabaseSchema> {
       .maybeSingle();
 
     if (!error && data && data.data) {
-      const remoteDb = data.data as DatabaseSchema;
+      const remoteDb = ensureDbDefaults(data.data as DatabaseSchema);
       // Also cache to local file for offline fallback
       try {
         await fs.mkdir(DATA_DIR, { recursive: true });
@@ -477,14 +527,14 @@ export async function readDb(): Promise<DatabaseSchema> {
   try {
     await fs.mkdir(DATA_DIR, { recursive: true });
     const raw = await fs.readFile(DB_FILE, 'utf-8');
-    return JSON.parse(raw) as DatabaseSchema;
+    return ensureDbDefaults(JSON.parse(raw) as DatabaseSchema);
   } catch {
     // If on Vercel and DB_FILE not in /tmp yet, try reading bundled db.json
     try {
       const bundled = await fs.readFile(BUNDLED_DB_FILE, 'utf-8');
-      const parsed = JSON.parse(bundled) as DatabaseSchema;
+      const parsed = ensureDbDefaults(JSON.parse(bundled) as DatabaseSchema);
       try {
-        await fs.writeFile(DB_FILE, bundled, 'utf-8');
+        await fs.writeFile(DB_FILE, JSON.stringify(parsed, null, 2), 'utf-8');
       } catch {}
       return parsed;
     } catch {}

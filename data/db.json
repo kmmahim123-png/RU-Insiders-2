@@ -83,7 +83,9 @@
       ],
       "inStock": true,
       "featured": true,
-      "createdAt": "2026-11-08T11:04:53.338Z"
+      "createdAt": "2026-11-08T11:04:53.338Z",
+      "merchantId": "m-motihar-crafts",
+      "merchantName": "?????? ??????? ??????? ??????"
     },
     {
       "id": "prod-dropshoulder-1",
@@ -110,7 +112,9 @@
       ],
       "inStock": true,
       "featured": true,
-      "createdAt": "2026-11-08T11:04:53.340Z"
+      "createdAt": "2026-11-08T11:04:53.340Z",
+      "merchantId": "m-motihar-crafts",
+      "merchantName": "?????? ??????? ??????? ??????"
     },
     {
       "id": "prod-jersey-1",
@@ -142,7 +146,9 @@
       ],
       "inStock": true,
       "featured": true,
-      "createdAt": "2026-11-08T11:04:53.340Z"
+      "createdAt": "2026-11-08T11:04:53.340Z",
+      "merchantId": "m-motihar-crafts",
+      "merchantName": "?????? ??????? ??????? ??????"
     },
     {
       "id": "prod-gur-1",
@@ -182,7 +188,9 @@
       ],
       "inStock": true,
       "featured": true,
-      "createdAt": "2026-11-08T11:04:53.340Z"
+      "createdAt": "2026-11-08T11:04:53.340Z",
+      "merchantId": "m-varendra-foods",
+      "merchantName": "???????? ????? ??? ? ???? ?????"
     },
     {
       "id": "prod-naru-1",
@@ -213,7 +221,9 @@
       ],
       "inStock": true,
       "featured": true,
-      "createdAt": "2026-11-08T11:04:53.340Z"
+      "createdAt": "2026-11-08T11:04:53.340Z",
+      "merchantId": "m-varendra-foods",
+      "merchantName": "???????? ????? ??? ? ???? ?????"
     },
     {
       "id": "prod-souvenir-1",
@@ -235,7 +245,9 @@
       ],
       "inStock": true,
       "featured": true,
-      "createdAt": "2026-11-08T11:04:53.340Z"
+      "createdAt": "2026-11-08T11:04:53.340Z",
+      "merchantId": "m-motihar-crafts",
+      "merchantName": "?????? ??????? ??????? ??????"
     }
   ],
   "mapSpots": {
@@ -514,5 +526,43 @@
     }
   ],
   "subscribers": [],
-  "departments": {}
+  "departments": {},
+  "merchants": [
+    {
+      "id": "m-motihar-crafts",
+      "shopName": "?????? ??????? ??????? ??????",
+      "ownerName": "????? ?? ?????",
+      "phone": "01711223344",
+      "email": "motihar.crafts@gmail.com",
+      "password": "motihar-2026",
+      "status": "active",
+      "category": "????? ? ????",
+      "address": "???????? ?????, ???? ?????????",
+      "payoutPhone": "01711223344",
+      "payoutMethod": "bkash",
+      "facebookPixelId": "123456789012345",
+      "commissionRate": 0,
+      "totalSales": 18500,
+      "totalOrders": 24,
+      "createdAt": "2026-11-01T10:00:00.000Z"
+    },
+    {
+      "id": "m-varendra-foods",
+      "shopName": "???????? ????? ??? ? ???? ?????",
+      "ownerName": "??: ?????? ?????",
+      "phone": "01822334455",
+      "email": "varendra.foods@gmail.com",
+      "password": "varendra-2026",
+      "status": "active",
+      "category": "?????????? ????? ? ???",
+      "address": "?????? ? ????, ???????",
+      "payoutPhone": "01822334455",
+      "payoutMethod": "bkash",
+      "facebookPixelId": "",
+      "commissionRate": 0,
+      "totalSales": 34200,
+      "totalOrders": 42,
+      "createdAt": "2026-11-01T10:00:00.000Z"
+    }
+  ]
 }

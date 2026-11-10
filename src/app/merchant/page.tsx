@@ -66,7 +66,7 @@ export default function MerchantPortalPage() {
   // Dashboard Data
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'orders' | 'logistics' | 'marketing' | 'download'>('overview');
+  const [activeTab, setActiveTab] = useState<'orders' | 'overview' | 'logistics' | 'marketing' | 'download'>('orders');
   const [copiedFeed, setCopiedFeed] = useState(false);
   const [copiedPixel, setCopiedPixel] = useState(false);
   const [fbAdProductId, setFbAdProductId] = useState('');
@@ -75,7 +75,9 @@ export default function MerchantPortalPage() {
   const [centralRiderGroupUrl, setCentralRiderGroupUrl] = useState<string>('https://chat.whatsapp.com/');
 
   // Orders Workflow & Dispatch State
-  const [orderFilterStatus, setOrderFilterStatus] = useState<string>('all');
+  const [orderFilterStatus, setOrderFilterStatus] = useState<'intake' | 'ready' | 'with_rider' | 'delivered' | 'cancelled'>('intake');
+  const [workflowViewMode, setWorkflowViewMode] = useState<'folder' | 'board'>('folder');
+  const [workflowNotice, setWorkflowNotice] = useState<{ text: string; targetStage: 'intake' | 'ready' | 'with_rider' | 'delivered' | 'cancelled' } | null>(null);
   const [dispatchModalOrder, setDispatchModalOrder] = useState<Order | null>(null);
   const [riderNameInput, setRiderNameInput] = useState('');
   const [riderPhoneInput, setRiderPhoneInput] = useState('');
@@ -368,6 +370,7 @@ export default function MerchantPortalPage() {
         body: JSON.stringify({
           action: 'SAVE_PRODUCT',
           password: merchant.password,
+          merchantId: merchant.id,
           payload: { product: newProd },
         }),
       });
@@ -429,6 +432,7 @@ export default function MerchantPortalPage() {
         body: JSON.stringify({
           action: 'UPDATE_ORDER_STATUS',
           password: merchant.password,
+          merchantId: merchant.id,
           payload: {
             orderId,
             status,
@@ -439,6 +443,17 @@ export default function MerchantPortalPage() {
       const data = await res.json();
       if (data.ok && data.orders) {
         setOrders(data.orders);
+        const stageLabels: Record<string, string> = {
+          intake: '১. ইনটেক',
+          ready: '২. রেডি হলো',
+          with_rider: '৩. রাইডারকে দিলাম',
+          delivered: '৪. ডেলিভারড',
+          cancelled: '৫. ক্যান্সেল',
+        };
+        setWorkflowNotice({
+          text: `অর্ডার #${orderId} সফলভাবে "${stageLabels[status]}" ধাপে স্থানান্তর হয়েছে।`,
+          targetStage: status,
+        });
       } else {
         alert(data.error || 'অর্ডার স্ট্যাটাস আপডেট করা যায়নি');
       }
@@ -596,6 +611,7 @@ export default function MerchantPortalPage() {
         body: JSON.stringify({
           action: 'DELETE_PRODUCT',
           password: merchant.password,
+          merchantId: merchant.id,
           payload: { productId },
         }),
       });
@@ -645,7 +661,9 @@ export default function MerchantPortalPage() {
 
     const headers = ['Order ID', 'Date', 'Customer Name', 'Phone', 'Items', 'Quantity', 'Amount (BDT)', 'Status'];
     const rows = orders.map((order) => {
-      const myItems = (order.items || []).filter((it) => it.merchantId === merchant.id);
+      const myItems = merchant.id === 'admin-master'
+        ? (order.items || [])
+        : (order.items || []).filter((it) => it.merchantId === merchant.id);
       const itemsList = myItems.map((it) => `${it.nameBn} (${it.selectedOption})`).join('; ');
       const totalQty = myItems.reduce((acc, it) => acc + it.quantity, 0);
       const myAmount = myItems.reduce((acc, it) => acc + it.unitPrice * it.quantity, 0);
@@ -734,6 +752,255 @@ export default function MerchantPortalPage() {
       : (order.items || []).filter((it) => it.merchantId === merchant?.id);
     return sum + myItems.reduce((acc, it) => acc + it.unitPrice * it.quantity, 0);
   }, 0);
+
+  const WORKFLOW_STAGES = [
+    {
+      id: 'intake' as const,
+      step: '১',
+      title: 'ইনটেক',
+      subtitle: 'নতুন অর্ডার জমা হয়েছে',
+      badgeColor: 'bg-amber-100 text-amber-900 border-amber-300',
+      activeRing: 'border-amber-500 bg-amber-50/70 ring-2 ring-amber-300/60',
+      colHeaderBg: 'bg-amber-50 border-amber-200 text-amber-950',
+    },
+    {
+      id: 'ready' as const,
+      step: '২',
+      title: 'রেডি হলো',
+      subtitle: 'প্যাকিং ও ডিসপ্যাচ প্রস্তুত',
+      badgeColor: 'bg-blue-100 text-blue-900 border-blue-300',
+      activeRing: 'border-blue-500 bg-blue-50/70 ring-2 ring-blue-300/60',
+      colHeaderBg: 'bg-blue-50 border-blue-200 text-blue-950',
+    },
+    {
+      id: 'with_rider' as const,
+      step: '৩',
+      title: 'রাইডারকে দিলাম',
+      subtitle: 'রাইডার / কুরিয়ারের পথে',
+      badgeColor: 'bg-indigo-100 text-indigo-900 border-indigo-300',
+      activeRing: 'border-indigo-500 bg-indigo-50/70 ring-2 ring-indigo-300/60',
+      colHeaderBg: 'bg-indigo-50 border-indigo-200 text-indigo-950',
+    },
+    {
+      id: 'delivered' as const,
+      step: '৪',
+      title: 'ডেলিভারড',
+      subtitle: 'ডেলিভারি সম্পন্ন হয়েছে',
+      badgeColor: 'bg-emerald-100 text-emerald-900 border-emerald-300',
+      activeRing: 'border-emerald-500 bg-emerald-50/70 ring-2 ring-emerald-300/60',
+      colHeaderBg: 'bg-emerald-50 border-emerald-200 text-emerald-950',
+    },
+    {
+      id: 'cancelled' as const,
+      step: '৫',
+      title: 'ক্যান্সেল',
+      subtitle: 'বাতিলকৃত অর্ডার',
+      badgeColor: 'bg-red-100 text-red-900 border-red-300',
+      activeRing: 'border-red-500 bg-red-50/70 ring-2 ring-red-300/60',
+      colHeaderBg: 'bg-red-50 border-red-200 text-red-950',
+    },
+  ];
+
+  // Reusable order card for both Folder View & 5-Column Kanban Workflow View
+  const renderOrderCard = (ord: Order, compact = false) => {
+    if (!merchant) return null;
+    const myItems =
+      merchant.id === 'admin-master'
+        ? (ord.items || [])
+        : (ord.items || []).filter((it) => it.merchantId === merchant.id);
+    const mySubtotal = myItems.reduce((acc, it) => acc + it.unitPrice * it.quantity, 0);
+    const stage = normalizeStage(ord.status);
+
+    return (
+      <div
+        key={ord.orderId}
+        className={`bg-white rounded-2xl sm:rounded-3xl ${compact ? 'p-3.5' : 'p-5'} border-2 shadow-xs space-y-3 ${
+          stage === 'cancelled'
+            ? 'border-red-200 bg-red-50/20'
+            : stage === 'delivered'
+            ? 'border-emerald-200'
+            : 'border-slate-200'
+        }`}
+      >
+        {/* Order Head & Direct Customer Contact */}
+        <div className="flex flex-wrap items-start justify-between gap-2 pb-2.5 border-b border-slate-100">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="font-black text-xs sm:text-sm text-slate-900 font-mono">{ord.orderId}</span>
+              <span className="text-[10px] text-slate-400 font-semibold">
+                {new Date(ord.createdAt).toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+            <p className="text-xs text-slate-600 mt-0.5 truncate">
+              <strong className="text-slate-900">{ord.customerName}</strong> • {ord.phone}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <a
+              href={`tel:${ord.phone}`}
+              className="bg-slate-100 hover:bg-slate-200 text-slate-800 px-2.5 py-1 rounded-xl text-[11px] font-bold flex items-center gap-1 transition"
+              title="সরাসরি কল"
+            >
+              <Phone className="w-3 h-3" />
+              <span>কল</span>
+            </a>
+            <a
+              href={`https://wa.me/88${ord.phone.replace(/\D/g, '')}?text=${encodeURIComponent(
+                `আসসালামু আলাইকুম ${ord.customerName}! আমি RU Insiders এর ${merchant.shopName} থেকে আপনার অর্ডার #${ord.orderId} নিয়ে যোগাযোগ করছি।`
+              )}`}
+              target="_blank"
+              rel="noreferrer"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded-xl text-[11px] font-bold flex items-center gap-1 shadow-xs transition"
+              title="কাস্টমারকে সরাসরি WhatsApp"
+            >
+              <MessageCircle className="w-3 h-3" />
+              <span>WA</span>
+            </a>
+          </div>
+        </div>
+
+        {/* Scoped Merchant Items */}
+        <div className="space-y-1.5 bg-slate-50/80 p-2.5 rounded-2xl border border-slate-100 text-xs">
+          {myItems.map((item, idx) => (
+            <div key={idx} className="flex items-center justify-between gap-2 font-bold text-slate-800">
+              <div className="flex items-center gap-2 min-w-0">
+                <img src={item.image} alt={item.nameBn} className="w-7 h-7 rounded-lg object-cover border shrink-0" />
+                <span className="truncate">
+                  {item.nameBn} ({item.selectedOption}) × {item.quantity}
+                </span>
+              </div>
+              <span className="shrink-0">৳{item.unitPrice * item.quantity}</span>
+            </div>
+          ))}
+          <div className="pt-1.5 border-t border-slate-200/70 flex flex-wrap items-center justify-between gap-1 text-[11px]">
+            <span className="text-slate-600 truncate max-w-full">
+              📍 {ord.addressDetails} ({ord.deliveryZone === 'campus' ? 'ক্যাম্পাস' : ord.deliveryZone === 'city' ? 'সিটি' : 'সারাদেশ'})
+            </span>
+            <span className="font-black text-emerald-700">আপনার মূল্য: ৳{mySubtotal}</span>
+          </div>
+        </div>
+
+        {/* Steadfast / Rider Badge */}
+        {(ord.steadfastTrackingCode || ord.assignedRiderName) && (
+          <div className="p-2.5 rounded-xl bg-indigo-50/70 border border-indigo-200 flex flex-wrap items-center justify-between gap-1.5 text-[11px]">
+            {ord.steadfastTrackingCode ? (
+              <>
+                <span className="font-bold text-indigo-950 flex items-center gap-1">
+                  <Truck className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Steadfast: <code className="font-mono bg-white px-1.5 py-0.5 rounded">{ord.steadfastTrackingCode}</code></span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleCheckSteadfastStatus(ord)}
+                  disabled={steadfastLoadingOrder === ord.orderId}
+                  className="px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold transition disabled:opacity-50"
+                >
+                  {steadfastLoadingOrder === ord.orderId ? '...' : '🔄 সিঙ্ক'}
+                </button>
+              </>
+            ) : (
+              <span className="font-bold text-indigo-950">
+                🛵 রাইডার: {ord.assignedRiderName} {ord.assignedRiderPhone ? `(${ord.assignedRiderPhone})` : ''}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Cancellation Note */}
+        {stage === 'cancelled' && (
+          <div className="p-2.5 bg-red-50 border border-red-200 rounded-xl text-[11px] text-red-900 space-y-0.5">
+            <p className="font-black flex items-center gap-1">
+              <XCircle className="w-3.5 h-3.5 text-red-600 shrink-0" />
+              <span>কারণ: {ord.cancellationReason || 'উল্লেখ করা হয়নি'}</span>
+            </p>
+            {ord.cancelledBy && <p className="text-[10px] text-red-700">বাতিলকারী: {ord.cancelledBy}</p>}
+          </div>
+        )}
+
+        {/* Stage Transition Action Buttons */}
+        <div className="flex flex-wrap items-center justify-between gap-1.5 pt-1">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {stage === 'intake' && (
+              <button
+                type="button"
+                onClick={() => handleUpdateOrderStatus(ord.orderId, 'ready', { note: '১. ইনটেক থেকে ২. রেডি ধাপে পাঠানো হয়েছে' })}
+                className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold flex items-center gap-1 shadow-xs transition cursor-pointer"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>২. রেডিতে পাঠান ➔</span>
+              </button>
+            )}
+
+            {stage === 'ready' && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDispatchModalOrder(ord);
+                    setRiderNameInput('');
+                    setRiderPhoneInput('');
+                  }}
+                  className="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-extrabold flex items-center gap-1 shadow-xs transition cursor-pointer"
+                >
+                  <Send className="w-3 h-3" />
+                  <span>🛵 রাইডার গ্রুপ</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSendToSteadfast(ord)}
+                  disabled={steadfastLoadingOrder === ord.orderId}
+                  className="px-2.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-extrabold flex items-center gap-1 shadow-xs transition cursor-pointer disabled:opacity-50"
+                >
+                  <Truck className="w-3 h-3" />
+                  <span>{steadfastLoadingOrder === ord.orderId ? '...' : '📦 Steadfast'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleUpdateOrderStatus(ord.orderId, 'with_rider', {
+                      assignedRiderName: 'সরাসরি রাইডার হ্যান্ডওভার',
+                      dispatchedVia: 'manual',
+                      note: '২. রেডি থেকে ৩. রাইডার ধাপে স্থানান্তর',
+                    })
+                  }
+                  className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-[11px] font-extrabold flex items-center gap-1 shadow-xs transition cursor-pointer"
+                >
+                  <span>৩. রাইডারে দিন ➔</span>
+                </button>
+              </>
+            )}
+
+            {stage === 'with_rider' && (
+              <button
+                type="button"
+                onClick={() => handleUpdateOrderStatus(ord.orderId, 'delivered', { note: '৩. রাইডার থেকে ৪. ডেলিভারি সম্পন্ন' })}
+                className="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-extrabold flex items-center gap-1 shadow-xs transition cursor-pointer"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>৪. ডেলিভারড হয়েছে ✓</span>
+              </button>
+            )}
+          </div>
+
+          {/* Cancel allowed from ANY stage (intake, ready, with_rider, delivered) */}
+          {stage !== 'cancelled' && (
+            <button
+              type="button"
+              onClick={() => {
+                setCancelModalOrder(ord);
+                setCancelReasonInput('');
+              }}
+              className="px-2.5 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-[11px] font-bold flex items-center gap-1 transition cursor-pointer"
+            >
+              <XCircle className="w-3 h-3" />
+              <span>ক্যান্সেল</span>
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-20">
@@ -889,21 +1156,21 @@ export default function MerchantPortalPage() {
                       type="button"
                       onClick={() => {
                         setLoginIdentifier('01711223344');
-                        setLoginPassword('merchant-2026');
+                        setLoginPassword('motihar-2026');
                       }}
-                      className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold"
+                      className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold cursor-pointer"
                     >
-                      🛍️ মতিহার ক্রাফটস (অটো-ফিল)
+                      🛍️ মতিহার ক্রাফটস (আলাদা লগইন)
                     </button>
                     <button
                       type="button"
                       onClick={() => {
                         setLoginIdentifier('01822334455');
-                        setLoginPassword('merchant-2026');
+                        setLoginPassword('varendra-2026');
                       }}
-                      className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold"
+                      className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold cursor-pointer"
                     >
-                      🍯 বরেন্দ্র খাঁটি গুড় (অটো-ফিল)
+                      🍯 বরেন্দ্র খাঁটি গুড় (আলাদা লগইন)
                     </button>
                   </div>
                 </div>
@@ -1123,28 +1390,28 @@ export default function MerchantPortalPage() {
             <div className="flex items-center gap-2 overflow-x-auto pb-1 border-b border-slate-200 scrollbar-none text-xs sm:text-sm font-extrabold">
               <button
                 type="button"
-                onClick={() => setActiveTab('overview')}
-                className={`py-2 px-4 rounded-xl shrink-0 transition flex items-center gap-1.5 ${
-                  activeTab === 'overview'
-                    ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'text-slate-600 hover:bg-slate-100'
-                }`}
-              >
-                <Layers className="w-4 h-4" />
-                <span>ওভারভিউ ও পণ্যসমূহ ({products.length})</span>
-              </button>
-
-              <button
-                type="button"
                 onClick={() => setActiveTab('orders')}
-                className={`py-2 px-4 rounded-xl shrink-0 transition flex items-center gap-1.5 ${
+                className={`py-2.5 px-4 rounded-xl shrink-0 transition flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'orders'
                     ? 'bg-emerald-600 text-white shadow-xs'
                     : 'text-slate-600 hover:bg-slate-100'
                 }`}
               >
                 <Package className="w-4 h-4" />
-                <span>অর্ডার প্রসেস ({orders.length})</span>
+                <span>অর্ডার ওয়ার্কফ্লো ({orders.length})</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('overview')}
+                className={`py-2.5 px-4 rounded-xl shrink-0 transition flex items-center gap-1.5 cursor-pointer ${
+                  activeTab === 'overview'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <Layers className="w-4 h-4" />
+                <span>আমার পণ্যসমূহ ({products.length})</span>
               </button>
 
               <button
@@ -1291,19 +1558,44 @@ export default function MerchantPortalPage() {
             )}
 
             {/* ========================================================================= */}
-            {/* TAB 2: ORDERS WORKFLOW MANAGEMENT (1 INTAKE -> 2 READY -> 3 RIDER -> 4 DELIVERED -> 5 CANCEL) */}
+            {/* TAB 2: 5-STAGE ORDER WORKFLOW (1 INTAKE -> 2 READY -> 3 RIDER -> 4 DELIVERED -> 5 CANCEL) */}
             {/* ========================================================================= */}
             {activeTab === 'orders' && (
               <div className="space-y-4">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="text-base font-black text-slate-900">
-                    ৫-ধাপের অর্ডার প্রসেস ও ডেলিভারি ম্যানেজমেন্ট ({orders.length}টি)
-                  </h3>
-                  <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-base sm:text-lg font-black text-slate-900">
+                      ৫-ধাপের অর্ডার ওয়ার্কফ্লো ({orders.length}টি অর্ডার)
+                    </h3>
+                    <p className="text-[11px] text-slate-500">
+                      নতুন অর্ডার প্রথমে <strong>১. ইনটেক</strong>-এ আসে → ক্লিক করলেই <strong>২. রেডি</strong> → <strong>৩. রাইডার</strong> → <strong>৪. ডেলিভারড</strong> ধাপে চলে যাবে (যেকোনো ধাপ থেকে <strong>৫. ক্যান্সেল</strong> করা যাবে)।
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 text-[11px] font-bold">
+                      <button
+                        type="button"
+                        onClick={() => setWorkflowViewMode('folder')}
+                        className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
+                          workflowViewMode === 'folder' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600'
+                        }`}
+                      >
+                        📂 ধাপ অনুযায়ী
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setWorkflowViewMode('board')}
+                        className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
+                          workflowViewMode === 'board' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600'
+                        }`}
+                      >
+                        📊 ৫-কলাম বোর্ড
+                      </button>
+                    </div>
                     <button
                       type="button"
                       onClick={() => loadMerchantData(merchant.id, merchant.phone, merchant.password)}
-                      className="text-xs font-bold text-slate-600 hover:text-emerald-700 flex items-center gap-1"
+                      className="px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-1 cursor-pointer"
                     >
                       <RefreshCw className="w-3.5 h-3.5" />
                       <span>রিফ্রেশ</span>
@@ -1311,289 +1603,128 @@ export default function MerchantPortalPage() {
                     <button
                       type="button"
                       onClick={downloadReportCsv}
-                      className="text-xs font-bold text-emerald-700 hover:underline flex items-center gap-1"
+                      className="px-2.5 py-1.5 rounded-xl border border-emerald-200 bg-emerald-50 text-xs font-bold text-emerald-800 hover:bg-emerald-100 flex items-center gap-1 cursor-pointer"
                     >
                       <Download className="w-3.5 h-3.5" />
-                      <span>CSV ডাউনলোড</span>
+                      <span>CSV</span>
                     </button>
                   </div>
                 </div>
 
-                {/* 5-Stage Filter Tabs */}
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs font-bold">
-                  {[
-                    { id: 'all', label: `সব অর্ডার (${orders.length})` },
-                    { id: 'intake', label: `১. ইনটেক (${orders.filter((o) => normalizeStage(o.status) === 'intake').length})` },
-                    { id: 'ready', label: `২. রেডি (${orders.filter((o) => normalizeStage(o.status) === 'ready').length})` },
-                    { id: 'with_rider', label: `৩. রাইডারের কাছে (${orders.filter((o) => normalizeStage(o.status) === 'with_rider').length})` },
-                    { id: 'delivered', label: `৪. ডেলিভারড (${orders.filter((o) => normalizeStage(o.status) === 'delivered').length})` },
-                    { id: 'cancelled', label: `৫. ক্যান্সেল (${orders.filter((o) => normalizeStage(o.status) === 'cancelled').length})` },
-                  ].map((f) => (
-                    <button
-                      key={f.id}
-                      type="button"
-                      onClick={() => setOrderFilterStatus(f.id)}
-                      className={`px-3 py-1.5 rounded-xl shrink-0 border transition ${
-                        orderFilterStatus === f.id
-                          ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                          : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-                      }`}
-                    >
-                      {f.label}
-                    </button>
-                  ))}
-                </div>
-
-                {orders.filter((o) => orderFilterStatus === 'all' || normalizeStage(o.status) === orderFilterStatus).length === 0 ? (
-                  <div className="bg-white rounded-3xl p-10 border border-slate-200 text-center space-y-2">
-                    <p className="text-sm font-bold text-slate-700">এই ধাপে কোনো অর্ডার পাওয়া যায়নি</p>
-                    <p className="text-xs text-slate-400">গ্রাহকরা আপনার পণ্য অর্ডার করলেই এখানে ৫-ধাপের প্রসেস দেখাবে।</p>
+                {/* Live Transition Feedback Banner */}
+                {workflowNotice && (
+                  <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-950 text-xs font-bold flex flex-wrap items-center justify-between gap-2 shadow-xs animate-in fade-in duration-150">
+                    <span className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>{workflowNotice.text}</span>
+                    </span>
+                    <div className="flex items-center gap-2">
+                      {workflowViewMode === 'folder' && workflowNotice.targetStage !== orderFilterStatus && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setOrderFilterStatus(workflowNotice.targetStage);
+                            setWorkflowNotice(null);
+                          }}
+                          className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[11px] font-black transition cursor-pointer"
+                        >
+                          ওই ধাপ খুলুন ➔
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setWorkflowNotice(null)}
+                        className="p-1 text-emerald-700 hover:bg-emerald-100 rounded-lg"
+                        aria-label="Close notice"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    {orders
-                      .filter((o) => orderFilterStatus === 'all' || normalizeStage(o.status) === orderFilterStatus)
-                      .map((ord) => {
-                        const myItems = merchant.id === 'admin-master'
-                          ? (ord.items || [])
-                          : (ord.items || []).filter((it) => it.merchantId === merchant.id);
-                        const mySubtotal = myItems.reduce((acc, it) => acc + it.unitPrice * it.quantity, 0);
-                        const stage = normalizeStage(ord.status);
-                        const activeStepNum =
-                          stage === 'intake' ? 1 : stage === 'ready' ? 2 : stage === 'with_rider' ? 3 : stage === 'delivered' ? 4 : 0;
+                )}
 
+                {workflowViewMode === 'folder' ? (
+                  <>
+                    {/* 5 Separated Stage Boxes Selector */}
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+                      {WORKFLOW_STAGES.map((st) => {
+                        const count = orders.filter((o) => normalizeStage(o.status) === st.id).length;
+                        const active = orderFilterStatus === st.id;
                         return (
-                          <div
-                            key={ord.orderId}
-                            className={`bg-white rounded-3xl p-5 border-2 shadow-xs space-y-4 ${
-                              stage === 'cancelled'
-                                ? 'border-red-200 bg-red-50/20'
-                                : stage === 'delivered'
-                                ? 'border-emerald-200'
-                                : 'border-slate-200'
+                          <button
+                            key={st.id}
+                            type="button"
+                            onClick={() => setOrderFilterStatus(st.id)}
+                            className={`p-3 rounded-2xl border-2 text-left transition cursor-pointer flex flex-col justify-between gap-1 ${
+                              active ? st.activeRing : 'border-slate-200 bg-white hover:border-slate-300'
                             }`}
                           >
-                            {/* Header: Order ID + Direct Contact with Customer */}
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
-                              <div>
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <span className="font-black text-sm text-slate-900 font-mono">{ord.orderId}</span>
-                                  <span
-                                    className={`text-[11px] font-black px-2.5 py-0.5 rounded-full border ${
-                                      stage === 'delivered'
-                                        ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                                        : stage === 'with_rider'
-                                        ? 'bg-indigo-100 text-indigo-800 border-indigo-300'
-                                        : stage === 'ready'
-                                        ? 'bg-blue-100 text-blue-800 border-blue-300'
-                                        : stage === 'cancelled'
-                                        ? 'bg-red-100 text-red-800 border-red-300'
-                                        : 'bg-amber-100 text-amber-800 border-amber-300'
-                                    }`}
-                                  >
-                                    {stage === 'intake'
-                                      ? '১. ইনটেক (নতুন অর্ডার)'
-                                      : stage === 'ready'
-                                      ? '২. অর্ডার রেডি হলো'
-                                      : stage === 'with_rider'
-                                      ? '৩. রাইডারকে দিলাম'
-                                      : stage === 'delivered'
-                                      ? '৪. ডেলিভারড সম্পন্ন'
-                                      : '৫. ক্যান্সেল করা হয়েছে'}
-                                  </span>
-                                </div>
-                                <p className="text-xs text-slate-500 mt-1">
-                                  {new Date(ord.createdAt).toLocaleString('bn-BD')} • গ্রাহক: <strong className="text-slate-800">{ord.customerName}</strong> ({ord.phone})
-                                </p>
-                              </div>
-
-                              {/* Direct Customer Contact Buttons */}
-                              <div className="flex flex-wrap items-center gap-2">
-                                <a
-                                  href={`tel:${ord.phone}`}
-                                  className="bg-slate-100 hover:bg-slate-200 text-slate-800 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition"
-                                >
-                                  <Phone className="w-3.5 h-3.5 text-slate-600" />
-                                  <span>কল করুন</span>
-                                </a>
-                                <a
-                                  href={`https://wa.me/88${ord.phone.replace(/\D/g, '')}?text=${encodeURIComponent(
-                                    `আসসালামু আলাইকুম ${ord.customerName}! আমি RU Insiders এর ${merchant.shopName} থেকে আপনার অর্ডার #${ord.orderId} নিয়ে সরাসরি যোগাযোগ করছি।`
-                                  )}`}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 shadow-xs transition"
-                                >
-                                  <MessageCircle className="w-3.5 h-3.5" />
-                                  <span>কাস্টমারকে WhatsApp</span>
-                                </a>
-                              </div>
+                            <div className="flex items-center justify-between gap-1">
+                              <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${st.badgeColor}`}>
+                                ধাপ {st.step}
+                              </span>
+                              <span className="text-base sm:text-lg font-black text-slate-900">{count}</span>
                             </div>
-
-                            {/* Visual 4-Step Progress Pipeline */}
-                            {stage !== 'cancelled' ? (
-                              <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
-                                {[
-                                  { num: 1, title: '১. ইনটেক', sub: 'অর্ডার জমা' },
-                                  { num: 2, title: '২. রেডি', sub: 'প্যাকিং শেষ' },
-                                  { num: 3, title: '৩. রাইডার', sub: 'ডেলিভারিতে' },
-                                  { num: 4, title: '৪. ডেলিভারড', sub: 'সম্পন্ন' },
-                                ].map((step) => {
-                                  const done = activeStepNum >= step.num;
-                                  const current = activeStepNum === step.num;
-                                  return (
-                                    <div
-                                      key={step.num}
-                                      className={`p-2 rounded-xl border text-center transition ${
-                                        current
-                                          ? 'bg-emerald-50 border-emerald-500 ring-1 ring-emerald-400'
-                                          : done
-                                          ? 'bg-emerald-50/50 border-emerald-200 text-emerald-800'
-                                          : 'bg-slate-50 border-slate-200 opacity-50'
-                                      }`}
-                                    >
-                                      <p className="text-[11px] font-black text-slate-900">{step.title}</p>
-                                      <p className="text-[10px] text-slate-500 hidden sm:block">{step.sub}</p>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            ) : (
-                              <div className="p-3 bg-red-50 border border-red-200 rounded-2xl text-xs text-red-900 flex items-center justify-between gap-2">
-                                <span className="font-bold flex items-center gap-1.5">
-                                  <XCircle className="w-4 h-4 text-red-600 shrink-0" />
-                                  অর্ডার বাতিল করা হয়েছে {ord.cancellationReason ? `— কারণ: ${ord.cancellationReason}` : ''}
-                                </span>
-                                {ord.cancelledBy && <span className="text-[10px] text-red-700 font-bold">বাতিলকারী: {ord.cancelledBy}</span>}
-                              </div>
-                            )}
-
-                            {/* Steadfast / Assigned Rider Badge */}
-                            {(ord.steadfastTrackingCode || ord.assignedRiderName) && (
-                              <div className="p-3 rounded-2xl bg-indigo-50/70 border border-indigo-200 flex flex-wrap items-center justify-between gap-2 text-xs">
-                                {ord.steadfastTrackingCode ? (
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <Truck className="w-4 h-4 text-indigo-600" />
-                                    <span className="font-bold text-indigo-950">
-                                      Steadfast ট্র্যাকিং: <span className="font-mono bg-white px-2 py-0.5 rounded border border-indigo-200">{ord.steadfastTrackingCode}</span>
-                                    </span>
-                                    {ord.steadfastStatus && (
-                                      <span className="text-[11px] bg-indigo-200 text-indigo-900 px-2 py-0.5 rounded-full font-bold">
-                                        {ord.steadfastStatus}
-                                      </span>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <span className="font-bold text-indigo-950">
-                                    🛵 রাইডার: {ord.assignedRiderName} {ord.assignedRiderPhone ? `(${ord.assignedRiderPhone})` : ''}
-                                  </span>
-                                )}
-
-                                {ord.steadfastTrackingCode && (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleCheckSteadfastStatus(ord)}
-                                    disabled={steadfastLoadingOrder === ord.orderId}
-                                    className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[11px] font-bold transition disabled:opacity-50"
-                                  >
-                                    {steadfastLoadingOrder === ord.orderId ? 'চেক হচ্ছে...' : '🔄 স্ট্যাটাস সিঙ্ক'}
-                                  </button>
-                                )}
-                              </div>
-                            )}
-
-                            {/* Items List */}
-                            <div className="space-y-2 bg-slate-50/80 p-3 rounded-2xl border border-slate-100">
-                              {myItems.map((item, idx) => (
-                                <div key={idx} className="flex items-center justify-between text-xs font-bold text-slate-800">
-                                  <div className="flex items-center gap-2">
-                                    <img src={item.image} alt="Item" className="w-8 h-8 rounded-lg object-cover border" />
-                                    <span>
-                                      {item.nameBn} ({item.selectedOption}) × {item.quantity}
-                                    </span>
-                                  </div>
-                                  <span>৳{item.unitPrice * item.quantity}</span>
-                                </div>
-                              ))}
-                              <div className="pt-2 border-t border-slate-200/70 flex flex-wrap items-center justify-between gap-2 text-xs">
-                                <span className="text-slate-600">
-                                  ঠিকানা: <strong>{ord.addressDetails}</strong> ({ord.deliveryZone === 'campus' ? 'রাবি ক্যাম্পাস' : ord.deliveryZone === 'city' ? 'রাজশাহী সিটি' : 'সারাদেশ কুরিয়ার'})
-                                </span>
-                                <span className="font-black text-emerald-700 text-sm">মোট বকেয়া (COD): ৳{ord.totalAmount} (আপনার অংশ: ৳{mySubtotal})</span>
-                              </div>
+                            <div>
+                              <p className="text-xs sm:text-sm font-black text-slate-900">{st.title}</p>
+                              <p className="text-[10px] text-slate-500 line-clamp-1">{st.subtitle}</p>
                             </div>
-
-                            {/* Workflow Action Controls */}
-                            <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-                              <div className="flex flex-wrap items-center gap-2">
-                                {stage === 'intake' && (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleUpdateOrderStatus(ord.orderId, 'ready', { note: 'মার্চেন্ট পণ্য প্রস্তুত করেছে' })}
-                                    className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-xs transition cursor-pointer"
-                                  >
-                                    <CheckCircle2 className="w-3.5 h-3.5" />
-                                    <span>২. অর্ডার রেডি হলো ✓</span>
-                                  </button>
-                                )}
-
-                                {(stage === 'intake' || stage === 'ready') && (
-                                  <>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setDispatchModalOrder(ord);
-                                        setRiderNameInput('');
-                                        setRiderPhoneInput('');
-                                      }}
-                                      className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-xs transition cursor-pointer"
-                                    >
-                                      <Send className="w-3.5 h-3.5" />
-                                      <span>🛵 রাইডার WhatsApp গ্রুপে দিন</span>
-                                    </button>
-
-                                    <button
-                                      type="button"
-                                      onClick={() => handleSendToSteadfast(ord)}
-                                      disabled={steadfastLoadingOrder === ord.orderId}
-                                      className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-xs transition cursor-pointer disabled:opacity-50"
-                                    >
-                                      <Truck className="w-3.5 h-3.5" />
-                                      <span>{steadfastLoadingOrder === ord.orderId ? 'পাঠানো হচ্ছে...' : '📦 Steadfast API-তে পাঠান'}</span>
-                                    </button>
-                                  </>
-                                )}
-
-                                {stage === 'with_rider' && (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleUpdateOrderStatus(ord.orderId, 'delivered', { note: 'ডেলিভারি সম্পন্ন হয়েছে' })}
-                                    className="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-xs transition cursor-pointer"
-                                  >
-                                    <CheckCircle2 className="w-3.5 h-3.5" />
-                                    <span>✅ ৪. ডেলিভারড সম্পন্ন মার্ক করুন</span>
-                                  </button>
-                                )}
-                              </div>
-
-                              {/* 5. Cancel Button — Available from ANY stage (except already cancelled) */}
-                              {stage !== 'cancelled' && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setCancelModalOrder(ord);
-                                    setCancelReasonInput('');
-                                  }}
-                                  className="px-3 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-bold flex items-center gap-1 transition cursor-pointer"
-                                >
-                                  <XCircle className="w-3.5 h-3.5" />
-                                  <span>৫. অর্ডার ক্যান্সেল</span>
-                                </button>
-                              )}
-                            </div>
-                          </div>
+                          </button>
                         );
                       })}
+                    </div>
+
+                    {/* Active Stage Bucket Contents */}
+                    {(() => {
+                      const activeStageObj = WORKFLOW_STAGES.find((s) => s.id === orderFilterStatus) || WORKFLOW_STAGES[0];
+                      const bucketOrders = orders.filter((o) => normalizeStage(o.status) === activeStageObj.id);
+                      return bucketOrders.length === 0 ? (
+                        <div className="bg-white rounded-3xl p-10 border border-slate-200 text-center space-y-2">
+                          <p className="text-sm font-bold text-slate-700">
+                            &ldquo;{activeStageObj.step}. {activeStageObj.title}&rdquo; ধাপে কোনো অর্ডার নেই
+                          </p>
+                          <p className="text-xs text-slate-400">
+                            গ্রাহকরা আপনার পণ্য অর্ডার করলে প্রথমে ইনটেকে আসবে এবং ধাপে ধাপে এখানে স্থানান্তর হবে।
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {bucketOrders.map((ord) => renderOrderCard(ord, false))}
+                        </div>
+                      );
+                    })()}
+                  </>
+                ) : (
+                  /* 5-Column Side-by-Side Kanban Pipeline Board */
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3 items-start">
+                    {WORKFLOW_STAGES.map((st) => {
+                      const stageOrders = orders.filter((o) => normalizeStage(o.status) === st.id);
+                      return (
+                        <div
+                          key={st.id}
+                          className="rounded-3xl bg-slate-100/70 border border-slate-200 overflow-hidden flex flex-col min-h-[260px]"
+                        >
+                          <div className={`px-3.5 py-2.5 border-b flex items-center justify-between ${st.colHeaderBg}`}>
+                            <div>
+                              <p className="text-xs font-black">
+                                {st.step}. {st.title}
+                              </p>
+                              <p className="text-[10px] opacity-80">{st.subtitle}</p>
+                            </div>
+                            <span className="px-2 py-0.5 rounded-full bg-white text-slate-900 font-black text-xs shadow-xs">
+                              {stageOrders.length}
+                            </span>
+                          </div>
+                          <div className="p-2.5 space-y-2.5 flex-1">
+                            {stageOrders.length === 0 ? (
+                              <p className="text-[11px] text-slate-400 text-center py-8 font-bold">খালি</p>
+                            ) : (
+                              stageOrders.map((ord) => renderOrderCard(ord, true))
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>

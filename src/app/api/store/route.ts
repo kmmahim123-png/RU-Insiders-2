@@ -392,9 +392,19 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ ok: false, error: 'দোকানের নাম, মালিকের নাম, মোবাইল নম্বর ও পাসওয়ার্ড আবশ্যক।' }, { status: 400 });
       }
 
-      const existingPhone = (db.merchants || []).find((m) => m.phone.replace(/\D/g, '') === phone.replace(/\D/g, ''));
+      const cleanPhone = phone.replace(/\D/g, '');
+      const existingPhone = (db.merchants || []).find((m) => m.phone.replace(/\D/g, '') === cleanPhone);
       if (existingPhone) {
         return NextResponse.json({ ok: false, error: 'এই মোবাইল নম্বর দিয়ে ইতিমধ্যে একটি মার্চেন্ট অ্যাকাউন্ট তৈরি করা আছে।' }, { status: 400 });
+      }
+
+      const trimmedPass = merchantPassword.trim();
+      const duplicatePass =
+        trimmedPass === db.settings.superAdminPassword ||
+        trimmedPass === db.settings.productManagerPassword ||
+        (db.merchants || []).some((m) => m.password === trimmedPass);
+      if (duplicatePass) {
+        return NextResponse.json({ ok: false, error: 'নিরাপত্তার জন্য একটি স্বতন্ত্র (আলাদা) গোপন পাসওয়ার্ড ব্যবহার করুন।' }, { status: 400 });
       }
 
       const newMerchant = {
@@ -461,13 +471,27 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      const foundMerchant = (db.merchants || []).find(
-        (m) =>
-          ((m.phone && cleanId.replace(/\D/g, '') && m.phone.replace(/\D/g, '').includes(cleanId.replace(/\D/g, ''))) ||
-            (m.email && cleanId && m.email.toLowerCase() === cleanId) ||
-            (cleanId === '' && m.password === cleanP)) &&
-          m.password === cleanP
-      );
+      const cleanDigits = cleanId.replace(/\D/g, '');
+      const foundMerchant = (db.merchants || []).find((m) => {
+        if (m.password !== cleanP) return false;
+        const mDigits = (m.phone || '').replace(/\D/g, '');
+        const mEmail = (m.email || '').trim().toLowerCase();
+        // Require exact identifier match when provided (allow empty identifier only if password matches uniquely)
+        if (!cleanId) {
+          const samePassCount = (db.merchants || []).filter((x) => x.password === cleanP).length;
+          return samePassCount === 1;
+        }
+        if (cleanDigits.length >= 10 && (mDigits === cleanDigits || mDigits.endsWith(cleanDigits.slice(-10)))) {
+          return true;
+        }
+        if (mEmail && mEmail === cleanId) {
+          return true;
+        }
+        if ((m.shopName || '').trim().toLowerCase() === cleanId) {
+          return true;
+        }
+        return false;
+      });
 
       if (!foundMerchant) {
         return NextResponse.json({ ok: false, error: 'মার্চেন্ট ফোন/ইমেইল অথবা পাসওয়ার্ড সঠিক নয়।' }, { status: 401 });
@@ -486,18 +510,25 @@ export async function POST(req: NextRequest) {
 
     // 8. Role-Protected Actions
     const cleanPass = (password || '').trim();
+    const targetMerchantId = (body.merchantId || payload?.merchantId || '').trim();
     const isSuper = cleanPass === db.settings.superAdminPassword;
     const isProdMgr = cleanPass === db.settings.productManagerPassword;
     const matchedClub = db.clubs.find((c) => c.password === cleanPass);
-    const matchedMerchant = (db.merchants || []).find((m) => m.password === cleanPass);
+    const matchedMerchant = targetMerchantId
+      ? (db.merchants || []).find((m) => m.id === targetMerchantId && m.password === cleanPass)
+      : (db.merchants || []).find((m) => m.password === cleanPass);
 
     // Product & Order Manager + Super Admin + Merchant Actions
     if (action === 'SAVE_PRODUCT' && (isSuper || isProdMgr || matchedMerchant)) {
       const prod = { ...payload.product };
       const sendPush = Boolean(payload.sendChromePush);
 
-      // If called by merchant, enforce their ownership
+      // If called by merchant, strictly enforce their ownership (never overwrite another merchant's product)
       if (matchedMerchant) {
+        const existingTarget = db.products.find((p) => p.id === prod.id);
+        if (existingTarget && existingTarget.merchantId !== matchedMerchant.id) {
+          return NextResponse.json({ ok: false, error: 'অন্য মার্চেন্টের পণ্য সম্পাদনার অনুমতি নেই।' }, { status: 403 });
+        }
         prod.merchantId = matchedMerchant.id;
         prod.merchantName = matchedMerchant.shopName;
         if (matchedMerchant.facebookPixelId && !prod.facebookPixelId) {
