@@ -226,7 +226,7 @@ export default function NavbarAndAuth() {
       const perm = await Notification.requestPermission();
       setPushPerm(perm);
       if (perm === 'granted') {
-        new Notification('RU Insiders নোটিফিকেশন চালু হয়েছে!', {
+        new Notification('Rabian নোটিফিকেশন চালু হয়েছে!', {
           body: 'নতুন অফার, খেজুরের গুড়, হুডি ও ক্যাম্পাস নিউজ সবার আগে Chrome-এ পাবেন।',
           icon: '/logo.png',
         });
@@ -327,11 +327,11 @@ export default function NavbarAndAuth() {
           }}
         >
           <div className="relative flex items-center justify-center w-36 h-36 rounded-full border-4 border-amber-400 shadow-[0_0_50px_rgba(250,204,21,0.6)] bg-white/10 backdrop-blur-md p-3 overflow-hidden">
-            <img src="/logo-center.png" alt="RU Insiders" className="absolute inset-0 w-full h-full object-contain p-2" />
+            <img src="/logo-center.png" alt="Rabian" className="absolute inset-0 w-full h-full object-contain p-2" />
             <img src="/logo-hands.png" alt="Rotating Hands" className="absolute inset-0 w-full h-full object-contain animate-[spin_12s_linear_infinite]" />
           </div>
           <h1 className="mt-6 text-3xl sm:text-5xl font-extrabold tracking-tight drop-shadow-lg">
-            RU Insiders
+            Rabian
           </h1>
           <p className="mt-2 text-sm sm:text-base text-amber-300 font-medium text-center px-4">
             রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল মার্চেন্ডাইজ স্টোর ও ক্যাম্পাস পোর্টাল
@@ -362,7 +362,7 @@ export default function NavbarAndAuth() {
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold text-lg sm:text-xl text-slate-900 tracking-tight group-hover:text-blue-700 transition">
-                  RU Insiders
+                  Rabian
                 </span>
                 <span className="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold px-2 py-0.5 rounded-full">
                   অফিশিয়াল
@@ -562,7 +562,7 @@ export default function NavbarAndAuth() {
 
             {/* WhatsApp Direct Chat Button (Desktop & Tablet) */}
             <a
-              href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('আসসালামু আলাইকুম! আমি RU Insiders থেকে সরাসরি যোগাযোগ করছি।')}`}
+              href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('আসসালামু আলাইকুম! আমি Rabian থেকে সরাসরি যোগাযোগ করছি।')}`}
               target="_blank"
               rel="noreferrer"
               className="hidden md:flex h-11 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white items-center gap-1.5 text-xs font-bold shadow-sm transition shrink-0"
@@ -739,7 +739,7 @@ export default function NavbarAndAuth() {
               </div>
 
               <a
-                href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('আসসালামু আলাইকুম! আমি RU Insiders থেকে সাহায্য চাই।')}`}
+                href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('আসসালামু আলাইকুম! আমি Rabian থেকে সাহায্য চাই।')}`}
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center justify-center gap-1.5 p-2 rounded-xl bg-emerald-600 text-white text-xs font-bold shadow-xs"

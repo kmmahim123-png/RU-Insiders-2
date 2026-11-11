@@ -26,12 +26,13 @@ export function buildSystemInstruction(db: DatabaseSchema, extraSystemHint?: str
   const deliveryCharges = db.settings.deliveryCharges;
   const today = new Date().toISOString().slice(0, 10);
   const docs = (aiConfig?.trainingDocs || [])
-    .map((d, i) => `${i + 1}. [${d.category}] ${d.title}: ${d.content}`)
+    .map((d, i) => `${i + 1}. [${d.category}] ${d.title}: ${d.content}`.replace(/RU\s*Insiders?/gi, 'Rabian'))
     .join('\n');
 
-  const basePersona =
+  const rawPersona =
     aiConfig?.systemPersonaBn ||
-    'তুমি RU Insiders (রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল মার্চেন্ডাইজ স্টোর ও ক্যাম্পাস পোর্টাল)-এর স্মার্ট AI অ্যাসিস্ট্যান্ট। সবসময় ভদ্র ও স্পষ্ট বাংলায় উত্তর দাও।';
+    'তুমি Rabian (রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল মার্চেন্ডাইজ স্টোর ও ক্যাম্পাস পোর্টাল)-এর স্মার্ট AI অ্যাসিস্ট্যান্ট। সবসময় ভদ্র ও স্পষ্ট বাংলায় উত্তর দাও।';
+  const basePersona = rawPersona.replace(/RU\s*Insiders?/gi, 'Rabian');
 
   const liveSnapshot = buildLiveWebsiteSnapshot(db);
 
@@ -119,7 +120,7 @@ export async function runOpenRouterSlot(
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
         'HTTP-Referer': 'https://ruinsider-2.vercel.app',
-        'X-Title': 'RU Insiders AI & MCP Agent',
+        'X-Title': 'Rabian AI & MCP Agent',
       },
       body: JSON.stringify(reqBody),
       signal: AbortSignal.timeout(20000),

@@ -160,7 +160,7 @@ export default function ProductDetailPage() {
   };
 
   const whatsappMessage = encodeURIComponent(
-    `আসসালামু আলাইকুম! আমি RU Insiders-এর "${product.nameBn}" সম্পর্কে জানতে চাই।\nঅপশন: ${currentOptionLabel}\nমূল্য: ৳${currentPrice}\nলিংক: ${typeof window !== 'undefined' ? window.location.href : ''}`
+    `আসসালামু আলাইকুম! আমি Rabian-এর "${product.nameBn}" সম্পর্কে জানতে চাই।\nঅপশন: ${currentOptionLabel}\nমূল্য: ৳${currentPrice}\nলিংক: ${typeof window !== 'undefined' ? window.location.href : ''}`
   );
 
   return (

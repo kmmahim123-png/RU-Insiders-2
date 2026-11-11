@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { action = 'CHAT', messages, password, slot, apiKey, model, customerAccessToken } = body;
+    const { action = 'CHAT', messages, password, slot, apiKey, model, customerAccessToken, clientMode } = body;
     const db = await readDb();
     const aiCfg = db.settings.aiConfig;
 
@@ -50,7 +50,17 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 2. Public Visitor Chat with Automatic 3-Slot Failover + MCP Tools + Optional Jev Pre-Router
+    // 2. App-Only Visitor Chat with Automatic 3-Slot Failover + MCP Tools + Optional Jev Pre-Router
+    if (clientMode !== 'app') {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: 'AI অ্যাসিস্ট্যান্ট শুধুমাত্র Rabian অ্যাপে ব্যবহার করা যাবে (ওয়েবসাইটে নয়)।',
+        },
+        { status: 403 }
+      );
+    }
+
     const chatMessages: AiChatMessage[] = Array.isArray(messages) ? messages.slice(-10) : [];
     if (chatMessages.length === 0) {
       return NextResponse.json({ ok: false, error: 'মেসেজ লিখুন।' }, { status: 400 });

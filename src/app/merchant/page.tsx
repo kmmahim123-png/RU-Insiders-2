@@ -597,7 +597,7 @@ export default function MerchantPortalPage() {
         : ord.deliveryZone === 'city'
         ? 'রাজশাহী সিটি'
         : 'কুরিয়ার/সারাদেশ';
-    return `🛵 *নতুন ডেলিভারি রিকোয়েস্ট!* (RU Insiders)\n📦 অর্ডার আইডি: #${ord.orderId}\n🏪 মার্চেন্ট শপ: ${merchant?.shopName}\n📍 পিকআপ ঠিকানা: ${merchant?.address || 'রাবি ক্যাম্পাস'} (${merchant?.phone})\n---------------------------------\n👤 কাস্টমারের নাম: ${ord.customerName}\n📞 কাস্টমার ফোন: ${ord.phone}\n📍 ডেলিভারি ঠিকানা: ${ord.addressDetails} (${zoneBn})\n💰 কালেকশন / COD: ৳${ord.totalAmount}\n🛍️ পণ্যসমূহ:\n${itemsText}\n---------------------------------\nযেই রাইডার ভাই ডেলিভারি করতে আগ্রহী, দ্রুত এই মেসেজে রিপ্লাই দিয়ে অর্ডারটি পিকআপ করুন!`;
+    return `🛵 *নতুন ডেলিভারি রিকোয়েস্ট!* (Rabian)\n📦 অর্ডার আইডি: #${ord.orderId}\n🏪 মার্চেন্ট শপ: ${merchant?.shopName}\n📍 পিকআপ ঠিকানা: ${merchant?.address || 'রাবি ক্যাম্পাস'} (${merchant?.phone})\n---------------------------------\n👤 কাস্টমারের নাম: ${ord.customerName}\n📞 কাস্টমার ফোন: ${ord.phone}\n📍 ডেলিভারি ঠিকানা: ${ord.addressDetails} (${zoneBn})\n💰 কালেকশন / COD: ৳${ord.totalAmount}\n🛍️ পণ্যসমূহ:\n${itemsText}\n---------------------------------\nযেই রাইডার ভাই ডেলিভারি করতে আগ্রহী, দ্রুত এই মেসেজে রিপ্লাই দিয়ে অর্ডারটি পিকআপ করুন!`;
   };
 
   // 6. Delete Product
@@ -847,7 +847,7 @@ export default function MerchantPortalPage() {
             </a>
             <a
               href={`https://wa.me/88${ord.phone.replace(/\D/g, '')}?text=${encodeURIComponent(
-                `আসসালামু আলাইকুম ${ord.customerName}! আমি RU Insiders এর ${merchant.shopName} থেকে আপনার অর্ডার #${ord.orderId} নিয়ে যোগাযোগ করছি।`
+                `আসসালামু আলাইকুম ${ord.customerName}! আমি Rabian-এর ${merchant.shopName} থেকে আপনার অর্ডার #${ord.orderId} নিয়ে যোগাযোগ করছি।`
               )}`}
               target="_blank"
               rel="noreferrer"
@@ -1018,7 +1018,7 @@ export default function MerchantPortalPage() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-black uppercase tracking-wider bg-amber-400 text-slate-950 px-2 py-0.5 rounded-md">
-                  RU INSIDERS ভেন্ডর হাব
+                  RABIAN ভেন্ডর হাব
                 </span>
                 <span className="text-xs text-emerald-200 hidden sm:inline">• মাল্টি-ভেন্ডর সেলার ড্যাশবোর্ড</span>
               </div>

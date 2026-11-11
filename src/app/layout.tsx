@@ -8,8 +8,8 @@ import MetaPixelTracker from '@/components/MetaPixelTracker';
 import RuAiAssistant from '@/components/RuAiAssistant';
 
 export const metadata: Metadata = {
-  title: 'RU Insiders | রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল মার্চেন্ডাইজ স্টোর ও ক্যাম্পাস পোর্টাল',
-  description: 'রাবি অফিসিয়াল উইন্টার হুডি, টি-শার্ট, খাঁটি খেজুরের গুড়, ৩-ধাপের ইন্টারঅ্যাক্টিভ ম্যাপ, নিউজ ও ক্যাম্পাস পোর্টাল।',
+  title: 'Rabian | রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল মার্চেন্ডাইজ স্টোর ও ক্যাম্পাস পোর্টাল',
+  description: 'Rabian — রাবি অফিসিয়াল উইন্টার হুডি, টি-শার্ট, খাঁটি খেজুরের গুড়, ৩-ধাপের ইন্টারঅ্যাক্টিভ ম্যাপ, নিউজ, রক্তদান ও ক্যাম্পাস পোর্টাল।',
   manifest: '/manifest.json',
   icons: {
     icon: '/logo.png',

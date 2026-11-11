@@ -1,5 +1,5 @@
-// RU Insiders Offline Service Worker
-const CACHE_NAME = 'ru-insiders-cache-v2';
+// Rabian Offline Service Worker
+const CACHE_NAME = 'rabian-cache-v3';
 const OFFLINE_URLS = [
   '/',
   '/map',
@@ -7,9 +7,12 @@ const OFFLINE_URLS = [
   '/merchant',
   '/track',
   '/academics',
+  '/blood',
   '/clubs',
   '/inside-ru',
   '/logo.png',
+  '/logo-center.png',
+  '/logo-hands.png',
   '/manifest.json',
   '/merchant-manifest.json'
 ];

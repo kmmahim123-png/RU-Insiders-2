@@ -13,11 +13,11 @@ export async function generateMetadata({
 
     if (!product) {
       return {
-        title: 'পণ্য বিস্তারিত | RU Insiders শপ',
+        title: 'পণ্য বিস্তারিত | Rabian শপ',
       };
     }
 
-    const title = `${product.nameBn} — মাত্র ৳${product.price} | RU Insiders`;
+    const title = `${product.nameBn} — মাত্র ৳${product.price} | Rabian`;
     const description =
       product.shortSummary ||
       `${product.nameBn} — রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল শপে অর্ডার করুন (১০০% ক্যাশ অন ডেলিভারি)।`;
@@ -41,7 +41,7 @@ export async function generateMetadata({
     };
   } catch {
     return {
-      title: 'পণ্য বিস্তারিত | RU Insiders শপ',
+      title: 'পণ্য বিস্তারিত | Rabian শপ',
     };
   }
 }

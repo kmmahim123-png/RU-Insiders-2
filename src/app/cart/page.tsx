@@ -202,7 +202,7 @@ export default function CartAndCheckoutPage() {
         : 'সারা বাংলাদেশ কুরিয়ার';
 
     const orderSummaryText = encodeURIComponent(
-      `আসসালামু আলাইকুম RU Insiders!\nআমি একটি নতুন অর্ডার প্লেস করেছি।\n\nঅর্ডার আইডি: ${placedOrder.orderId}\nগ্রাহক: ${placedOrder.customerName}\nমোবাইল: ${placedOrder.phone}\nডেলিভারি এলাকা: ${zoneNameBn}\nঠিকানা: ${placedOrder.addressDetails}\n\nপণ্য তালিকা:\n${placedOrder.items
+      `আসসালামু আলাইকুম Rabian!\nআমি একটি নতুন অর্ডার প্লেস করেছি।\n\nঅর্ডার আইডি: ${placedOrder.orderId}\nগ্রাহক: ${placedOrder.customerName}\nমোবাইল: ${placedOrder.phone}\nডেলিভারি এলাকা: ${zoneNameBn}\nঠিকানা: ${placedOrder.addressDetails}\n\nপণ্য তালিকা:\n${placedOrder.items
         .map((i) => `• ${i.nameBn} (${i.selectedOption}) x${i.quantity} = ৳${i.unitPrice * i.quantity}`)
         .join('\n')}\n\nসাবটোটাল: ৳${placedOrder.subtotal}\nডেলিভারি চার্জ: ৳${placedOrder.deliveryCharge}\nসর্বমোট বকেয়া (COD): ৳${placedOrder.totalAmount}\n\nদয়া করে অর্ডারটি কনফার্ম করুন। ধন্যবাদ!`
     );
@@ -249,9 +249,9 @@ export default function CartAndCheckoutPage() {
           {/* Cash Memo Header */}
           <div className="flex flex-wrap items-center justify-between pb-6 border-b-2 border-slate-200 gap-4">
             <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="Logo" className="w-12 h-12 rounded-full border border-amber-400" />
+              <img src="/logo.png" alt="Rabian Logo" className="w-12 h-12 rounded-full border border-amber-400" />
               <div>
-                <h2 className="text-xl font-black text-slate-900 tracking-tight">RU Insiders</h2>
+                <h2 className="text-xl font-black text-slate-900 tracking-tight">Rabian</h2>
                 <p className="text-xs text-slate-500 font-semibold">
                   রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল মার্চেন্ডাইজ স্টোর
                 </p>

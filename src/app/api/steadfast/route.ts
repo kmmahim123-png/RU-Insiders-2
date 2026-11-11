@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
         recipient_phone: order.phone,
         recipient_address: `${order.addressDetails} (${order.deliveryZone === 'campus' ? 'মতিহার ক্যাম্পাস' : order.deliveryZone === 'city' ? 'রাজশাহী সিটি' : 'সারা বাংলাদেশ'})`,
         cod_amount: order.totalAmount,
-        note: note || `RU Insiders Order ${order.orderId} - ${order.items.map((i) => `${i.nameBn} (${i.selectedOption}) x${i.quantity}`).join(', ')}`,
+        note: note || `Rabian Order ${order.orderId} - ${order.items.map((i) => `${i.nameBn} (${i.selectedOption}) x${i.quantity}`).join(', ')}`,
       };
 
       try {

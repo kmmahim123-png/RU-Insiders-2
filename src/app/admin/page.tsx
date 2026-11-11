@@ -340,7 +340,7 @@ export default function AdminPage() {
     title: '',
     category: 'ব্রেকিং নিউজ',
     authorName: 'সেন্ট্রাল ডেস্ক',
-    department: 'RU Insiders অফিশিয়াল',
+    department: 'Rabian অফিশিয়াল',
     whatsappNumber: '8801700000000',
     images: ['/campus/paris-road-rain.jpg'],
     summary: '',
@@ -359,7 +359,7 @@ export default function AdminPage() {
       title: '',
       category: isBreaking ? 'ব্রেকিং নিউজ' : 'ক্যাম্পাস নিউজ',
       authorName: 'সেন্ট্রাল ডেস্ক',
-      department: 'RU Insiders',
+      department: 'Rabian',
       whatsappNumber: settings?.whatsappNumber || '8801700000000',
       images: ['/campus/paris-road-rain.jpg'],
       summary: '',
@@ -1377,7 +1377,7 @@ export default function AdminPage() {
               </span>
               <h1 className="text-lg sm:text-xl font-black text-slate-900">{roleTitle}</h1>
             </div>
-            <p className="text-xs text-slate-500">RU Insiders অফিসিয়াল কন্ট্রোল প্যানেল</p>
+            <p className="text-xs text-slate-500">Rabian অফিসিয়াল কন্ট্রোল প্যানেল</p>
           </div>
         </div>
 
@@ -1894,7 +1894,7 @@ export default function AdminPage() {
                       o.status,
                       o.createdAt,
                     ]);
-                    exportToCsv(`ru-insiders-orders-${Date.now()}.csv`, [header, ...rows]);
+                    exportToCsv(`rabian-orders-${Date.now()}.csv`, [header, ...rows]);
                   }}
                   className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5"
                 >

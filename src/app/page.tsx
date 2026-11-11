@@ -6,30 +6,31 @@ import {
   ShoppingBag,
   MapPin,
   Trophy,
-  Newspaper,
   GraduationCap,
   Sparkles,
   ArrowRight,
   Truck,
   ShieldCheck,
   MessageCircle,
-  CheckCircle2,
-  Users,
   Compass,
   Bot,
   HeartPulse,
+  PlusCircle,
 } from 'lucide-react';
-import { Product, InsideRuArticle } from '@/types';
+import { Product, InsideRuArticle, BloodDonor } from '@/types';
+import { calculateDonorEligibility } from '@/lib/bloodUtils';
+import { useIsInstalledApp } from '@/lib/appRuntime';
 import CampusStories from '@/components/CampusStories';
 import ProductCard from '@/components/ProductCard';
 import SeasonalParticles from '@/components/SeasonalParticles';
 import CampusAudioPlayer from '@/components/CampusAudioPlayer';
-import BloodBankSection from '@/components/BloodBankSection';
 
 export default function HomePage() {
+  const isInstalledApp = useIsInstalledApp();
   const [products, setProducts] = useState<Product[]>([]);
   const [articles, setArticles] = useState<InsideRuArticle[]>([]);
   const [whatsappNumber, setWhatsappNumber] = useState('8801700000000');
+  const [bloodStats, setBloodStats] = useState({ total: 0, eligible: 0 });
 
   useEffect(() => {
     fetch('/api/store')
@@ -38,6 +39,11 @@ export default function HomePage() {
         if (data.products) setProducts(data.products);
         if (data.articles) setArticles(data.articles);
         if (data.settings?.whatsappNumber) setWhatsappNumber(data.settings.whatsappNumber);
+        if (Array.isArray(data.bloodDonors)) {
+          const donors = data.bloodDonors as BloodDonor[];
+          const eligible = donors.filter((d) => calculateDonorEligibility(d).isEligible).length;
+          setBloodStats({ total: donors.length, eligible });
+        }
       })
       .catch(() => {});
   }, []);
@@ -60,7 +66,7 @@ export default function HomePage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20 w-full space-y-6">
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-extrabold text-amber-300 shadow-sm">
             <Sparkles className="w-4 h-4 text-amber-400" />
-            <span>মতিহারের গৌরব • রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল প্ল্যাটফর্ম</span>
+            <span>Rabian • মতিহারের গৌরব • রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল প্ল্যাটফর্ম</span>
           </div>
 
           <div className="max-w-3xl space-y-3 sm:space-y-4">
@@ -76,42 +82,60 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 sm:gap-3 pt-2">
             <Link
               href="/shop"
-              className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs sm:text-sm shadow-xl flex items-center justify-center gap-2 transition"
+              className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs sm:text-sm shadow-xl flex items-center justify-center gap-2 emil-press"
             >
               <ShoppingBag className="w-4 h-4 text-slate-950" />
               <span>শপ কালেকশন দেখুন →</span>
             </Link>
 
             <Link
+              href="/clubs"
+              className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-black text-xs sm:text-sm shadow-xl border border-teal-400/40 flex items-center justify-center gap-2 emil-press"
+            >
+              <Trophy className="w-4 h-4 text-amber-300" />
+              <span>ক্লাব ও মেম্বারশিপ</span>
+            </Link>
+
+            <Link
+              href="/academics"
+              className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs sm:text-sm shadow-xl border border-blue-400/40 flex items-center justify-center gap-2 emil-press"
+            >
+              <GraduationCap className="w-4 h-4 text-amber-200" />
+              <span>বিভাগ, স্যার ও অ্যালামনাই</span>
+            </Link>
+
+            <Link
+              href="/blood"
+              className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 emil-press shadow-xl border border-rose-400/40"
+            >
+              <HeartPulse className="w-4 h-4 text-amber-200" />
+              <span>রক্তদান ও ডোনার খুঁজুন</span>
+            </Link>
+
+            <Link
               href="/map"
-              className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-extrabold text-xs sm:text-sm backdrop-blur-md flex items-center justify-center gap-2 transition"
+              className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-extrabold text-xs sm:text-sm backdrop-blur-md flex items-center justify-center gap-2 emil-press"
             >
               <Compass className="w-4 h-4 text-emerald-400" />
               <span>ইন্টারঅ্যাক্টিভ ম্যাপ (ভ্রমণ সনদ)</span>
             </Link>
 
-            <button
-              type="button"
-              onClick={() => window.dispatchEvent(new Event('ru_open_ai'))}
-              className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-xl border border-indigo-400/40 cursor-pointer"
-            >
-              <Bot className="w-4 h-4 text-amber-300" />
-              <span>AI দিয়ে জানুন ও অর্ডার করুন</span>
-            </button>
+            {isInstalledApp && (
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new Event('ru_open_ai'))}
+                className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 emil-press shadow-xl border border-indigo-400/40 cursor-pointer"
+              >
+                <Bot className="w-4 h-4 text-amber-300" />
+                <span>AI দিয়ে জানুন ও অর্ডার করুন</span>
+              </button>
+            )}
 
             <a
-              href="#blood-bank-section"
-              className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-xl border border-rose-400/40"
-            >
-              <HeartPulse className="w-4 h-4 text-amber-200" />
-              <span>রক্তদান ও ডোনার খুঁজুন</span>
-            </a>
-
-            <a
-              href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('আসসালামু আলাইকুম! আমি RU Insiders থেকে অর্ডার বা তথ্য জানতে চাই।')}`}
+              href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('আসসালামু আলাইকুম! আমি Rabian থেকে অর্ডার বা তথ্য জানতে চাই।')}`}
               target="_blank"
               rel="noreferrer"
-              className="px-5 py-3 sm:py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-sm"
+              className="px-5 py-3 sm:py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 emil-press shadow-sm"
             >
               <MessageCircle className="w-4 h-4" />
               <span>WhatsApp মেসেজ</span>
@@ -308,73 +332,110 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 5.5 LIVE HOMEPAGE BLOOD BANK SECTION (ডোনার খুঁজুন, কল দিন ও ফর্ম পূরণ করুন) */}
+      {/* 5.5 COMPACT BLOOD BANK BANNER (পূর্ণাঙ্গ তালিকা /blood পেজে — হোমপেজ পরিচ্ছন্ন রাখতে) */}
       <section id="blood-bank-section" className="max-w-7xl mx-auto px-3 sm:px-6 scroll-mt-24">
-        <BloodBankSection isHomepage />
+        <div className="bg-gradient-to-r from-rose-700 via-red-700 to-rose-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="space-y-2.5 max-w-2xl">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 bg-white/15 border border-white/25 px-3 py-1 rounded-full text-xs font-black">
+                <HeartPulse className="w-4 h-4 text-amber-300" />
+                <span>Rabian লাইভ ব্লাড ব্যাংক • ৯০-দিন (৩ মাস) স্বয়ংক্রিয় যাচাই</span>
+              </span>
+              {bloodStats.total > 0 && (
+                <span className="inline-flex items-center gap-1 bg-emerald-500/25 border border-emerald-300/40 px-2.5 py-1 rounded-full text-xs font-bold">
+                  ✓ এখনই প্রস্তুত: {bloodStats.eligible} জন (মোট {bloodStats.total})
+                </span>
+              )}
+            </div>
+            <h2 className="text-xl sm:text-3xl font-black tracking-tight">
+              জরুরি রক্তের প্রয়োজনে গ্রুপ সিলেক্ট করে সরাসরি দাতাকে কল দিন বা ডোনার ফর্ম পূরণ করুন
+            </h2>
+            <p className="text-xs sm:text-sm text-rose-100 leading-relaxed">
+              সকল রক্তদাতার তালিকা, গ্রুপ ফিল্টার (A+, B+, O+...), ৯০ দিনের হিসাব ও নিবন্ধন ফর্ম আলাদা ব্লাড ব্যাংক পেজে সুন্দরভাবে সাজানো আছে।
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 shrink-0">
+            <Link
+              href="/blood"
+              className="px-5 py-3.5 rounded-2xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg emil-press"
+            >
+              <HeartPulse className="w-4 h-4" />
+              <span>রক্তদাতা খুঁজুন ও তালিকা দেখুন →</span>
+            </Link>
+            <Link
+              href="/blood"
+              className="px-4 py-3.5 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/30 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 emil-press"
+            >
+              <PlusCircle className="w-4 h-4" />
+              <span>আমি রক্ত দিতে চাই</span>
+            </Link>
+          </div>
+        </div>
       </section>
 
       {/* 6. ACADEMICS, BLOOD BANK & CLUBS PROMO BAR */}
       <section className="max-w-7xl mx-auto px-3 sm:px-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-4 flex flex-col justify-between">
+          <Link
+            href="/academics"
+            className="bg-white rounded-3xl border border-slate-200 hover:border-blue-400 p-6 sm:p-8 shadow-sm hover:shadow-md hover:-translate-y-0.5 emil-card space-y-4 flex flex-col justify-between group"
+          >
             <div className="space-y-2">
               <span className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
                 <GraduationCap className="w-5 h-5" />
               </span>
-              <h3 className="text-xl font-black text-slate-900">
+              <h3 className="text-xl font-black text-slate-900 group-hover:text-blue-700 transition-colors duration-200">
                 ৫৯টি বিভাগ, স্যার ও অ্যালামনাই ডিরেক্টরি
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                 বিভাগের সম্মানিত শিক্ষকমণ্ডলীর তথ্য, বিসিএস, টেক ও আন্তর্জাতিক স্কলারশিপের ক্যারিয়ার গাইডলাইন এবং প্রাক্তন রাবিয়ানদের প্রোফাইল দেখুন।
               </p>
             </div>
-            <Link
-              href="/academics"
-              className="text-xs sm:text-sm font-extrabold text-blue-700 hover:underline flex items-center gap-1"
-            >
+            <span className="text-xs sm:text-sm font-extrabold text-blue-700 group-hover:underline flex items-center gap-1">
               <span>বিভাগ, স্যার ও অ্যালামনাই দেখুন →</span>
-            </Link>
-          </div>
+            </span>
+          </Link>
 
-          <div className="bg-gradient-to-br from-rose-50 via-white to-red-50 rounded-3xl border border-rose-200 p-6 sm:p-8 shadow-sm space-y-4 flex flex-col justify-between">
+          <Link
+            href="/blood"
+            className="bg-gradient-to-br from-rose-50 via-white to-red-50 rounded-3xl border border-rose-200 hover:border-rose-400 p-6 sm:p-8 shadow-sm hover:shadow-md hover:-translate-y-0.5 emil-card space-y-4 flex flex-col justify-between group"
+          >
             <div className="space-y-2">
               <span className="w-10 h-10 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center font-bold">
                 <HeartPulse className="w-5 h-5" />
               </span>
-              <h3 className="text-xl font-black text-slate-900">
+              <h3 className="text-xl font-black text-slate-900 group-hover:text-rose-700 transition-colors duration-200">
                 রাবি ব্লাড ব্যাংক ও ৯০+ দিন এভেইলেবল ডোনার
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                শেষ রক্তদানের তারিখ থেকে স্বয়ংক্রিয়ভাবে ৯০ দিন (৩ মাস) হিসাব করে এভেইলেবল রক্তদাতার সংখ্যা ও সরাসরি ফোন নম্বর পান—AI চ্যাটেও খুঁজতে পারবেন।
+                শেষ রক্তদানের তারিখ থেকে স্বয়ংক্রিয়ভাবে ৯০ দিন (৩ মাস) হিসাব করে এভেইলেবল রক্তদাতার সংখ্যা ও সরাসরি ফোন নম্বর পান—Rabian অ্যাপে AI চ্যাটেও খুঁজতে পারবেন।
               </p>
             </div>
-            <Link
-              href="/blood"
-              className="text-xs sm:text-sm font-extrabold text-rose-700 hover:underline flex items-center gap-1"
-            >
+            <span className="text-xs sm:text-sm font-extrabold text-rose-700 group-hover:underline flex items-center gap-1">
               <span>রক্তদাতা খুঁজুন বা নিবন্ধন করুন →</span>
-            </Link>
-          </div>
+            </span>
+          </Link>
 
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-4 flex flex-col justify-between">
+          <Link
+            href="/clubs"
+            className="bg-white rounded-3xl border border-slate-200 hover:border-emerald-400 p-6 sm:p-8 shadow-sm hover:shadow-md hover:-translate-y-0.5 emil-card space-y-4 flex flex-col justify-between group"
+          >
             <div className="space-y-2">
               <span className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
                 <Trophy className="w-5 h-5" />
               </span>
-              <h3 className="text-xl font-black text-slate-900">
+              <h3 className="text-xl font-black text-slate-900 group-hover:text-emerald-700 transition-colors duration-200">
                 ক্যাম্পাসের শীর্ষ ক্লাবসমূহে ১-ক্লিক মেম্বারশিপ
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                 RUCS, RUDEU, RUSC, RUPS, বাঁধন, রোভার স্কাউট, রঙ্গভূমি ও IEEE RU-তে মেম্বারশিপের জন্য এখনই সরাসরি অনলাইনে আবেদন জমা দিন।
               </p>
             </div>
-            <Link
-              href="/clubs"
-              className="text-xs sm:text-sm font-extrabold text-emerald-700 hover:underline flex items-center gap-1"
-            >
+            <span className="text-xs sm:text-sm font-extrabold text-emerald-700 group-hover:underline flex items-center gap-1">
               <span>ক্লাব ও আবেদন ফর্ম দেখুন →</span>
-            </Link>
-          </div>
+            </span>
+          </Link>
         </div>
       </section>
 
@@ -384,8 +445,8 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-3 md:col-span-1">
               <div className="flex items-center gap-2.5">
-                <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-full border border-amber-400" />
-                <span className="font-black text-lg text-white">RU Insiders</span>
+                <img src="/logo.png" alt="Rabian Logo" className="w-10 h-10 rounded-full border border-amber-400" />
+                <span className="font-black text-lg text-white">Rabian</span>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed">
                 রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল মার্চেন্ডাইজ স্টোর ও ক্যাম্পাস পোর্টাল। মতিহার ক্যাম্পাসে ফ্রি ডেলিভারি ও সারা বাংলাদেশে ক্যাশ অন ডেলিভারি।
@@ -430,7 +491,7 @@ export default function HomePage() {
           </div>
 
           <div className="pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2">
-            <p>© {new Date().getFullYear()} RU Insiders. সর্বস্বত্ব সংরক্ষিত।</p>
+            <p>© {new Date().getFullYear()} Rabian. সর্বস্বত্ব সংরক্ষিত।</p>
             <p>রাজশাহী বিশ্ববিদ্যালয় • মতিহার, রাজশাহী-৬২০৫</p>
           </div>
         </div>

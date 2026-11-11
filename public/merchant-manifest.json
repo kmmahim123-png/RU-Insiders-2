@@ -1,7 +1,7 @@
 {
-  "name": "RU Merchant Hub | মার্চেন্ট ও সেলার ড্যাশবোর্ড অ্যাপ",
-  "short_name": "RU Merchant",
-  "description": "RU Insiders মার্চেন্ট ড্যাশবোর্ড — প্রোডাক্ট, ৫-ধাপের অর্ডার প্রসেস, রাইডার হোয়াটসঅ্যাপ গ্রুপ, Steadfast Courier API ও মেটা পিক্সেল নিয়ন্ত্রণ।",
+  "name": "Rabian Merchant Hub | মার্চেন্ট ও সেলার ড্যাশবোর্ড অ্যাপ",
+  "short_name": "Rabian Merchant",
+  "description": "Rabian মার্চেন্ট ড্যাশবোর্ড — প্রোডাক্ট, ৫-ধাপের অর্ডার প্রসেস, রাইডার হোয়াটসঅ্যাপ গ্রুপ, Steadfast Courier API ও মেটা পিক্সেল নিয়ন্ত্রণ।",
   "start_url": "/merchant",
   "scope": "/merchant",
   "display": "standalone",

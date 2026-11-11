@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { BloodDonor } from '@/types';
 import { calculateDonorEligibility } from '@/lib/bloodUtils';
+import { useIsInstalledApp } from '@/lib/appRuntime';
 import {
   HeartPulse,
   Phone,
@@ -27,6 +28,7 @@ interface BloodBankSectionProps {
 
 /** Interactive Blood Bank & Donor Registry shared cleanly between Homepage (/) and /blood page. */
 export default function BloodBankSection({ isHomepage = false }: BloodBankSectionProps) {
+  const isInstalledApp = useIsInstalledApp();
   const [donors, setDonors] = useState<BloodDonor[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedGroup, setSelectedGroup] = useState<string>('all');
@@ -182,8 +184,8 @@ export default function BloodBankSection({ isHomepage = false }: BloodBankSectio
               রক্তের গ্রুপ সিলেক্ট করে এভেইলেবল দাতাকে কল দিন বা ডোনার ফর্ম পূরণ করুন
             </h2>
             <p className="text-xs sm:text-sm text-rose-100 leading-relaxed">
-              নিচের গ্রুপগুলোতে ক্লিক করলেই এই মুহূর্তে রক্ত দিতে প্রস্তুত দাতাদের নাম, আবাসনের স্থান ও সরাসরি কল নম্বর দেখা যাবে। আমাদের{' '}
-              <strong>AI অ্যাসিস্ট্যান্টও</strong> সরাসরি এই ডাটাবেজ থেকে উত্তর দেয়।
+              নিচের গ্রুপগুলোতে ক্লিক করলেই এই মুহূর্তে রক্ত দিতে প্রস্তুত দাতাদের নাম, আবাসনের স্থান ও সরাসরি কল নম্বর দেখা যাবে — আমাদের{' '}
+              <strong>Rabian অ্যাপের AI অ্যাসিস্ট্যান্টও</strong> সরাসরি এই ডাটাবেজ থেকে উত্তর দেয়।
             </p>
           </div>
 
@@ -215,14 +217,16 @@ export default function BloodBankSection({ isHomepage = false }: BloodBankSectio
           <span className="bg-white/10 border border-white/20 px-3 py-1.5 rounded-xl">
             মোট নিবন্ধিত ডোনার: {donors.length} জন
           </span>
-          <button
-            type="button"
-            onClick={() => window.dispatchEvent(new Event('ru_open_ai'))}
-            className="bg-white text-rose-800 px-3 py-1.5 rounded-xl flex items-center gap-1.5 hover:bg-rose-50 emil-press cursor-pointer"
-          >
-            <Bot className="w-3.5 h-3.5" />
-            <span>AI-কে জিজ্ঞেস করুন (৯০-দিন + নম্বর)</span>
-          </button>
+          {isInstalledApp && (
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event('ru_open_ai'))}
+              className="bg-white text-rose-800 px-3 py-1.5 rounded-xl flex items-center gap-1.5 hover:bg-rose-50 emil-press cursor-pointer"
+            >
+              <Bot className="w-3.5 h-3.5" />
+              <span>AI-কে জিজ্ঞেস করুন (৯০-দিন + নম্বর)</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -389,7 +393,7 @@ export default function BloodBankSection({ isHomepage = false }: BloodBankSectio
                   </a>
                   <a
                     href={`https://wa.me/88${donor.phone.replace(/\D/g, '')}?text=${encodeURIComponent(
-                      `আসসালামু আলাইকুম ${donor.nameBn}! RU Insiders ব্লাড ব্যাংক থেকে জরুরি ${donor.bloodGroup} রক্তের জন্য যোগাযোগ করছি।`
+                      `আসসালামু আলাইকুম ${donor.nameBn}! Rabian ব্লাড ব্যাংক থেকে জরুরি ${donor.bloodGroup} রক্তের জন্য যোগাযোগ করছি।`
                     )}`}
                     target="_blank"
                     rel="noreferrer"

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { supabaseBrowser } from '@/lib/supabaseBrowser';
+import { useIsInstalledApp } from '@/lib/appRuntime';
 import {
   Bot,
   Send,
@@ -44,12 +45,13 @@ const QUICK_PROMPTS = [
 
 export default function RuAiAssistant({ mode = 'floating' }: { mode?: 'embedded' | 'floating' }) {
   const pathname = usePathname();
+  const isInstalledApp = useIsInstalledApp();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<AiChatMsg[]>([
     {
       role: 'assistant',
       content:
-        'আসসালামু আলাইকুম! আমি RU Insiders স্মার্ট AI ও MCP অ্যাসিস্ট্যান্ট 🤖\n\nআমি সরাসরি লাইভ ডেটাবেজ থেকে:\n• যেকোনো গ্রুপের রক্তদাতা (৯০ দিনের হিসাব ও ফোন নম্বর)\n• ডিপার্টমেন্ট ও স্যারদের কন্টাক্ট তথ্য\n• শপের পণ্য সার্চ ও কথা বলেই অর্ডার প্লেস (`১. ইনটেক`)\n• ক্যাম্পাস ম্যাপ ও অর্ডার ট্র্যাকিং — সবকিছু করে দিতে পারি! কী জানতে বা অর্ডার করতে চান বলুন।',
+        'আসসালামু আলাইকুম! আমি Rabian স্মার্ট AI ও MCP অ্যাসিস্ট্যান্ট 🤖\n\nআমি সরাসরি লাইভ ডেটাবেজ থেকে:\n• যেকোনো গ্রুপের রক্তদাতা (৯০ দিনের হিসাব ও ফোন নম্বর)\n• ডিপার্টমেন্ট ও স্যারদের কন্টাক্ট তথ্য\n• শপের পণ্য সার্চ ও কথা বলেই অর্ডার প্লেস (`১. ইনটেক`)\n• ক্যাম্পাস ম্যাপ ও অর্ডার ট্র্যাকিং — সবকিছু করে দিতে পারি! কী জানতে বা অর্ডার করতে চান বলুন।',
     },
   ]);
   const [input, setInput] = useState('');
@@ -84,6 +86,7 @@ export default function RuAiAssistant({ mode = 'floating' }: { mode?: 'embedded'
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'CHAT',
+          clientMode: isInstalledApp ? 'app' : 'website',
           messages: nextHistory.map((m) => ({ role: m.role, content: m.content })),
           customerAccessToken,
         }),
@@ -140,7 +143,7 @@ export default function RuAiAssistant({ mode = 'floating' }: { mode?: 'embedded'
           </div>
           <div className="min-w-0">
             <h3 className="text-sm font-black truncate flex items-center gap-1.5">
-              <span>RU Insider AI অ্যাসিস্ট্যান্ট</span>
+              <span>Rabian AI অ্যাসিস্ট্যান্ট</span>
               <span className="text-[10px] bg-emerald-500/30 border border-emerald-400/40 text-emerald-200 px-1.5 py-0.2 rounded font-bold">
                 MCP
               </span>
@@ -269,8 +272,8 @@ export default function RuAiAssistant({ mode = 'floating' }: { mode?: 'embedded'
     return renderChatBox(true);
   }
 
-  // Do not duplicate floating widget on Admin / Merchant panels
-  if (pathname?.startsWith('/admin') || pathname?.startsWith('/merchant')) {
+  // Do not duplicate floating widget on Admin / Merchant panels, and restrict customer AI strictly to Installed App
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/merchant') || !isInstalledApp) {
     return null;
   }
 
@@ -285,7 +288,7 @@ export default function RuAiAssistant({ mode = 'floating' }: { mode?: 'embedded'
           type="button"
           onClick={() => setIsOpen(true)}
           className="group flex items-center gap-2 pl-3.5 pr-4 py-3 rounded-full bg-gradient-to-r from-emerald-800 to-teal-700 hover:from-emerald-700 hover:to-teal-600 text-white shadow-xl border-2 border-amber-400/70 transition-[transform,box-shadow,background-color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:scale-[1.03] active:scale-[0.97] cursor-pointer"
-          title="RU Insider AI অ্যাসিস্ট্যান্ট"
+          title="Rabian AI অ্যাসিস্ট্যান্ট"
         >
           <span className="w-7 h-7 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center">
             <Bot className="w-4 h-4" />

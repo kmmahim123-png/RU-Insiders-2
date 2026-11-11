@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
       `${p.price} BDT`,
       `${origin}/shop/${p.id}`,
       p.images?.[0]?.startsWith('http') ? p.images[0] : `${origin}${p.images?.[0] || '/logo.png'}`,
-      escapeCsv(p.merchantName || 'RU Insiders'),
+      escapeCsv(p.merchantName || 'Rabian'),
       escapeCsv(p.category || 'Apparel & Accessories'),
     ]);
     const csvBody = '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
       status: 200,
       headers: {
         'Content-Type': 'text/csv; charset=utf-8',
-        'Content-Disposition': `attachment; filename="ru-insiders-${merchantParam || 'all'}-catalog.csv"`,
+        'Content-Disposition': `attachment; filename="rabian-${merchantParam || 'all'}-catalog.csv"`,
         'Cache-Control': 'no-cache, no-store, must-revalidate',
       },
     });
@@ -575,7 +575,7 @@ export async function POST(req: NextRequest) {
           isAdminSession: true,
           merchant: {
             id: 'admin-master',
-            shopName: 'RU Insiders মাস্টার মার্চেন্ট',
+            shopName: 'Rabian মাস্টার মার্চেন্ট',
             ownerName: 'সুপার অ্যাডমিন',
             phone: db.settings.whatsappNumber || '8801700000000',
             email: '',
@@ -721,7 +721,7 @@ export async function POST(req: NextRequest) {
           ok: true,
           merchant: {
             id: 'admin-master',
-            shopName: 'RU Insiders মাস্টার মার্চেন্ট',
+            shopName: 'Rabian মাস্টার মার্চেন্ট',
             ownerName: 'সুপার অ্যাডমিন',
             phone: updatedDb.settings.whatsappNumber || '8801700000000',
             email: '',

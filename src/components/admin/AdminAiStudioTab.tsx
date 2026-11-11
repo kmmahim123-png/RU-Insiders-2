@@ -136,7 +136,7 @@ const DEFAULT_AI_CONFIG: AiConfig = {
   geminiEnabled: true,
   priorityOrder: ['openrouter1', 'openrouter2', 'gemini'],
   systemPersonaBn:
-    'তুমি RU Insiders (রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল মার্চেন্ডাইজ স্টোর ও ক্যাম্পাস পোর্টাল)-এর স্মার্ট ও আন্তরিক বাংলা AI অ্যাসিস্ট্যান্ট। সবসময় সহজ, নির্ভুল বাংলায় উত্তর দাও।',
+    'তুমি Rabian (রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল মার্চেন্ডাইজ স্টোর ও ক্যাম্পাস পোর্টাল)-এর স্মার্ট ও আন্তরিক বাংলা AI অ্যাসিস্ট্যান্ট। সবসময় সহজ, নির্ভুল বাংলায় উত্তর দাও।',
   trainingDocs: [],
   mcpEnabled: true,
   mcpSecretToken: '',
@@ -144,7 +144,7 @@ const DEFAULT_AI_CONFIG: AiConfig = {
   decisionRouterModel: 'typesafe/jev-1.14',
   decisionRouterApiKey: '',
   whatsappAgentEnabled: true,
-  whatsappVerifyToken: 'ru-insiders-wa-verify',
+  whatsappVerifyToken: 'rabian-wa-verify',
   whatsappPhoneNumberId: '',
   whatsappAccessToken: '',
   whatsappBridgeSecret: '',
@@ -1007,9 +1007,9 @@ export default function AdminAiStudioTab({
             <label className="text-xs font-bold text-slate-700">Webhook Verify Token (Meta-তে বসাতে হবে)</label>
             <input
               type="text"
-              value={config.whatsappVerifyToken ?? 'ru-insiders-wa-verify'}
+              value={config.whatsappVerifyToken ?? 'rabian-wa-verify'}
               onChange={(e) => setConfig({ ...config, whatsappVerifyToken: e.target.value })}
-              placeholder="ru-insiders-wa-verify"
+              placeholder="rabian-wa-verify"
               className="w-full text-xs font-mono font-bold text-slate-900 bg-white border border-slate-200 rounded-xl p-2.5"
             />
           </div>

@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { Download, WifiOff, X, Sparkles } from 'lucide-react';
+import { Download, WifiOff, X } from 'lucide-react';
+import { useIsInstalledApp } from '@/lib/appRuntime';
 
 export default function PWAInstallBanner() {
   const pathname = usePathname();
+  const isInstalledApp = useIsInstalledApp();
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showBanner, setShowBanner] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
@@ -76,17 +78,17 @@ export default function PWAInstallBanner() {
         </div>
       )}
 
-      {/* Install Floating Pill (Hidden on Merchant/Admin portals so they keep dedicated apps) */}
-      {showBanner && deferredPrompt && !isMerchantOrAdminRoute && (
+      {/* Install Floating Pill (Hidden on Merchant/Admin portals or when already inside installed App) */}
+      {showBanner && deferredPrompt && !isMerchantOrAdminRoute && !isInstalledApp && (
         <div className="fixed bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900/95 backdrop-blur-md text-white p-2.5 sm:p-3 pr-4 rounded-2xl shadow-2xl border border-amber-400/30 flex items-center gap-3 animate-slideUp max-w-[92vw]">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-400 to-amber-500 text-slate-950 flex items-center justify-center font-black shrink-0 shadow-sm">
             <Download className="w-5 h-5" />
           </div>
 
           <div className="text-left min-w-0">
-            <h5 className="text-xs font-black truncate">RU Insiders অ্যাপ ইনস্টল করুন</h5>
+            <h5 className="text-xs font-black truncate">Rabian অ্যাপ ইনস্টল করুন</h5>
             <p className="text-[10px] text-slate-400 truncate">
-              দ্রুত ব্রাউজিং ও ইন্টারনেট ছাড়াই ম্যাপ দেখার সুবিধা
+              AI অ্যাসিস্ট্যান্ট, দ্রুত ব্রাউজিং ও অফলাইন ম্যাপ — শুধু অ্যাপে
             </p>
           </div>
 

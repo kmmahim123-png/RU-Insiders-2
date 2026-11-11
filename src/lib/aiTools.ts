@@ -56,7 +56,7 @@ export const AI_MCP_TOOLS: AiToolDefinition[] = [
   {
     name: 'search_products',
     description:
-      'Search RU Insiders merchandise store products (hoodies, t-shirts, jerseys, khejurer gur, naru, souvenirs, merchant products) with live prices, sizes/weight options, stock status, and merchant names.',
+      'Search Rabian merchandise store products (hoodies, t-shirts, jerseys, khejurer gur, naru, souvenirs, merchant products) with live prices, sizes/weight options, stock status, and merchant names.',
     parameters: {
       type: 'object',
       properties: {
@@ -307,7 +307,7 @@ export async function executeAiTool(name: string, rawArgs: any = {}): Promise<an
           sizes: p.sizes || [],
           weightOptions: p.weightOptions || [],
           inStock: p.inStock,
-          merchantName: p.merchantName || 'RU Insiders',
+          merchantName: p.merchantName || 'Rabian',
           shortSummary: p.shortSummary,
           link: `/shop/${p.id}`,
         })),

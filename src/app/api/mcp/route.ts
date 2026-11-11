@@ -18,7 +18,7 @@ export async function GET() {
     enabled: mcpEnabled,
     requiresToken: Boolean(db.settings.aiConfig?.mcpSecretToken),
     serverInfo: {
-      name: 'ru-insiders-mcp-server',
+      name: 'rabian-mcp-server',
       version: '1.0.0',
     },
     tools: AI_MCP_TOOLS.map((t) => ({ name: t.name, description: t.description })),
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
         id,
         result: {
           protocolVersion: '2024-11-05',
-          serverInfo: { name: 'ru-insiders-mcp-server', version: '1.0.0' },
+          serverInfo: { name: 'rabian-mcp-server', version: '1.0.0' },
           capabilities: {
             tools: { listChanged: false },
             resources: { subscribe: false, listChanged: false },
@@ -110,12 +110,12 @@ export async function POST(req: NextRequest) {
         result: {
           resources: [
             {
-              uri: 'ru-insiders://knowledge/all',
-              name: 'RU Insiders Admin Trained Knowledge Base',
+              uri: 'rabian://knowledge/all',
+              name: 'Rabian Admin Trained Knowledge Base',
               mimeType: 'application/json',
             },
             ...docs.map((d) => ({
-              uri: `ru-insiders://training/${d.id}`,
+              uri: `rabian://training/${d.id}`,
               name: d.title,
               mimeType: 'text/plain',
             })),
@@ -127,7 +127,7 @@ export async function POST(req: NextRequest) {
     if (method === 'resources/read') {
       const uri = params?.uri || '';
       const docs = aiCfg?.trainingDocs || [];
-      if (uri === 'ru-insiders://knowledge/all') {
+      if (uri === 'rabian://knowledge/all' || uri === 'ru-insiders://knowledge/all') {
         return NextResponse.json({
           jsonrpc: '2.0',
           id,
@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
           },
         });
       }
-      const matched = docs.find((d) => `ru-insiders://training/${d.id}` === uri);
+      const matched = docs.find((d) => `rabian://training/${d.id}` === uri || `ru-insiders://training/${d.id}` === uri);
       if (matched) {
         return NextResponse.json({
           jsonrpc: '2.0',

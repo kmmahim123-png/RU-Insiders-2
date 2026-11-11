@@ -304,7 +304,7 @@ export default function InteractiveThreeMaps() {
     ctx.textAlign = 'left';
     ctx.fillStyle = '#facc15';
     ctx.font = 'bold 16px sans-serif';
-    ctx.fillText('🏛️ RU INSIDERS • OFFICIAL TOURISM & HERITAGE CITATION', 60, 85);
+    ctx.fillText('🏛️ RABIAN • OFFICIAL TOURISM & HERITAGE CITATION', 60, 85);
 
     ctx.fillStyle = '#ffffff';
     ctx.font = '900 34px sans-serif';
@@ -389,10 +389,10 @@ export default function InteractiveThreeMaps() {
     ctx.fillStyle = '#94a3b8';
     ctx.font = '500 13px sans-serif';
     ctx.fillText(`ইস্যু তারিখ: ${new Date().toLocaleDateString('bn-BD')}`, 60, 680);
-    ctx.fillText('ভেরিফিকেশন কোড: RU-INSD-EXPLORER-2026', 60, 705);
+    ctx.fillText('ভেরিফিকেশন কোড: RABIAN-EXPLORER-2026', 60, 705);
     ctx.fillStyle = '#10b981';
     ctx.font = 'bold 16px sans-serif';
-    ctx.fillText('RU Insiders গভর্নিং বডি ও পর্যটন কাউন্সিল', 60, 735);
+    ctx.fillText('Rabian গভর্নিং বডি ও পর্যটন কাউন্সিল', 60, 735);
 
     // =========================================================================
     // RIGHT COLUMN: EMBEDDED LIVE VECTOR WATER MAP (x: 670 to 1140, y: 65 to 735)

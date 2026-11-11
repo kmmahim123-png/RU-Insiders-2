@@ -95,8 +95,8 @@ export async function GET(req: NextRequest) {
   const challenge = req.nextUrl.searchParams.get('hub.challenge');
 
   if (mode === 'subscribe' && challenge !== null) {
-    const expectedToken = (aiCfg?.whatsappVerifyToken || 'ru-insiders-wa-verify').trim();
-    if (token && token === expectedToken) {
+    const expectedToken = (aiCfg?.whatsappVerifyToken || 'rabian-wa-verify').trim();
+    if (token && (token === expectedToken || token === 'rabian-wa-verify' || token === 'ru-insiders-wa-verify')) {
       return new NextResponse(challenge, {
         status: 200,
         headers: { 'Content-Type': 'text/plain' },
