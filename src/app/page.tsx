@@ -4,29 +4,25 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   ShoppingBag,
-  MapPin,
   Trophy,
   GraduationCap,
   Sparkles,
   ArrowRight,
-  Truck,
   ShieldCheck,
   MessageCircle,
-  Compass,
-  Bot,
   HeartPulse,
   PlusCircle,
+  Compass,
 } from 'lucide-react';
 import { Product, InsideRuArticle, BloodDonor } from '@/types';
 import { calculateDonorEligibility } from '@/lib/bloodUtils';
-import { useIsInstalledApp } from '@/lib/appRuntime';
 import CampusStories from '@/components/CampusStories';
 import ProductCard from '@/components/ProductCard';
 import SeasonalParticles from '@/components/SeasonalParticles';
 import CampusAudioPlayer from '@/components/CampusAudioPlayer';
+import RabianHeroOrbit from '@/components/RabianHeroOrbit';
 
 export default function HomePage() {
-  const isInstalledApp = useIsInstalledApp();
   const [products, setProducts] = useState<Product[]>([]);
   const [articles, setArticles] = useState<InsideRuArticle[]>([]);
   const [whatsappNumber, setWhatsappNumber] = useState('8801700000000');
@@ -63,103 +59,68 @@ export default function HomePage() {
         {/* Paris Road Seasonal Ambient Particles (Leaves / Rain / Mist) */}
         <SeasonalParticles defaultMode="leaves" className="absolute inset-0" />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20 w-full space-y-6">
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-extrabold text-amber-300 shadow-sm">
-            <Sparkles className="w-4 h-4 text-amber-400" />
-            <span>Rabian • মতিহারের গৌরব • রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল প্ল্যাটফর্ম</span>
-          </div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-16 w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+          {/* Left Column: Clean Rabian Solution Identity + Focused Primary Actions */}
+          <div className="lg:col-span-7 space-y-5 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 backdrop-blur-md px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-extrabold text-amber-300 shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />
+              <span>Rabian Solution • রাজশাহী বিশ্ববিদ্যালয় স্মার্ট ক্যাম্পাস সলিউশন</span>
+            </div>
 
-          <div className="max-w-3xl space-y-3 sm:space-y-4">
-            <h1 className="text-2xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.2] sm:leading-[1.15]">
-              রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল মার্চেন্ডাইজ স্টোর ও ক্যাম্পাস পোর্টাল
-            </h1>
-            <p className="text-xs sm:text-lg text-emerald-100/90 leading-relaxed max-w-2xl font-medium">
-              প্রিমিয়াম উইন্টার হুডি, ড্রপ শোল্ডার, রাজশাহীর খাঁটি খেজুরের গুড় ও নাড়ু — মতিহার ক্যাম্পাসে ফ্রি হোম ডেলিভারি এবং সারা বাংলাদেশে ১০০% ক্যাশ অন ডেলিভারি।
-            </p>
-          </div>
+            <div className="space-y-3">
+              <h1 className="text-2xl sm:text-5xl font-black tracking-tight leading-[1.22] sm:leading-[1.15]">
+                Rabian Solution — রাবি শিক্ষার্থীদের সব ডিজিটাল সেবা এক প্ল্যাটফর্মে
+              </h1>
+              <p className="text-xs sm:text-base text-emerald-100/90 leading-relaxed max-w-xl mx-auto lg:mx-0 font-medium">
+                ক্লাব মেম্বারশিপ, ৫৯ বিভাগ ও স্যারদের ডিরেক্টরি, ৯০-দিন ব্লাড ব্যাংক, ৩-ধাপের ম্যাপ, নিউজ পোর্টাল ও ক্যাম্পাস কালেকশন — সবকিছু এখন একটি গোছানো সমাধানের ছায়ায়।
+              </p>
+            </div>
 
-          {/* Call to Actions */}
-          <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 sm:gap-3 pt-2">
-            <Link
-              href="/shop"
-              className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs sm:text-sm shadow-xl flex items-center justify-center gap-2 emil-press"
-            >
-              <ShoppingBag className="w-4 h-4 text-slate-950" />
-              <span>শপ কালেকশন দেখুন →</span>
-            </Link>
-
-            <Link
-              href="/clubs"
-              className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-black text-xs sm:text-sm shadow-xl border border-teal-400/40 flex items-center justify-center gap-2 emil-press"
-            >
-              <Trophy className="w-4 h-4 text-amber-300" />
-              <span>ক্লাব ও মেম্বারশিপ</span>
-            </Link>
-
-            <Link
-              href="/academics"
-              className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs sm:text-sm shadow-xl border border-blue-400/40 flex items-center justify-center gap-2 emil-press"
-            >
-              <GraduationCap className="w-4 h-4 text-amber-200" />
-              <span>বিভাগ, স্যার ও অ্যালামনাই</span>
-            </Link>
-
-            <Link
-              href="/blood"
-              className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 emil-press shadow-xl border border-rose-400/40"
-            >
-              <HeartPulse className="w-4 h-4 text-amber-200" />
-              <span>রক্তদান ও ডোনার খুঁজুন</span>
-            </Link>
-
-            <Link
-              href="/map"
-              className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-extrabold text-xs sm:text-sm backdrop-blur-md flex items-center justify-center gap-2 emil-press"
-            >
-              <Compass className="w-4 h-4 text-emerald-400" />
-              <span>ইন্টারঅ্যাক্টিভ ম্যাপ (ভ্রমণ সনদ)</span>
-            </Link>
-
-            {isInstalledApp && (
-              <button
-                type="button"
-                onClick={() => window.dispatchEvent(new Event('ru_open_ai'))}
-                className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 emil-press shadow-xl border border-indigo-400/40 cursor-pointer"
+            {/* Only 2 Clean Uncluttered Primary Actions (all 6 modules orbit cleanly alongside!) */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5 sm:gap-3 pt-1">
+              <Link
+                href="/shop"
+                className="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs sm:text-sm shadow-xl flex items-center justify-center gap-2 emil-press"
               >
-                <Bot className="w-4 h-4 text-amber-300" />
-                <span>AI দিয়ে জানুন ও অর্ডার করুন</span>
-              </button>
-            )}
+                <ShoppingBag className="w-4 h-4 text-slate-950" />
+                <span>সলিউশন ও শপ দেখুন →</span>
+              </Link>
 
-            <a
-              href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('আসসালামু আলাইকুম! আমি Rabian থেকে অর্ডার বা তথ্য জানতে চাই।')}`}
-              target="_blank"
-              rel="noreferrer"
-              className="px-5 py-3 sm:py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 emil-press shadow-sm"
-            >
-              <MessageCircle className="w-4 h-4" />
-              <span>WhatsApp মেসেজ</span>
-            </a>
+              <a
+                href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('আসসালামু আলাইকুম! আমি Rabian Solution থেকে সেবা বা তথ্য জানতে চাই।')}`}
+                target="_blank"
+                rel="noreferrer"
+                className="px-5 py-3 rounded-2xl bg-emerald-600/90 hover:bg-emerald-600 border border-emerald-400/40 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 emil-press shadow-md"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>WhatsApp যোগাযোগ</span>
+              </a>
+            </div>
+
+            {/* Compact Trust Pillars */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-4 border-t border-white/15 max-w-2xl mx-auto lg:mx-0 text-[11px] font-bold text-emerald-200">
+              <div className="flex items-center justify-center lg:justify-start gap-1.5">
+                <Trophy className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span>সকল ক্লাব ও আবেদন</span>
+              </div>
+              <div className="flex items-center justify-center lg:justify-start gap-1.5">
+                <GraduationCap className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span>৫৯ বিভাগ ও স্যার</span>
+              </div>
+              <div className="flex items-center justify-center lg:justify-start gap-1.5">
+                <HeartPulse className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span>৯০-দিন ব্লাড ব্যাংক</span>
+              </div>
+              <div className="flex items-center justify-center lg:justify-start gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span>১০০% ভেরিফাইড সেবা</span>
+              </div>
+            </div>
           </div>
 
-          {/* Feature Badges */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 border-t border-white/15 max-w-4xl text-xs font-bold text-emerald-200">
-            <div className="flex items-center gap-2">
-              <Truck className="w-4 h-4 text-amber-400" />
-              <span>ক্যাম্পাসে ফ্রি ডেলিভারি</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-amber-400" />
-              <span>১০০% ক্যাশ অন ডেলিভারি</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-amber-400" />
-              <span>৪২ স্পট ডিজিটাল ম্যাপ</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Trophy className="w-4 h-4 text-amber-400" />
-              <span>ভ্রমণ সনদ শেয়ার কার্ড</span>
-            </div>
+          {/* Right Column: Movable Orbital Worker-Ant Icon Showcase & Central AI Observer */}
+          <div className="lg:col-span-5 flex items-center justify-center">
+            <RabianHeroOrbit />
           </div>
         </div>
       </section>
@@ -445,11 +406,11 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-3 md:col-span-1">
               <div className="flex items-center gap-2.5">
-                <img src="/logo.png" alt="Rabian Logo" className="w-10 h-10 rounded-full border border-amber-400" />
-                <span className="font-black text-lg text-white">Rabian</span>
+                <img src="/logo.png" alt="Rabian Solution Logo" className="w-10 h-10 rounded-full border border-amber-400" />
+                <span className="font-black text-lg text-white">Rabian Solution</span>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed">
-                রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল মার্চেন্ডাইজ স্টোর ও ক্যাম্পাস পোর্টাল। মতিহার ক্যাম্পাসে ফ্রি ডেলিভারি ও সারা বাংলাদেশে ক্যাশ অন ডেলিভারি।
+                রাজশাহী বিশ্ববিদ্যালয়ের স্মার্ট ক্যাম্পাস সলিউশন — একাডেমিক, ক্লাব, ব্লাড ব্যাংক, ডিজিটাল ম্যাপ ও ক্যাম্পাস কালেকশন এক প্ল্যাটফর্মে।
               </p>
             </div>
 
@@ -491,7 +452,7 @@ export default function HomePage() {
           </div>
 
           <div className="pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2">
-            <p>© {new Date().getFullYear()} Rabian. সর্বস্বত্ব সংরক্ষিত।</p>
+            <p>© {new Date().getFullYear()} Rabian Solution. সর্বস্বত্ব সংরক্ষিত।</p>
             <p>রাজশাহী বিশ্ববিদ্যালয় • মতিহার, রাজশাহী-৬২০৫</p>
           </div>
         </div>

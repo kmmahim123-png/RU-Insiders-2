@@ -331,10 +331,10 @@ export default function NavbarAndAuth() {
             <img src="/logo-hands.png" alt="Rotating Hands" className="absolute inset-0 w-full h-full object-contain animate-[spin_12s_linear_infinite]" />
           </div>
           <h1 className="mt-6 text-3xl sm:text-5xl font-extrabold tracking-tight drop-shadow-lg">
-            Rabian
+            Rabian Solution
           </h1>
           <p className="mt-2 text-sm sm:text-base text-amber-300 font-medium text-center px-4">
-            রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল মার্চেন্ডাইজ স্টোর ও ক্যাম্পাস পোর্টাল
+            রাজশাহী বিশ্ববিদ্যালয় স্মার্ট ক্যাম্পাস সলিউশন ও ডিজিটাল হাব
           </p>
           <p className="mt-6 text-xs text-emerald-200/80 bg-white/10 px-4 py-1.5 rounded-full backdrop-blur-sm">
             প্রবেশ করতে যেকোনো স্থানে স্পর্শ করুন
@@ -361,15 +361,15 @@ export default function NavbarAndAuth() {
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-lg sm:text-xl text-slate-900 tracking-tight group-hover:text-blue-700 transition">
-                  Rabian
+                <span className="font-extrabold text-base sm:text-xl text-slate-900 tracking-tight group-hover:text-blue-700 transition whitespace-nowrap">
+                  Rabian Solution
                 </span>
-                <span className="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                <span className="hidden xs:inline-block bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0">
                   অফিশিয়াল
                 </span>
               </div>
               <p className="hidden sm:inline-block text-[11px] text-slate-500">
-                রাজশাহী বিশ্ববিদ্যালয় ক্যাম্পাস পোর্টাল
+                রাজশাহী বিশ্ববিদ্যালয় স্মার্ট ক্যাম্পাস সলিউশন
               </p>
             </div>
           </Link>

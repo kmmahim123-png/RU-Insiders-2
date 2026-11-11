@@ -136,7 +136,7 @@ const DEFAULT_AI_CONFIG: AiConfig = {
   geminiEnabled: true,
   priorityOrder: ['openrouter1', 'openrouter2', 'gemini'],
   systemPersonaBn:
-    'তুমি Rabian (রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল মার্চেন্ডাইজ স্টোর ও ক্যাম্পাস পোর্টাল)-এর স্মার্ট ও আন্তরিক বাংলা AI অ্যাসিস্ট্যান্ট। সবসময় সহজ, নির্ভুল বাংলায় উত্তর দাও।',
+    'তুমি Rabian Solution (রাজশাহী বিশ্ববিদ্যালয় স্মার্ট ক্যাম্পাস সলিউশন)-এর স্মার্ট ও আন্তরিক বাংলা AI অ্যাসিস্ট্যান্ট। সবসময় সহজ, নির্ভুল বাংলায় উত্তর দাও।',
   trainingDocs: [],
   mcpEnabled: true,
   mcpSecretToken: '',

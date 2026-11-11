@@ -31,8 +31,10 @@ export function buildSystemInstruction(db: DatabaseSchema, extraSystemHint?: str
 
   const rawPersona =
     aiConfig?.systemPersonaBn ||
-    'তুমি Rabian (রাজশাহী বিশ্ববিদ্যালয় অফিসিয়াল মার্চেন্ডাইজ স্টোর ও ক্যাম্পাস পোর্টাল)-এর স্মার্ট AI অ্যাসিস্ট্যান্ট। সবসময় ভদ্র ও স্পষ্ট বাংলায় উত্তর দাও।';
-  const basePersona = rawPersona.replace(/RU\s*Insiders?/gi, 'Rabian');
+    'তুমি Rabian Solution (রাজশাহী বিশ্ববিদ্যালয় স্মার্ট ক্যাম্পাস সলিউশন)-এর স্মার্ট AI অ্যাসিস্ট্যান্ট। সবসময় ভদ্র ও স্পষ্ট বাংলায় উত্তর দাও।';
+  const basePersona = rawPersona
+    .replace(/RU\s*Insiders?/gi, 'Rabian Solution')
+    .replace(/অফিসিয়াল মার্চেন্ডাইজ স্টোর ও ক্যাম্পাস পোর্টাল/g, 'স্মার্ট ক্যাম্পাস সলিউশন');
 
   const liveSnapshot = buildLiveWebsiteSnapshot(db);
 
