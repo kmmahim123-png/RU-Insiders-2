@@ -221,7 +221,7 @@ Single login input at `/admin` detects caller role dynamically against `db`:
 ### Frontend Pages (`src/app/`)
 | Route | Purpose |
 | :--- | :--- |
-| `/` | Homepage: Hero CTA, Breaking News ticker, Campus Stories, Audio Ambience (`CampusAudioPlayer`), Embedded AI Assistant (`#ru-ai-section`), Map teaser, News, Featured Products, Academics/Blood/Clubs cards |
+| `/` | Homepage: Hero CTA (triggers Floating AI), Breaking News ticker, Campus Stories, Audio Ambience (`CampusAudioPlayer`), Map teaser, News, Featured Products, Interactive Blood Bank (`#blood-bank-section`), Academics/Blood/Clubs cards |
 | `/shop` & `/shop/[id]` | Product catalog, multi-variant / weight selectors, merchant badges, cart/checkout triggers |
 | `/cart` | Cart review, zone selector (`campus` ৳0, `city` ৳40, `nationwide` ৳100), COD checkout (`CREATE_ORDER`), digital cash memo |
 | `/track` | Order tracking by `RUI-...` Order ID or phone number (`TRACK_ORDER`) |

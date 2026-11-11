@@ -24,7 +24,6 @@ import CampusStories from '@/components/CampusStories';
 import ProductCard from '@/components/ProductCard';
 import SeasonalParticles from '@/components/SeasonalParticles';
 import CampusAudioPlayer from '@/components/CampusAudioPlayer';
-import RuAiAssistant from '@/components/RuAiAssistant';
 import BloodBankSection from '@/components/BloodBankSection';
 
 export default function HomePage() {
@@ -91,13 +90,14 @@ export default function HomePage() {
               <span>ইন্টারঅ্যাক্টিভ ম্যাপ (ভ্রমণ সনদ)</span>
             </Link>
 
-            <a
-              href="#ru-ai-section"
-              className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-xl border border-indigo-400/40"
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event('ru_open_ai'))}
+              className="px-5 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-xl border border-indigo-400/40 cursor-pointer"
             >
               <Bot className="w-4 h-4 text-amber-300" />
               <span>AI দিয়ে জানুন ও অর্ডার করুন</span>
-            </a>
+            </button>
 
             <a
               href="#blood-bank-section"
@@ -152,11 +152,6 @@ export default function HomePage() {
           title="প্যারিস রোডের শান্ত নিসর্গ ও পাখির গান"
         />
       </div>
-
-      {/* 2.8 HOMEPAGE RU INSIDERS AI & MCP ASSISTANT */}
-      <section id="ru-ai-section" className="max-w-7xl mx-auto px-3 sm:px-6 scroll-mt-24">
-        <RuAiAssistant mode="embedded" />
-      </section>
 
       {/* 3. 3-STAGE INTERACTIVE MAP TEASER (রাবি ক্যাম্পাস ও রাজশাহী কতটুকু ঘুরলেন) */}
       <section className="max-w-7xl mx-auto px-3 sm:px-6">
