@@ -152,7 +152,7 @@ export default function CampusAudioPlayer({
 
   return (
     <div
-      className={`rounded-2xl border p-3 flex items-center justify-between gap-3 transition-all ${
+      className={`rounded-2xl border p-3 flex items-center justify-between gap-3 transition-[background-color,border-color,color,box-shadow] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] ${
         isPlaying
           ? 'bg-emerald-950/90 text-white border-emerald-500/40 shadow-md ring-1 ring-emerald-500/30'
           : 'bg-slate-50 text-slate-800 border-slate-200'
@@ -163,7 +163,7 @@ export default function CampusAudioPlayer({
           onClick={togglePlay}
           type="button"
           aria-label={isPlaying ? 'Pause Campus Ambience' : 'Play Campus Ambience'}
-          className={`w-9 h-9 rounded-xl flex items-center justify-center transition shrink-0 cursor-pointer ${
+          className={`w-9 h-9 rounded-xl flex items-center justify-center emil-press shrink-0 cursor-pointer ${
             isPlaying
               ? 'bg-amber-400 text-slate-950 hover:bg-amber-300 shadow-md'
               : 'bg-emerald-700 text-white hover:bg-emerald-800'
@@ -192,7 +192,7 @@ export default function CampusAudioPlayer({
         {[0.4, 0.9, 0.6, 1.0, 0.5, 0.7].map((height, i) => (
           <span
             key={i}
-            className={`w-1 rounded-full transition-all duration-300 ${
+            className={`w-1 rounded-full transition-[height,background-color] duration-250 ease-[cubic-bezier(0.23,1,0.32,1)] ${
               isPlaying
                 ? 'bg-amber-400 animate-pulse'
                 : 'bg-slate-300'

@@ -55,6 +55,12 @@ body {
   animation: pulse-glow 2s infinite ease-in-out;
 }
 
+:root {
+  --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-ios-sheet: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.1);
+}
+
 @keyframes shimmer {
   100% {
     transform: translateX(100%);
@@ -83,38 +89,120 @@ body {
 
 @keyframes slideLeft {
   from {
-    transform: translateX(100%);
+    transform: translate3d(100%, 0, 0);
   }
   to {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translate(-50%, 20px);
+    transform: translate3d(-50%, 16px, 0);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, 0);
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes popInBottom {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes popInTop {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -8px, 0) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
   }
 }
 
 .animate-fadeIn {
-  animation: fadeIn 0.2s ease-out forwards;
+  animation: fadeIn 180ms var(--ease-out-quint) forwards;
 }
 
 .animate-scaleUp {
-  animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: scaleUp 220ms var(--ease-out-quint) forwards;
 }
 
 .animate-slideLeft {
-  animation: slideLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideLeft 280ms var(--ease-ios-sheet) forwards;
+  will-change: transform;
 }
 
 .animate-slideUp {
-  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideUp 240ms var(--ease-out-quint) forwards;
+}
+
+/* Native GPU replacements for animate-in utilities (Emil Kowalski timing & scale rules) */
+.animate-in.fade-in {
+  animation: fadeIn 180ms var(--ease-out-quint) forwards;
+}
+
+.animate-in.fade-in.zoom-in-95 {
+  animation: scaleUp 190ms var(--ease-out-quint) forwards;
+}
+
+.animate-in.fade-in.slide-in-from-bottom-4 {
+  animation: popInBottom 240ms var(--ease-out-quint) forwards;
+}
+
+.animate-in.fade-in.slide-in-from-top-2 {
+  animation: popInTop 200ms var(--ease-out-quint) forwards;
+}
+
+/* Origin-aware popovers & tactile button press */
+.emil-pop-br {
+  transform-origin: bottom right;
+  animation: popInBottom 220ms var(--ease-out-quint) forwards;
+}
+
+.emil-pop-tr {
+  transform-origin: top right;
+  animation: popInTop 190ms var(--ease-out-quint) forwards;
+}
+
+.emil-press {
+  transition:
+    transform 150ms var(--ease-out-quint),
+    background-color 150ms ease-out,
+    border-color 150ms ease-out,
+    color 150ms ease-out,
+    box-shadow 180ms var(--ease-out-quint);
+}
+
+.emil-press:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.emil-card {
+  transition:
+    transform 240ms var(--ease-out-quint),
+    box-shadow 240ms var(--ease-out-quint),
+    border-color 200ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Streetlamp Glow on Paris Road */

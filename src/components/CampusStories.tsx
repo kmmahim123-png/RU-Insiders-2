@@ -165,7 +165,7 @@ export default function CampusStories() {
           <div>
             <h2 className="text-base sm:text-lg font-extrabold text-slate-900 flex items-center gap-2">
               ক্যাম্পাস স্টোরিজ ও হাইলাইটস
-              <span className="text-[10px] font-extrabold bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full animate-pulse">
+              <span className="text-[10px] font-extrabold bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full">
                 লাইভ
               </span>
             </h2>
@@ -188,13 +188,13 @@ export default function CampusStories() {
           >
             {/* Rotating Conic Ring */}
             <div
-              className={`p-[3px] rounded-full bg-gradient-to-tr ${story.gradient} shadow-md transition-transform duration-300 group-hover:scale-105 group-active:scale-95`}
+              className={`p-[3px] rounded-full bg-gradient-to-tr ${story.gradient} shadow-md transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.04] group-active:scale-[0.96]`}
             >
               <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 border-white bg-slate-100 relative">
                 <img
                   src={story.image}
                   alt={story.title}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  className="w-full h-full object-cover transition-transform duration-250 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.05]"
                 />
               </div>
             </div>
@@ -220,7 +220,7 @@ export default function CampusStories() {
           onTouchEnd={() => setIsPaused(false)}
         >
           <div
-            className="relative w-full max-w-sm sm:max-w-md h-[100dvh] sm:h-[84vh] sm:rounded-3xl overflow-hidden bg-slate-900 shadow-2xl flex flex-col justify-between"
+            className="relative w-full max-w-sm sm:max-w-md h-[100dvh] sm:h-[84vh] sm:rounded-3xl overflow-hidden bg-slate-900 shadow-2xl flex flex-col justify-between animate-scaleUp"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Background Story Image */}
@@ -239,7 +239,7 @@ export default function CampusStories() {
                 {CAMPUS_STORIES.map((_, i) => (
                   <div key={i} className="flex-1 h-1 bg-white/30 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-white transition-all duration-75 ease-linear rounded-full"
+                      className="h-full bg-white transition-[width] duration-75 ease-linear rounded-full"
                       style={{
                         width:
                           i < (activeStoryIdx || 0)

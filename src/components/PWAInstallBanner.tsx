@@ -70,7 +70,7 @@ export default function PWAInstallBanner() {
     <>
       {/* Offline Toast */}
       {isOffline && (
-        <div className="fixed top-14 left-1/2 -translate-x-1/2 z-[9999] bg-amber-500 text-slate-950 font-black px-4 py-2 rounded-2xl shadow-xl flex items-center gap-2 text-xs border-2 border-white animate-bounce">
+        <div className="fixed top-14 left-1/2 -translate-x-1/2 z-[9999] bg-amber-500 text-slate-950 font-black px-4 py-2 rounded-2xl shadow-xl flex items-center gap-2 text-xs border-2 border-white animate-in fade-in">
           <WifiOff className="w-4 h-4" />
           <span>অফলাইন মোড সক্রিয় — ক্যাশড ম্যাপ ও তথ্য দেখতে পাবেন</span>
         </div>
@@ -92,7 +92,7 @@ export default function PWAInstallBanner() {
 
           <button
             onClick={handleInstallClick}
-            className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shrink-0 shadow-sm transition"
+            className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shrink-0 shadow-sm emil-press cursor-pointer"
           >
             ইনস্টল
           </button>

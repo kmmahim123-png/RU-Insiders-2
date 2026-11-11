@@ -191,7 +191,7 @@ export default function BloodBankSection({ isHomepage = false }: BloodBankSectio
             <button
               type="button"
               onClick={() => setShowRegisterModal(true)}
-              className="px-4 py-3 rounded-2xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-lg transition cursor-pointer"
+              className="px-4 py-3 rounded-2xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-lg emil-press cursor-pointer"
             >
               <PlusCircle className="w-4 h-4" />
               <span>আমি রক্ত দিতে চাই (ফর্ম পূরণ করুন)</span>
@@ -200,7 +200,7 @@ export default function BloodBankSection({ isHomepage = false }: BloodBankSectio
             <button
               type="button"
               onClick={() => setShowUpdateModal(true)}
-              className="px-4 py-3 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/30 text-white font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
+              className="px-4 py-3 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/30 text-white font-bold text-xs flex items-center gap-1.5 emil-press cursor-pointer"
             >
               <Calendar className="w-4 h-4" />
               <span>রক্তদানের তারিখ আপডেট</span>
@@ -218,7 +218,7 @@ export default function BloodBankSection({ isHomepage = false }: BloodBankSectio
           <button
             type="button"
             onClick={() => window.dispatchEvent(new Event('ru_open_ai'))}
-            className="bg-white text-rose-800 px-3 py-1.5 rounded-xl flex items-center gap-1.5 hover:bg-rose-50 transition cursor-pointer"
+            className="bg-white text-rose-800 px-3 py-1.5 rounded-xl flex items-center gap-1.5 hover:bg-rose-50 emil-press cursor-pointer"
           >
             <Bot className="w-3.5 h-3.5" />
             <span>AI-কে জিজ্ঞেস করুন (৯০-দিন + নম্বর)</span>
@@ -240,7 +240,7 @@ export default function BloodBankSection({ isHomepage = false }: BloodBankSectio
           <button
             type="button"
             onClick={() => setSelectedGroup('all')}
-            className={`p-2.5 rounded-2xl border-2 text-center transition cursor-pointer ${
+            className={`p-2.5 rounded-2xl border-2 text-center emil-press cursor-pointer ${
               selectedGroup === 'all'
                 ? 'border-rose-600 bg-rose-50 shadow-sm'
                 : 'border-slate-200 bg-white hover:border-rose-300'

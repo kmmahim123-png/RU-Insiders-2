@@ -263,14 +263,14 @@ export default function InsideRuPage() {
             <Link
               key={art.id}
               href={`/inside-ru/${art.id}`}
-              className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group"
+              className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 emil-card flex flex-col group"
             >
               {/* Cover Image */}
               <div className="aspect-[16/10] bg-slate-100 relative overflow-hidden">
                 <img
                   src={art.images[0] || '/campus/paris-road-rain.jpg'}
                   alt={art.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="w-full h-full object-cover transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.03]"
                 />
                 <span className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
                   {art.category}

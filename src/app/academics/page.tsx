@@ -273,14 +273,14 @@ export default function AcademicsPage() {
                 setActiveGalleryIdx(0);
                 setSelectedDept(dept);
               }}
-              className="bg-white rounded-3xl border border-slate-200 hover:border-blue-500 p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300 space-y-4 flex flex-col justify-between cursor-pointer group relative overflow-hidden"
+              className="bg-white rounded-3xl border border-slate-200 hover:border-blue-500 p-5 sm:p-6 shadow-sm hover:shadow-xl hover:-translate-y-0.5 emil-card space-y-4 flex flex-col justify-between cursor-pointer group relative overflow-hidden"
             >
               {/* Top Image Preview Banner */}
               <div className="w-full h-36 rounded-2xl overflow-hidden bg-slate-100 border border-slate-100 relative">
                 <img
                   src={images[0]}
                   alt={dept.nameBn}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]"
                 />
                 <span className="absolute bottom-2 right-2 bg-black/75 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1">
                   <ImageIcon className="w-3 h-3 text-amber-400" /> {images.length}টি ছবি

@@ -319,7 +319,7 @@ export default function NavbarAndAuth() {
       {showSplash && (
         <div
           onClick={() => setShowSplash(false)}
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-emerald-950/95 text-white cursor-pointer transition-opacity duration-500"
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-emerald-950/95 text-white cursor-pointer transition-opacity duration-250 ease-[cubic-bezier(0.23,1,0.32,1)]"
           style={{
             backgroundImage: `linear-gradient(rgba(6, 78, 59, 0.88), rgba(2, 44, 34, 0.96)), url('/campus/paris-road-rain.jpg')`,
             backgroundSize: 'cover',
@@ -609,7 +609,7 @@ export default function NavbarAndAuth() {
             >
               <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center animate-bounce shadow-xs">
+                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] shadow-xs">
                   {cartCount}
                 </span>
               )}
@@ -643,7 +643,7 @@ export default function NavbarAndAuth() {
               <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 sm:gap-4 overflow-hidden">
                 <div className="flex items-center gap-3 sm:gap-4 overflow-hidden flex-1 min-w-0">
                   <span className="bg-white text-red-700 font-black px-2.5 sm:px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 shrink-0 shadow text-[11px] sm:text-xs">
-                    <Flame className="w-4 h-4 fill-red-600 text-red-600 animate-pulse" />
+                    <Flame className="w-4 h-4 fill-red-600 text-red-600" />
                     <span>ব্রেকিং নিউজ</span>
                   </span>
 
@@ -651,7 +651,7 @@ export default function NavbarAndAuth() {
                     <img
                       src={imageUrl || '/campus/paris-road-rain.jpg'}
                       alt="নিউজ ছবি"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-250 ease-[cubic-bezier(0.23,1,0.32,1)]"
                       onError={(e) => {
                         e.currentTarget.src = '/campus/paris-road-rain.jpg';
                       }}
@@ -779,8 +779,8 @@ export default function NavbarAndAuth() {
 
       {/* 5. Google OAuth Setup Helper (Shown only if Supabase Google Provider is not yet enabled in Dashboard) */}
       {showGoogleSetupModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-150">
-          <div className="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl border border-slate-200 shadow-2xl p-5 sm:p-6 space-y-4 max-h-[92vh] overflow-y-auto overscroll-contain">
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in">
+          <div className="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl border border-slate-200 shadow-2xl p-5 sm:p-6 space-y-4 max-h-[92vh] overflow-y-auto overscroll-contain animate-scaleUp">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
               <div className="flex items-center gap-2.5">
                 <svg className="w-7 h-7 shrink-0" viewBox="0 0 24 24" aria-hidden="true">

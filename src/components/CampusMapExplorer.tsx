@@ -315,7 +315,7 @@ export default function CampusMapExplorer() {
         <img
           src={viewMode === '3d' ? '/campus/ru-master-plan-3d.jpg' : '/campus/ru-campus-index-map.png'}
           alt="রাজশাহী বিশ্ববিদ্যালয় মাস্টারপ্ল্যান"
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.03]"
         />
 
         {/* মানচিত্রে ইন্টারঅ্যাক্টিভ পিন মার্কার */}
@@ -328,14 +328,14 @@ export default function CampusMapExplorer() {
               style={{ left: `${spot.x}%`, top: `${spot.y}%` }}
               className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer z-10 group/pin"
             >
-              <div className={`p-1.5 sm:p-2 rounded-full border-2 transition-all duration-300 shadow-lg ${
+              <div className={`p-1.5 sm:p-2 rounded-full border-2 transition-[transform,background-color,border-color,box-shadow] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover/pin:scale-110 group-active/pin:scale-95 shadow-lg ${
                 isVisited
                   ? 'bg-emerald-500 border-white ring-4 ring-emerald-500/30'
-                  : 'bg-amber-400 border-slate-950 ring-4 ring-amber-400/30 animate-bounce'
+                  : 'bg-amber-400 border-slate-950 ring-4 ring-amber-400/30'
               }`}>
                 <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-950" />
               </div>
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-0.5 rounded-md bg-slate-950/90 text-[10px] whitespace-nowrap text-white font-bold opacity-0 group-hover/pin:opacity-100 transition shadow pointer-events-none">
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-0.5 rounded-md bg-slate-950/90 text-[10px] whitespace-nowrap text-white font-bold opacity-0 translate-y-1 group-hover/pin:opacity-100 group-hover/pin:translate-y-0 transition-[opacity,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] shadow pointer-events-none">
                 {spot.nameBn} {isVisited ? '✓' : ''}
               </div>
             </div>

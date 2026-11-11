@@ -35,8 +35,8 @@ export default function ImageWithPlaceholder({
           setError(true);
           setLoaded(true);
         }}
-        className={`w-full h-full object-cover transition-all duration-500 ${
-          loaded ? 'opacity-100 blur-0 scale-100' : 'opacity-0 blur-md scale-105'
+        className={`w-full h-full object-cover transition-[opacity,transform,filter] duration-250 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+          loaded ? 'opacity-100 blur-0 scale-100' : 'opacity-0 blur-sm scale-[1.02]'
         } ${className}`}
         {...props}
       />

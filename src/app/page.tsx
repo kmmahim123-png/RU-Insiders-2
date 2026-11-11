@@ -246,13 +246,13 @@ export default function HomePage() {
               <Link
                 key={art.id}
                 href={`/inside-ru/${art.id}`}
-                className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col sm:flex-row group"
+                className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 emil-card flex flex-col sm:flex-row group"
               >
                 <div className="sm:w-2/5 aspect-[16/10] sm:aspect-auto bg-slate-100 overflow-hidden">
                   <img
                     src={art.images[0] || '/campus/paris-road-rain.jpg'}
                     alt={art.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.03]"
                   />
                 </div>
                 <div className="sm:w-3/5 p-6 flex flex-col justify-between space-y-3">

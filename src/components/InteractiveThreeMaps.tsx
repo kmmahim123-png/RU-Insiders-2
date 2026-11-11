@@ -593,7 +593,7 @@ export default function InteractiveThreeMaps() {
           <button
             type="button"
             onClick={() => setStage('division')}
-            className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow shrink-0 whitespace-nowrap ${
+            className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl emil-press flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow shrink-0 whitespace-nowrap ${
               stage === 'division'
                 ? 'bg-amber-400 text-slate-950 ring-2 ring-white font-black scale-[1.02]'
                 : 'bg-emerald-950/80 hover:bg-emerald-800 text-emerald-100 border border-emerald-700/60'
@@ -620,7 +620,7 @@ export default function InteractiveThreeMaps() {
               setSelectedDistrictId('rajshahi');
               setStage('rajshahi_district');
             }}
-            className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow shrink-0 whitespace-nowrap ${
+            className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl emil-press flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow shrink-0 whitespace-nowrap ${
               stage === 'rajshahi_district'
                 ? 'bg-amber-400 text-slate-950 ring-2 ring-white font-black scale-[1.02]'
                 : 'bg-emerald-950/80 hover:bg-emerald-800 text-emerald-100 border border-emerald-700/60'
@@ -646,7 +646,7 @@ export default function InteractiveThreeMaps() {
           <button
             type="button"
             onClick={() => setStage('ru_campus')}
-            className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow shrink-0 whitespace-nowrap ${
+            className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl emil-press flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow shrink-0 whitespace-nowrap ${
               stage === 'ru_campus'
                 ? 'bg-amber-400 text-slate-950 ring-2 ring-white font-black scale-[1.02]'
                 : 'bg-emerald-950/80 hover:bg-emerald-800 text-emerald-100 border border-emerald-700/60'
@@ -707,7 +707,7 @@ export default function InteractiveThreeMaps() {
                         // User can click to preview or double-click to drill into district
                       }
                     }}
-                    className={`px-3 py-1.5 rounded-xl text-left transition-all border whitespace-nowrap flex items-center gap-2 shrink-0 cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-xl text-left emil-press border whitespace-nowrap flex items-center gap-2 shrink-0 cursor-pointer ${
                       isSelected
                         ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-md ring-2 ring-white scale-[1.02] font-black'
                         : stats.pct > 0
@@ -757,7 +757,7 @@ export default function InteractiveThreeMaps() {
                             y={fillY}
                             width={dist.bbox.w + 10}
                             height={fillH + 10}
-                            className="transition-all duration-700 ease-out"
+                            className="transition-[y,height] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]"
                           />
                         </clipPath>
                       );
@@ -809,7 +809,7 @@ export default function InteractiveThreeMaps() {
                             fill="#059669"
                             clipPath={`url(#water-clip-${dist.id})`}
                             opacity="0.92"
-                            className="transition-all duration-700 ease-out"
+                            className="transition-opacity duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]"
                           />
                         )}
 
@@ -939,7 +939,7 @@ export default function InteractiveThreeMaps() {
               <div className="space-y-1">
                 <div className="w-full h-2.5 rounded-full bg-black/40 overflow-hidden border border-white/10">
                   <div
-                    className="h-full bg-gradient-to-r from-amber-400 via-emerald-400 to-teal-300 rounded-full transition-all duration-500"
+                    className="h-full bg-gradient-to-r from-amber-400 via-emerald-400 to-teal-300 rounded-full transition-[width] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]"
                     style={{ width: `${currentDistrictStats.pct}%` }}
                   />
                 </div>
@@ -970,7 +970,7 @@ export default function InteractiveThreeMaps() {
                           onToggleVisit: () => toggleDivSpot(spot.id),
                         })
                       }
-                      className={`p-3 sm:p-3.5 rounded-2xl bg-white text-slate-900 border transition-all duration-200 flex flex-col sm:flex-row gap-3.5 items-start sm:items-center justify-between group shadow-sm hover:shadow-md cursor-pointer ${
+                      className={`p-3 sm:p-3.5 rounded-2xl bg-white text-slate-900 border emil-card hover:-translate-y-0.5 flex flex-col sm:flex-row gap-3.5 items-start sm:items-center justify-between group shadow-sm hover:shadow-md cursor-pointer ${
                         isVisited
                           ? 'border-emerald-500 bg-emerald-50/40 ring-1 ring-emerald-500/20'
                           : 'border-slate-200/90 hover:border-emerald-400/80'
@@ -1098,7 +1098,7 @@ export default function InteractiveThreeMaps() {
                         setStage('ru_campus');
                       }
                     }}
-                    className={`px-3 py-1.5 rounded-xl text-left transition-all border whitespace-nowrap flex items-center gap-2 shrink-0 cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-xl text-left emil-press border whitespace-nowrap flex items-center gap-2 shrink-0 cursor-pointer ${
                       isSelected
                         ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-md ring-2 ring-white scale-[1.02] font-black'
                         : isVisited
@@ -1143,7 +1143,7 @@ export default function InteractiveThreeMaps() {
                             y={fillY}
                             width={region.bbox.w + 10}
                             height={fillH + 10}
-                            className="transition-all duration-700 ease-out"
+                            className="transition-[y,height] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]"
                           />
                         </clipPath>
                       );
@@ -1286,7 +1286,7 @@ export default function InteractiveThreeMaps() {
               <div className="space-y-1">
                 <div className="w-full h-2.5 rounded-full bg-black/40 overflow-hidden border border-white/10">
                   <div
-                    className="h-full bg-gradient-to-r from-amber-400 via-emerald-400 to-teal-300 rounded-full transition-all duration-500"
+                    className="h-full bg-gradient-to-r from-amber-400 via-emerald-400 to-teal-300 rounded-full transition-[width] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]"
                     style={{ width: `${pdfPercent}%` }}
                   />
                 </div>
@@ -1305,7 +1305,7 @@ export default function InteractiveThreeMaps() {
                     <div
                       key={region.id}
                       onClick={() => setSelectedPdfId(region.id)}
-                      className={`p-3 sm:p-3.5 rounded-2xl bg-white text-slate-900 border transition-all duration-200 flex flex-col sm:flex-row gap-3.5 items-start sm:items-center justify-between group shadow-sm hover:shadow-md cursor-pointer ${
+                      className={`p-3 sm:p-3.5 rounded-2xl bg-white text-slate-900 border emil-card hover:-translate-y-0.5 flex flex-col sm:flex-row gap-3.5 items-start sm:items-center justify-between group shadow-sm hover:shadow-md cursor-pointer ${
                         isSelected
                           ? 'border-amber-400 ring-2 ring-amber-400 bg-amber-50/40 shadow-md'
                           : isVisited
@@ -1420,7 +1420,7 @@ export default function InteractiveThreeMaps() {
                   key={cat.id}
                   type="button"
                   onClick={() => setRuCategory(cat.id)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bengali transition-all cursor-pointer ${
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bengali emil-press cursor-pointer ${
                     ruCategory === cat.id
                       ? 'bg-amber-400 text-slate-950 font-black shadow-sm'
                       : 'bg-emerald-950/70 hover:bg-emerald-900 text-emerald-200 border border-emerald-800/80'
@@ -1470,7 +1470,7 @@ export default function InteractiveThreeMaps() {
                             y={fillY}
                             width={place.bbox.w + 4}
                             height={fillH + 4}
-                            className="transition-all duration-700 ease-out"
+                            className="transition-[y,height] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]"
                           />
                         </clipPath>
                       );
@@ -1820,7 +1820,7 @@ export default function InteractiveThreeMaps() {
               <div className="space-y-1">
                 <div className="w-full h-2.5 rounded-full bg-black/40 overflow-hidden border border-white/10">
                   <div
-                    className="h-full bg-gradient-to-r from-amber-400 via-emerald-400 to-teal-300 rounded-full transition-all duration-500"
+                    className="h-full bg-gradient-to-r from-amber-400 via-emerald-400 to-teal-300 rounded-full transition-[width] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]"
                     style={{ width: `${ruPercent}%` }}
                   />
                 </div>
@@ -1852,7 +1852,7 @@ export default function InteractiveThreeMaps() {
                           onToggleVisit: () => toggleRuSpot(place.id),
                         })
                       }
-                      className={`p-3 sm:p-3.5 rounded-2xl bg-white text-slate-900 border transition-all duration-200 flex flex-col sm:flex-row gap-3.5 items-start sm:items-center justify-between group shadow-sm hover:shadow-md cursor-pointer ${
+                      className={`p-3 sm:p-3.5 rounded-2xl bg-white text-slate-900 border emil-card hover:-translate-y-0.5 flex flex-col sm:flex-row gap-3.5 items-start sm:items-center justify-between group shadow-sm hover:shadow-md cursor-pointer ${
                         isSelected
                           ? 'border-amber-400 ring-2 ring-amber-400 bg-amber-50/40 shadow-md'
                           : isVisited
@@ -1945,8 +1945,8 @@ export default function InteractiveThreeMaps() {
       {/* 5. SPOT FULL DETAIL MODAL (CAROUSEL + DESCRIPTION + GOOGLE MAPS) */}
       {/* ============================================================================ */}
       {detailModalSpot && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-3xl w-full max-h-[92dvh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden text-slate-900">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-3xl w-full max-h-[92dvh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden text-slate-900 animate-scaleUp">
             {/* Modal Header */}
             <div className="px-5 sm:px-6 py-4 bg-emerald-900 text-white flex items-center justify-between">
               <div>
@@ -2066,8 +2066,8 @@ export default function InteractiveThreeMaps() {
       {/* 6. OFFICIAL CITATION & CERTIFICATE GENERATOR MODAL */}
       {/* ============================================================================ */}
       {showCertModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-200 font-bengali">
-          <div className="bg-slate-900 border border-emerald-500/40 rounded-3xl max-w-4xl w-full max-h-[95dvh] flex flex-col shadow-2xl overflow-hidden text-white">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 animate-in fade-in font-bengali">
+          <div className="bg-slate-900 border border-emerald-500/40 rounded-3xl max-w-4xl w-full max-h-[95dvh] flex flex-col shadow-2xl overflow-hidden text-white animate-scaleUp">
             <div className="px-6 py-4 bg-emerald-950 border-b border-emerald-800/80 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Trophy className="h-5 w-5 text-amber-400" />

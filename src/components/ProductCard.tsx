@@ -84,13 +84,13 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <CardTilt className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group">
+    <CardTilt className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 emil-card flex flex-col group">
       {/* Product Image Container */}
       <Link href={`/shop/${product.id}`} className="relative aspect-[4/3] bg-slate-100 overflow-hidden block">
         <img
           src={product.images[0] || '/mockups/hoodie-front.jpg'}
           alt={product.nameBn}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.03]"
         />
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
           <span className="bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
@@ -137,7 +137,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <div className="flex items-center gap-1.5">
             <Link
               href={`/shop/${product.id}`}
-              className="p-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 transition"
+              className="p-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 emil-press"
               title="বিস্তারিত দেখুন"
             >
               <Eye className="w-4 h-4" />
@@ -146,7 +146,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             <button
               onClick={handleQuickAdd}
               disabled={!product.inStock}
-              className={`py-2 px-3 sm:px-3.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+              className={`py-2 px-3 sm:px-3.5 rounded-xl text-xs font-bold emil-press flex items-center gap-1.5 ${
                 added
                   ? 'bg-emerald-600 text-white'
                   : 'bg-blue-700 hover:bg-blue-800 text-white shadow-sm'

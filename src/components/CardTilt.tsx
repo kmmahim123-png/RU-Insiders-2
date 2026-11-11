@@ -25,8 +25,13 @@ export default function CardTilt({
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      // Disable 3D tilt on touch devices to ensure ultra-smooth 60fps native scrolling
-      if (typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0)) {
+      // Disable 3D tilt on touch devices and respect reduced-motion preferences
+      if (
+        typeof window !== 'undefined' &&
+        ('ontouchstart' in window ||
+          navigator.maxTouchPoints > 0 ||
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+      ) {
         return;
       }
       if (!cardRef.current) return;
@@ -66,12 +71,12 @@ export default function CardTilt({
     setIsHovered(false);
     setTiltStyle({
       transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
-      transition: 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
+      transition: 'transform 220ms cubic-bezier(0.23, 1, 0.32, 1)',
     });
     if (glare) {
       setGlareStyle({
         opacity: 0,
-        transition: 'opacity 0.4s ease',
+        transition: 'opacity 180ms cubic-bezier(0.23, 1, 0.32, 1)',
       });
     }
   };
