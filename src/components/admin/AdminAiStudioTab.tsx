@@ -21,6 +21,7 @@ import {
   CheckCircle2,
   RefreshCw,
   X,
+  MessageCircle,
 } from 'lucide-react';
 import { AiConfig, AiSlotKey, AiTrainingDoc } from '@/types';
 
@@ -142,6 +143,11 @@ const DEFAULT_AI_CONFIG: AiConfig = {
   decisionRouterEnabled: false,
   decisionRouterModel: 'typesafe/jev-1.14',
   decisionRouterApiKey: '',
+  whatsappAgentEnabled: true,
+  whatsappVerifyToken: 'ru-insiders-wa-verify',
+  whatsappPhoneNumberId: '',
+  whatsappAccessToken: '',
+  whatsappBridgeSecret: '',
 };
 
 /** Admin AI & MCP Studio managing 3 hot-swappable API failover slots, training docs, and MCP access. */
@@ -231,6 +237,46 @@ export default function AdminAiStudioTab({
   const [copiedMcp, setCopiedMcp] = useState(false);
   const [testingDecision, setTestingDecision] = useState(false);
   const [decisionTestResult, setDecisionTestResult] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [waWebhookUrl, setWaWebhookUrl] = useState('https://ruinsider-2.vercel.app/api/whatsapp');
+  const [copiedWa, setCopiedWa] = useState(false);
+  const [waTestPrompt, setWaTestPrompt] = useState('আমার B+ রক্ত লাগবে, ৯০+ দিন হয়েছে এমন কতজন আছেন ও নম্বর দিন?');
+  const [testingWa, setTestingWa] = useState(false);
+  const [waTestResult, setWaTestResult] = useState<{ ok: boolean; msg: string } | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setWaWebhookUrl(`${window.location.origin}/api/whatsapp`);
+    }
+  }, []);
+
+  const handleTestWhatsAppAgent = async () => {
+    setTestingWa(true);
+    setWaTestResult(null);
+    try {
+      const res = await fetch('/api/whatsapp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'TEST_WHATSAPP_AGENT',
+          password,
+          message: waTestPrompt,
+        }),
+      });
+      const data = await safeParseApiResponse(res);
+      if (data.ok) {
+        setWaTestResult({
+          ok: true,
+          msg: `উত্তর (${data.modelUsed || 'AI'}${data.usedTools?.length ? ` • Tools: ${data.usedTools.join(', ')}` : ''}): "${data.reply}"`,
+        });
+      } else {
+        setWaTestResult({ ok: false, msg: data.error || 'WhatsApp এজেন্ট টেস্ট ব্যর্থ হয়েছে' });
+      }
+    } catch (err: any) {
+      setWaTestResult({ ok: false, msg: err.message || 'নেটওয়ার্ক ত্রুটি' });
+    } finally {
+      setTestingWa(false);
+    }
+  };
 
   const handleTestDecisionRouter = async () => {
     setTestingDecision(true);
@@ -906,6 +952,169 @@ export default function AdminAiStudioTab({
           >
             <Check className="w-4 h-4" />
             <span>{saving ? 'সংরক্ষণ হচ্ছে...' : 'সমস্ত AI ও MCP সেটিংস সেভ করুন'}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* WhatsApp AI Agent Setup Card (Meta Cloud API + QR Bot Bridge + Live Simulator) */}
+      <div className="bg-white rounded-3xl border border-emerald-300 p-5 sm:p-6 shadow-xs space-y-5">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div className="flex items-center gap-2">
+            <MessageCircle className="w-5 h-5 text-emerald-600" />
+            <div>
+              <h3 className="text-base font-black text-slate-900">
+                WhatsApp AI এজেন্ট সেটআপ (Meta Cloud API ও QR Bot ব্রিজ)
+              </h3>
+              <p className="text-xs text-slate-500">
+                কাস্টমার আপনার WhatsApp-এ মেসেজ দিলে উপরের AI + লাইভ ওয়েবসাইট ডাটা ও ৭টি টুল ব্যবহার করে স্বয়ংক্রিয়ভাবে উত্তর দিবে, রক্তদাতার নম্বর খুঁজবে ও `১. ইনটেক` অর্ডার তৈরি করবে।
+              </p>
+            </div>
+          </div>
+
+          <label className="flex items-center gap-2 text-xs font-bold text-slate-800 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl cursor-pointer">
+            <input
+              type="checkbox"
+              checked={config.whatsappAgentEnabled !== false}
+              onChange={(e) => setConfig({ ...config, whatsappAgentEnabled: e.target.checked })}
+              className="rounded text-emerald-600"
+            />
+            <span>WhatsApp এজেন্ট চালু রাখুন</span>
+          </label>
+        </div>
+
+        {/* Copyable Webhook URL & Verify Token */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-700">Meta Webhook Callback URL</label>
+            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl p-2">
+              <code className="text-xs font-mono text-slate-900 flex-1 truncate">{waWebhookUrl}</code>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(waWebhookUrl);
+                  setCopiedWa(true);
+                  setTimeout(() => setCopiedWa(false), 2000);
+                }}
+                className="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-[10px] font-bold flex items-center gap-1 shrink-0"
+              >
+                {copiedWa ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                <span>{copiedWa ? 'কপি হয়েছে' : 'কপি'}</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-700">Webhook Verify Token (Meta-তে বসাতে হবে)</label>
+            <input
+              type="text"
+              value={config.whatsappVerifyToken ?? 'ru-insiders-wa-verify'}
+              onChange={(e) => setConfig({ ...config, whatsappVerifyToken: e.target.value })}
+              placeholder="ru-insiders-wa-verify"
+              className="w-full text-xs font-mono font-bold text-slate-900 bg-white border border-slate-200 rounded-xl p-2.5"
+            />
+          </div>
+        </div>
+
+        {/* Meta Phone Number ID & Permanent Access Token */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-700">Meta Phone Number ID</label>
+            <input
+              type="text"
+              value={config.whatsappPhoneNumberId ?? ''}
+              onChange={(e) => setConfig({ ...config, whatsappPhoneNumberId: e.target.value })}
+              placeholder="যেমন: 482910482910482"
+              className="w-full text-xs font-mono text-slate-900 bg-white border border-slate-200 rounded-xl p-2.5"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-700">Meta WhatsApp Permanent Access Token</label>
+            <div className="flex items-center gap-1.5">
+              <input
+                type={revealedKeys['whatsapp_token'] ? 'text' : 'password'}
+                value={config.whatsappAccessToken ?? ''}
+                onChange={(e) => setConfig({ ...config, whatsappAccessToken: e.target.value })}
+                placeholder="EAAG..."
+                className="flex-1 text-xs font-mono text-slate-900 bg-white border border-slate-200 rounded-xl p-2.5"
+              />
+              <button
+                type="button"
+                onClick={() =>
+                  setRevealedKeys({ ...revealedKeys, whatsapp_token: !revealedKeys['whatsapp_token'] })
+                }
+                className="p-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100"
+              >
+                {revealedKeys['whatsapp_token'] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Optional Personal/QR Bot Bridge Secret */}
+        <div className="space-y-1">
+          <label className="text-xs font-bold text-slate-700">
+            ঐচ্ছিক QR-Bot / WAHA / n8n ব্রিজ সিক্রেট (যদি Meta Cloud বাদে নিজের WhatsApp-এ QR বট চালান)
+          </label>
+          <input
+            type="text"
+            value={config.whatsappBridgeSecret ?? ''}
+            onChange={(e) => setConfig({ ...config, whatsappBridgeSecret: e.target.value })}
+            placeholder="যেমন: ru-wa-bridge-secret-2026 (Meta Cloud API ব্যবহার করলে খালি রাখুন)"
+            className="w-full text-xs font-mono text-slate-900 bg-white border border-slate-200 rounded-xl p-2.5"
+          />
+        </div>
+
+        {/* Live WhatsApp Simulator */}
+        <div className="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-4 space-y-2.5">
+          <h4 className="text-xs font-black text-emerald-950">💬 WhatsApp এজেন্ট লাইভ সিমুলেটর টেস্ট</h4>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              type="text"
+              value={waTestPrompt}
+              onChange={(e) => setWaTestPrompt(e.target.value)}
+              placeholder="টেস্ট মেসেজ লিখুন..."
+              className="flex-1 text-xs bg-white text-slate-900 border border-emerald-200 rounded-xl p-2.5 font-semibold"
+            />
+            <button
+              type="button"
+              onClick={handleTestWhatsAppAgent}
+              disabled={testingWa}
+              className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black flex items-center justify-center gap-1.5 shrink-0 disabled:opacity-50"
+            >
+              <Zap className="w-3.5 h-3.5 text-amber-300" />
+              <span>{testingWa ? 'চেক হচ্ছে...' : 'WhatsApp এজেন্ট টেস্ট করুন'}</span>
+            </button>
+          </div>
+          {waTestResult && (
+            <div
+              className={`text-xs font-bold p-3 rounded-xl whitespace-pre-wrap ${
+                waTestResult.ok
+                  ? 'bg-white text-emerald-900 border border-emerald-300'
+                  : 'bg-red-50 text-red-700 border border-red-200'
+              }`}
+            >
+              {waTestResult.msg}
+            </div>
+          )}
+        </div>
+
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-[11px] text-slate-700 space-y-1">
+          <p className="font-black text-slate-900">📌 Meta WhatsApp Cloud API যুক্ত করার ৩টি ধাপ:</p>
+          <p>১. <strong>developers.facebook.com</strong> → Create App → <strong>WhatsApp</strong> যুক্ত করুন।</p>
+          <p>২. WhatsApp → Configuration-এ উপরের <strong>Callback URL</strong> ও <strong>Verify Token</strong> বসিয়ে Verify দিন এবং <strong>messages</strong> Webhook Subscribe করুন।</p>
+          <p>৩. API Setup থেকে <strong>Phone Number ID</strong> ও <strong>Access Token</strong> কপি করে উপরের বক্সে বসিয়ে নিচে <strong>সেভ</strong> বাটনে ক্লিক করুন!</p>
+        </div>
+
+        <div className="pt-1 flex justify-end">
+          <button
+            type="button"
+            onClick={handleSaveConfig}
+            disabled={saving}
+            className="px-6 py-3 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs flex items-center gap-2 shadow-sm disabled:opacity-60 transition"
+          >
+            <Check className="w-4 h-4" />
+            <span>{saving ? 'সংরক্ষণ হচ্ছে...' : 'সমস্ত AI, MCP ও WhatsApp সেটিংস সেভ করুন'}</span>
           </button>
         </div>
       </div>

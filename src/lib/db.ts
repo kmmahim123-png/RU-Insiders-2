@@ -36,6 +36,7 @@ export interface DatabaseSchema {
   merchants?: Merchant[];
   departments?: Record<string, CustomDepartmentData>;
   bloodDonors?: BloodDonor[];
+  whatsappSessions?: Record<string, { role: 'user' | 'assistant'; content: string; updatedAt: string }[]>;
 }
 
 const INITIAL_DB: DatabaseSchema = {
@@ -97,6 +98,8 @@ const INITIAL_DB: DatabaseSchema = {
       ],
       mcpEnabled: true,
       mcpSecretToken: '',
+      whatsappAgentEnabled: true,
+      whatsappVerifyToken: 'ru-insiders-wa-verify',
     },
     breakingNewsItems: [
       {
@@ -599,6 +602,7 @@ function ensureDbDefaults(db: DatabaseSchema): DatabaseSchema {
     products,
     merchants,
     bloodDonors,
+    whatsappSessions: db.whatsappSessions || {},
   };
 }
 

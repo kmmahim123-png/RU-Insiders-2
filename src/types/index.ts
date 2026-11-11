@@ -172,6 +172,11 @@ export interface AiConfig {
   decisionRouterEnabled?: boolean;
   decisionRouterModel?: string;
   decisionRouterApiKey?: string;
+  whatsappAgentEnabled?: boolean;
+  whatsappVerifyToken?: string;
+  whatsappPhoneNumberId?: string;
+  whatsappAccessToken?: string;
+  whatsappBridgeSecret?: string;
 }
 
 export interface ClubApplication {
