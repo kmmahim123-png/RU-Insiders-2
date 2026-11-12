@@ -292,6 +292,9 @@ export interface SiteSettings {
   breakingNews: string[];
   breakingNewsItems?: BreakingNewsItem[];
   defaultFacebookPixelId?: string;
+  metaWhatsappPhoneNumberId?: string;
+  metaWhatsappAccountId?: string;
+  metaWhatsappAccessToken?: string;
   aiConfig?: AiConfig;
 }
 

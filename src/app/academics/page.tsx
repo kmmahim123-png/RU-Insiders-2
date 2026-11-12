@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { RU_FACULTIES, RU_DEPARTMENTS, RuDepartment } from '@/lib/ruAcademicData';
 import { AlumniProfile, CustomDepartmentData } from '@/types';
+import { getContactsForDept } from '@/data/ruDirectoryData';
+import CampusDirectoryView from '@/components/CampusDirectoryView';
 import {
   GraduationCap,
   Users,
@@ -28,6 +30,7 @@ import {
 import CardTilt from '@/components/CardTilt';
 
 export default function AcademicsPage() {
+  const [activeTab, setActiveTab] = useState<'departments' | 'directory'>('departments');
   const [search, setSearch] = useState('');
   const [selectedFaculty, setSelectedFaculty] = useState<string>('all');
   const [alumniList, setAlumniList] = useState<AlumniProfile[]>([]);
@@ -199,7 +202,39 @@ export default function AcademicsPage() {
         </button>
       </div>
 
-      {/* Search & Filter Header */}
+      {/* Top View Selector: 59 Departments vs 3,877 Faculty/Staff Directory */}
+      <div className="flex flex-wrap items-center gap-3 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm max-w-xl">
+        <button
+          type="button"
+          onClick={() => setActiveTab('departments')}
+          className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-black transition flex items-center justify-center gap-2 cursor-pointer ${
+            activeTab === 'departments'
+              ? 'bg-gradient-to-r from-blue-700 to-indigo-700 text-white shadow-md'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+          }`}
+        >
+          <Building className="w-4 h-4" />
+          <span>অনুষদ ও বিভাগ পরিচিতি (৫৯টি)</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('directory')}
+          className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-black transition flex items-center justify-center gap-2 cursor-pointer ${
+            activeTab === 'directory'
+              ? 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-md'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+          }`}
+        >
+          <Phone className="w-4 h-4 text-emerald-400" />
+          <span>শিক্ষক ও কর্মকর্তা ফোনবুক (৩,৮৭৭ জন)</span>
+        </button>
+      </div>
+
+      {activeTab === 'directory' ? (
+        <CampusDirectoryView />
+      ) : (
+        <>
+          {/* Search & Filter Header */}
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="relative flex-1 max-w-md">
@@ -332,6 +367,8 @@ export default function AcademicsPage() {
           );
         })}
       </div>
+        </>
+      )}
 
       {/* ============================================================================ */}
       {/* POPUP MODAL: FACULTY / DEPARTMENT FULL DETAILS + PHOTOS + ALUMNI            */}
@@ -465,73 +502,133 @@ export default function AcademicsPage() {
             </div>
 
             {/* ============================================================================ */}
-            {/* FACULTY / TEACHERS DIRECTORY SECTION                                         */}
+            {/* FACULTY / TEACHERS DIRECTORY SECTION (Real Contacts from Base APK)           */}
             {/* ============================================================================ */}
-            <div className="space-y-3 pt-4 border-t border-slate-200">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <h3 className="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
-                    <BookOpen className="w-4 h-4 text-emerald-600" />
-                    <span>
-                      বিভাগের সম্মানিত শিক্ষকমণ্ডলী ({(customDepts[selectedDept.id]?.teachers || []).length} জন)
-                    </span>
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    স্যারদের পদবি, ফোন নম্বর, ইমেইল ও রুম নম্বর — সরাসরি AI অ্যাসিস্ট্যান্ট থেকেও খুঁজতে পারবেন।
-                  </p>
-                </div>
-              </div>
+            {(() => {
+              const customTeachers = customDepts[selectedDept.id]?.teachers || [];
+              const directoryTeachers = getContactsForDept(selectedDept.nameEn);
+              const totalTeacherCount = customTeachers.length + directoryTeachers.length;
 
-              {(customDepts[selectedDept.id]?.teachers || []).length === 0 ? (
-                <div className="bg-slate-50 rounded-2xl p-4 text-center border border-dashed border-slate-200 text-xs text-slate-500">
-                  এই বিভাগের শিক্ষকদের তথ্য অ্যাডমিন প্যানেল থেকে যুক্ত করলে এখানে প্রদর্শিত হবে।
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {(customDepts[selectedDept.id]?.teachers || []).map((teacher) => (
-                    <div
-                      key={teacher.id}
-                      className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <h4 className="text-xs sm:text-sm font-black text-slate-900">{teacher.nameBn}</h4>
-                          <p className="text-[11px] font-bold text-emerald-700">{teacher.designationBn}</p>
-                        </div>
-                        {teacher.roomBn && (
-                          <span className="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded-md font-bold text-slate-600">
-                            {teacher.roomBn}
-                          </span>
-                        )}
-                      </div>
-                      {teacher.researchAreaBn && (
-                        <p className="text-[11px] text-slate-500">গবেষণা: {teacher.researchAreaBn}</p>
-                      )}
-                      <div className="flex flex-wrap items-center gap-2 pt-1">
-                        {teacher.phone && (
-                          <a
-                            href={`tel:${teacher.phone}`}
-                            className="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-[11px] font-bold flex items-center gap-1"
-                          >
-                            <Phone className="w-3 h-3" />
-                            <span>{teacher.phone}</span>
-                          </a>
-                        )}
-                        {teacher.email && (
-                          <a
-                            href={`mailto:${teacher.email}`}
-                            className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 text-[11px] font-bold flex items-center gap-1"
-                          >
-                            <Mail className="w-3 h-3 text-blue-600" />
-                            <span>{teacher.email}</span>
-                          </a>
-                        )}
-                      </div>
+              return (
+                <div className="space-y-3 pt-4 border-t border-slate-200">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <h3 className="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
+                        <BookOpen className="w-4 h-4 text-emerald-600" />
+                        <span>
+                          বিভাগের সম্মানিত শিক্ষকমণ্ডলী ও কর্মকর্তা ({totalTeacherCount} জন)
+                        </span>
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        স্যারদের পদবি, ফোন নম্বর ও ইমেইল — সরাসরি ১-ট্যাপে কল, WhatsApp অথবা ইমেইল করুন।
+                      </p>
                     </div>
-                  ))}
+                  </div>
+
+                  {totalTeacherCount === 0 ? (
+                    <div className="bg-slate-50 rounded-2xl p-4 text-center border border-dashed border-slate-200 text-xs text-slate-500">
+                      এই বিভাগের শিক্ষকদের তথ্য শীঘ্রই আপডেট করা হচ্ছে।
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-96 overflow-y-auto pr-1">
+                      {customTeachers.map((teacher) => (
+                        <div
+                          key={teacher.id}
+                          className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <h4 className="text-xs sm:text-sm font-black text-slate-900">{teacher.nameBn}</h4>
+                              <p className="text-[11px] font-bold text-emerald-700">{teacher.designationBn}</p>
+                            </div>
+                            {teacher.roomBn && (
+                              <span className="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded-md font-bold text-slate-600">
+                                {teacher.roomBn}
+                              </span>
+                            )}
+                          </div>
+                          {teacher.researchAreaBn && (
+                            <p className="text-[11px] text-slate-500">গবেষণা: {teacher.researchAreaBn}</p>
+                          )}
+                          <div className="flex flex-wrap items-center gap-2 pt-1">
+                            {teacher.phone && (
+                              <a
+                                href={`tel:${teacher.phone}`}
+                                className="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-[11px] font-bold flex items-center gap-1"
+                              >
+                                <Phone className="w-3 h-3" />
+                                <span>{teacher.phone}</span>
+                              </a>
+                            )}
+                            {teacher.email && (
+                              <a
+                                href={`mailto:${teacher.email}`}
+                                className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 text-[11px] font-bold flex items-center gap-1"
+                              >
+                                <Mail className="w-3 h-3 text-blue-600" />
+                                <span>{teacher.email}</span>
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+
+                      {directoryTeachers.map((contact) => (
+                        <div
+                          key={`dir-${contact.id}`}
+                          className="p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-emerald-400 space-y-1.5 shadow-sm transition"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <h4 className="text-xs sm:text-sm font-black text-slate-900">{contact.name}</h4>
+                              <p className="text-[11px] font-bold text-emerald-700">{contact.designation}</p>
+                            </div>
+                            <span className="text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-md font-bold shrink-0">
+                              {contact.category === 'teacher' ? 'শিক্ষক' : 'অফিসার'}
+                            </span>
+                          </div>
+                          {contact.department && (
+                            <p className="text-[11px] text-slate-500 truncate">{contact.department}</p>
+                          )}
+                          <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                            {contact.phone && (
+                              <a
+                                href={`tel:${contact.phone}`}
+                                className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold flex items-center gap-1 transition"
+                              >
+                                <Phone className="w-3 h-3" />
+                                <span>{contact.phone}</span>
+                              </a>
+                            )}
+                            {contact.phone && (
+                              <a
+                                href={`https://wa.me/88${contact.phone.replace(/[^0-9]/g, '')}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold flex items-center gap-1 hover:bg-emerald-100 transition"
+                              >
+                                <MessageCircle className="w-3 h-3" />
+                                <span>WA</span>
+                              </a>
+                            )}
+                            {contact.email && (
+                              <a
+                                href={`mailto:${contact.email}`}
+                                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold flex items-center gap-1 transition truncate max-w-[190px]"
+                                title={contact.email}
+                              >
+                                <Mail className="w-3 h-3 text-blue-600 shrink-0" />
+                                <span className="truncate">{contact.email}</span>
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              );
+            })()}
 
             {/* ============================================================================ */}
             {/* INTEGRATED ALUMNI SECTION (User Requirement: "অ্যালামনাইও ওটার নিচেই থাকবে") */}

@@ -4,6 +4,7 @@ import { RU_DEPARTMENTS } from '@/lib/ruAcademicData';
 import { RU_CAMPUS_PLACES } from '@/lib/ruCampusSvg';
 import { RAJSHAHI_PDF_REGIONS } from '@/lib/rajshahiPdfRegions';
 import { DIVISION_SPOTS } from '@/lib/divisionSpotsData';
+import { searchRuDirectory } from '@/data/ruDirectoryData';
 
 export interface AiToolDefinition {
   name: string;
@@ -48,6 +49,26 @@ export const AI_MCP_TOOLS: AiToolDefinition[] = [
         query: {
           type: 'string',
           description: 'Department name, code, or teacher name to search for.',
+        },
+      },
+      required: ['query'],
+    },
+  },
+  {
+    name: 'search_phonebook_directory',
+    description:
+      'Search the official 3,877 Rajshahi University campus phonebook directory (teachers, professors, deans, officers, proctor, doctors, registrars, staff, and emergency admin numbers) by person name, designation, department or office name.',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: {
+          type: 'string',
+          description: 'Name, title, or department (e.g., "Proctor", "Registrar", "CSE", "Dean", "Mahbubur", "Medical Centre", "Police")',
+        },
+        category: {
+          type: 'string',
+          enum: ['all', 'teacher', 'officer', 'staff', 'emergency'],
+          description: 'Filter by category (all, teacher, officer, staff, emergency)',
         },
       },
       required: ['query'],
@@ -241,6 +262,7 @@ export async function executeAiTool(name: string, rawArgs: any = {}): Promise<an
     case 'find_department_and_teachers': {
       const q = (args.query || '').trim().toLowerCase();
       const customDepts = db.departments || {};
+      const directoryContacts = searchRuDirectory(q, 'all', 'all', 12);
 
       const combined = RU_DEPARTMENTS.map((d) => {
         const custom = customDepts[d.id];
@@ -275,11 +297,32 @@ export async function executeAiTool(name: string, rawArgs: any = {}): Promise<an
       });
 
       return {
-        totalMatches: matches.length,
-        departments: matches.slice(0, 6).map((d) => ({
+        query: q,
+        totalDeptMatches: matches.length,
+        departments: matches.slice(0, 4).map((d) => ({
           ...d,
           teacherCount: d.teachers.length,
         })),
+        verifiedPhonebookContacts: directoryContacts.map((c) => ({
+          name: c.name,
+          designation: c.designation,
+          department: c.department,
+          phone: c.phone,
+          email: c.email || null,
+          category: c.category,
+        })),
+      };
+    }
+
+    case 'search_phonebook_directory': {
+      const q = (args.query || '').trim();
+      const cat = args.category || 'all';
+      const results = searchRuDirectory(q, cat as any, 'all', 20);
+      return {
+        query: q,
+        category: cat,
+        totalFound: results.length,
+        contacts: results,
       };
     }
 

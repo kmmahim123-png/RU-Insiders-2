@@ -271,7 +271,7 @@ export default function RabianHeroOrbit() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-3 w-full">
+    <div id="rabian-hero-orbit" className="flex flex-col items-center justify-center space-y-3 w-full">
       {/* Interactive Orbital Stage */}
       <div
         ref={stageRef}

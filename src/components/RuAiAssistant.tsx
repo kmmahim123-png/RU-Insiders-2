@@ -65,29 +65,43 @@ export default function RuAiAssistant({ mode = 'floating' }: { mode?: 'embedded'
     return () => window.removeEventListener('ru_open_ai', handleOpen);
   }, []);
 
-  // Track visibility of central orbit AI hub on homepage
+  // Track visibility of central orbit AI hub on homepage (auto-hide floating button when orbit or top hero is visible)
   useEffect(() => {
     let observer: IntersectionObserver | null = null;
+    let scrollHandler: (() => void) | null = null;
+
     const checkEl = () => {
-      const el = document.getElementById('orbit-ai-center');
-      if (!el) {
+      const el = document.getElementById('orbit-ai-center') || document.getElementById('rabian-hero-orbit');
+      if (el) {
+        observer = new IntersectionObserver(
+          ([entry]) => {
+            const isTop = pathname === '/' && typeof window !== 'undefined' && window.scrollY < 380;
+            setOrbitCenterVisible(entry.isIntersecting || isTop);
+          },
+          { threshold: 0 }
+        );
+        observer.observe(el);
+      } else {
         setOrbitCenterVisible(false);
-        return;
       }
-      observer = new IntersectionObserver(
-        ([entry]) => {
-          setOrbitCenterVisible(entry.isIntersecting);
-        },
-        { threshold: 0.15 }
-      );
-      observer.observe(el);
+
+      if (pathname === '/') {
+        scrollHandler = () => {
+          const isTop = window.scrollY < 380;
+          const rect = el?.getBoundingClientRect();
+          const inView = rect ? rect.top < window.innerHeight && rect.bottom > 0 : false;
+          setOrbitCenterVisible(isTop || inView);
+        };
+        window.addEventListener('scroll', scrollHandler, { passive: true });
+        scrollHandler();
+      }
     };
 
-    // Run check after initial render / navigation
-    const t = setTimeout(checkEl, 200);
+    const t = setTimeout(checkEl, 150);
     return () => {
       clearTimeout(t);
       if (observer) observer.disconnect();
+      if (scrollHandler) window.removeEventListener('scroll', scrollHandler);
     };
   }, [pathname]);
 

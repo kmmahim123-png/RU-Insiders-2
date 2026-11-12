@@ -49,6 +49,9 @@ const INITIAL_DB: DatabaseSchema = {
     productManagerPassword: 'ru-shop-2026',
     whatsappNumber: '8801700000000',
     deliveryWhatsAppGroupUrl: 'https://chat.whatsapp.com/',
+    metaWhatsappPhoneNumberId: '1457167637475986',
+    metaWhatsappAccountId: '1754655413326949',
+    metaWhatsappAccessToken: '',
     steadfastApiKey: '',
     steadfastSecretKey: '',
     deliveryCharges: {

@@ -423,11 +423,11 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-3 md:col-span-1">
               <div className="flex items-center gap-2.5">
-                <img src="/logo.png" alt="Rabian Solution Logo" className="w-10 h-10 rounded-full border border-amber-400" />
-                <span className="font-black text-lg text-white">Rabian Solution</span>
+                <img src="/logo.png" alt="রাবিয়ান" className="w-10 h-10 rounded-full border border-amber-400" />
+                <span className="font-black text-xl text-white">রাবিয়ান</span>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed">
-                রাজশাহী বিশ্ববিদ্যালয়ের স্মার্ট ক্যাম্পাস সলিউশন — একাডেমিক, ক্লাব, ব্লাড ব্যাংক, ডিজিটাল ম্যাপ ও ক্যাম্পাস কালেকশন এক প্ল্যাটফর্মে।
+                রাজশাহী বিশ্ববিদ্যালয়ের ডিজিটাল ক্যাম্পাস প্ল্যাটফর্ম — বাস শিডিউল, ম্যারাথন, শিক্ষক ও কর্মকর্তা ডিরেক্টরি, রক্তদান ও ক্যাম্পাস সেবা।
               </p>
             </div>
 
@@ -469,7 +469,7 @@ export default function HomePage() {
           </div>
 
           <div className="pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2">
-            <p>© {new Date().getFullYear()} Rabian Solution. সর্বস্বত্ব সংরক্ষিত।</p>
+            <p>© {new Date().getFullYear()} রাবিয়ান (Rabian). সর্বস্বত্ব সংরক্ষিত।</p>
             <p>রাজশাহী বিশ্ববিদ্যালয় • মতিহার, রাজশাহী-৬২০৫</p>
           </div>
         </div>
