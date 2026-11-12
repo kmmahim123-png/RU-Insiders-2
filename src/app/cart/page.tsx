@@ -251,9 +251,9 @@ export default function CartAndCheckoutPage() {
             <div className="flex items-center gap-3">
               <img src="/logo.png" alt="Rabian Logo" className="w-12 h-12 rounded-full border border-amber-400" />
               <div>
-                <h2 className="text-xl font-black text-slate-900 tracking-tight">Rabian Solution</h2>
+                <h2 className="text-xl font-black text-slate-900 tracking-tight">রাবিয়ান (Rabian)</h2>
                 <p className="text-xs text-slate-500 font-semibold">
-                  রাজশাহী বিশ্ববিদ্যালয় স্মার্ট ক্যাম্পাস সলিউশন
+                  রাজশাহী বিশ্ববিদ্যালয় স্মার্ট ক্যাম্পাস প্ল্যাটফর্ম
                 </p>
               </div>
             </div>

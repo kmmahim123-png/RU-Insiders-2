@@ -149,6 +149,7 @@ export async function GET(req: NextRequest) {
         ...d,
         phone: d.isPublicPhone !== false ? d.phone : '',
       })),
+      marathons: db.marathons || [],
       articles: db.articles.filter((a) => a.status === 'Published'),
       alumni: db.alumni.filter((al) => al.approved),
       notifications: db.notifications,
@@ -472,6 +473,89 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ ok: false, error: 'এই নম্বরে কোনো রক্তদাতা খুঁজে পাওয়া যায়নি।' }, { status: 404 });
       }
       return NextResponse.json({ ok: true, bloodDonors: updatedDb.bloodDonors });
+    }
+
+    // 6.5 Marathon Participant Registration (Public Form)
+    if (action === 'REGISTER_MARATHON') {
+      const {
+        marathonId,
+        name,
+        phone,
+        email,
+        department,
+        studentId,
+        session,
+        gender,
+        tShirtSize,
+        bloodGroup,
+        emergencyContact,
+      } = payload || {};
+
+      if (!marathonId || !name || !phone || !department || !studentId || !emergencyContact) {
+        return NextResponse.json(
+          { ok: false, error: 'সব প্রয়োজনীয় তথ্য (নাম, ফোন, বিভাগ, রোল/আইডি, জরুরি নম্বর) সঠিকভাবে দিন!' },
+          { status: 400 }
+        );
+      }
+
+      const marathon = (db.marathons || []).find((m) => m.id === marathonId);
+      if (!marathon) {
+        return NextResponse.json({ ok: false, error: 'ম্যারাথন ইভেন্টটি পাওয়া যায়নি।' }, { status: 404 });
+      }
+
+      if (marathon.isOpen === false) {
+        return NextResponse.json(
+          { ok: false, error: 'দুঃখিত, এই ম্যারাথনের অনলাইন আবেদন বর্তমানে বন্ধ রয়েছে।' },
+          { status: 400 }
+        );
+      }
+
+      if (marathon.deadline && new Date(marathon.deadline).getTime() < Date.now()) {
+        return NextResponse.json(
+          { ok: false, error: 'দুঃখিত, আবেদনের নির্ধারিত সময়সীমা (Deadline) অতিক্রান্ত হয়েছে।' },
+          { status: 400 }
+        );
+      }
+
+      const existingRegistrations = (db.marathonRegistrations || []).filter(
+        (r) => r.marathonId === marathonId
+      );
+      if (marathon.maxParticipants && existingRegistrations.length >= marathon.maxParticipants) {
+        return NextResponse.json(
+          { ok: false, error: 'দুঃখিত, ম্যারাথনের সকল আসন পূর্ণ হয়ে গেছে।' },
+          { status: 400 }
+        );
+      }
+
+      const bibNumber = `RBN-${String(existingRegistrations.length + 1).padStart(3, '0')}`;
+      const newRegistration = {
+        id: `mreg_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        marathonId,
+        name: String(name).trim(),
+        phone: String(phone).trim(),
+        email: String(email || '').trim(),
+        department: String(department).trim(),
+        studentId: String(studentId).trim(),
+        session: String(session || '').trim(),
+        gender: gender || 'male',
+        tShirtSize: tShirtSize || 'L',
+        bloodGroup: String(bloodGroup || '').trim(),
+        emergencyContact: String(emergencyContact).trim(),
+        status: 'confirmed' as const,
+        bibNumber,
+        createdAt: new Date().toISOString(),
+      };
+
+      const updatedDb = await writeDb((state) => ({
+        ...state,
+        marathonRegistrations: [newRegistration, ...(state.marathonRegistrations || [])],
+      }));
+
+      return NextResponse.json({
+        ok: true,
+        registration: newRegistration,
+        marathonRegistrations: updatedDb.marathonRegistrations,
+      });
     }
 
     // 7. Notification Subscribe
@@ -1144,6 +1228,67 @@ export async function POST(req: NextRequest) {
           bloodDonors: (state.bloodDonors || []).filter((d) => d.id !== payload?.donorId),
         }));
         return NextResponse.json({ ok: true, bloodDonors: updatedDb.bloodDonors });
+      }
+
+      // Marathon Management (Super Admin)
+      if (action === 'SAVE_MARATHON') {
+        const marathonData = payload?.marathon;
+        if (!marathonData || !marathonData.title) {
+          return NextResponse.json({ ok: false, error: 'ম্যারাথনের সঠিক শিরোনাম দিন।' }, { status: 400 });
+        }
+        const updatedDb = await writeDb((state) => {
+          const list = [...(state.marathons || [])];
+          const idx = list.findIndex((m) => m.id === marathonData.id);
+          if (idx >= 0) {
+            list[idx] = { ...list[idx], ...marathonData };
+          } else {
+            list.unshift({
+              ...marathonData,
+              id: marathonData.id || `marathon_${Date.now()}`,
+              createdAt: new Date().toISOString(),
+            });
+          }
+          return { ...state, marathons: list };
+        });
+        return NextResponse.json({ ok: true, marathons: updatedDb.marathons });
+      }
+
+      if (action === 'TOGGLE_MARATHON_REGISTRATION') {
+        const { marathonId, isOpen } = payload || {};
+        const updatedDb = await writeDb((state) => ({
+          ...state,
+          marathons: (state.marathons || []).map((m) =>
+            m.id === marathonId ? { ...m, isOpen: Boolean(isOpen) } : m
+          ),
+        }));
+        return NextResponse.json({ ok: true, marathons: updatedDb.marathons });
+      }
+
+      if (action === 'DELETE_MARATHON') {
+        const { marathonId } = payload || {};
+        const updatedDb = await writeDb((state) => ({
+          ...state,
+          marathons: (state.marathons || []).filter((m) => m.id !== marathonId),
+          marathonRegistrations: (state.marathonRegistrations || []).filter(
+            (r) => r.marathonId !== marathonId
+          ),
+        }));
+        return NextResponse.json({
+          ok: true,
+          marathons: updatedDb.marathons,
+          marathonRegistrations: updatedDb.marathonRegistrations,
+        });
+      }
+
+      if (action === 'DELETE_MARATHON_REGISTRATION') {
+        const { registrationId } = payload || {};
+        const updatedDb = await writeDb((state) => ({
+          ...state,
+          marathonRegistrations: (state.marathonRegistrations || []).filter(
+            (r) => r.id !== registrationId
+          ),
+        }));
+        return NextResponse.json({ ok: true, marathonRegistrations: updatedDb.marathonRegistrations });
       }
 
       if (action === 'SAVE_AI_CONFIG') {

@@ -1,7 +1,7 @@
 {
-  "name": "Rabian Solution | রাজশাহী বিশ্ববিদ্যালয় স্মার্ট ক্যাম্পাস সলিউশন",
-  "short_name": "Rabian",
-  "description": "Rabian Solution — রাবি ক্লাব, বিভাগ, ব্লাড ব্যাংক, ৩-ধাপের ভেক্টর ওয়াটার ম্যাপ, নিউজ, শপ ও অ্যাপ-অনলি AI অ্যাসিস্ট্যান্ট।",
+  "name": "রাবিয়ান | রাজশাহী বিশ্ববিদ্যালয় ক্যাম্পাস প্ল্যাটফর্ম",
+  "short_name": "রাবিয়ান",
+  "description": "রাবিয়ান — রাবি বাস শিডিউল ও লাইভ টাইমার, মাসিক ক্যাম্পাস ম্যারাথন, ক্লাব, বিভাগ, ৯০-দিন ব্লাড ব্যাংক ও ৩-ধাপের ওয়াটার ম্যাপ।",
   "start_url": "/?source=app",
   "display": "standalone",
   "background_color": "#0c2419",
@@ -19,6 +19,22 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "বাস ছাড়ার লাইভ টাইমার",
+      "short_name": "বাস টাইমার",
+      "description": "পরবর্তী রাবি বাস কখন ছাড়বে তার লাইভ কাউন্টডাউন",
+      "url": "/bus?widget=1",
+      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "মাসিক ক্যাম্পাস ম্যারাথন",
+      "short_name": "ম্যারাথন",
+      "description": "রাবিয়ান ক্যাম্পাস ম্যারাথন ও আবেদন",
+      "url": "/marathon",
+      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
     }
   ]
 }

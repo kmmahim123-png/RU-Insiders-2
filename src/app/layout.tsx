@@ -8,8 +8,8 @@ import MetaPixelTracker from '@/components/MetaPixelTracker';
 import RuAiAssistant from '@/components/RuAiAssistant';
 
 export const metadata: Metadata = {
-  title: 'Rabian Solution | রাজশাহী বিশ্ববিদ্যালয় স্মার্ট ক্যাম্পাস সলিউশন',
-  description: 'Rabian Solution — রাবি ক্লাব, ৫৯ বিভাগ ও শিক্ষক ডিরেক্টরি, ৯০-দিন ব্লাড ব্যাংক, ৩-ধাপের ইন্টারঅ্যাক্টিভ ম্যাপ, নিউজ ও ক্যাম্পাস সেবা।',
+  title: 'রাবিয়ান | রাজশাহী বিশ্ববিদ্যালয় স্মার্ট ক্যাম্পাস প্ল্যাটফর্ম',
+  description: 'রাবিয়ান (Rabian) — রাবি বাস শিডিউল ও লাইভ টাইমার, মাসিক ক্যাম্পাস ম্যারাথন, ক্লাব, ৫৯ বিভাগ ও শিক্ষক ডিরেক্টরি, ৯০-দিন ব্লাড ব্যাংক ও ৩-ধাপের ইন্টারঅ্যাক্টিভ ম্যাপ।',
   manifest: '/manifest.json',
   icons: {
     icon: '/logo.png',

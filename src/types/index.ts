@@ -294,3 +294,41 @@ export interface SiteSettings {
   defaultFacebookPixelId?: string;
   aiConfig?: AiConfig;
 }
+
+export interface MarathonEvent {
+  id: string;
+  title: string; // e.g. "রাবিয়ান ক্যাম্পাস রান ২০২৬"
+  edition: string; // e.g. "১ম সংস্করণ - নভেম্বর ২০২৬"
+  date: string; // e.g. "২০২৬-১১-৩০"
+  time: string; // e.g. "সকাল ০৬:৩০"
+  distance: string; // e.g. "৫ কিমি / ৭.৫ কিমি"
+  route: string; // e.g. "সাবাশ বাংলাদেশ চত্বর -> প্যারিস রোড -> কাজলা গেট -> জোহা চত্বর -> শহীদ মিনার"
+  registrationFee: number; // e.g. 0 বা ৫০
+  deadline: string; // ISO date-time string e.g. "2026-11-28T23:59:59.000Z"
+  isOpen: boolean; // Admin can toggle on/off
+  description: string;
+  rewards: string[]; // e.g. ['মেডেল ও সনদপত্র', 'অফিশিয়াল রানিং টি-শার্ট', 'রিফ্রেশমেন্ট ও স্ন্যাক্স']
+  maxParticipants: number;
+  contactNumber?: string;
+  bannerImage?: string;
+  createdAt: string;
+}
+
+export interface MarathonRegistration {
+  id: string;
+  marathonId: string;
+  name: string;
+  phone: string;
+  email?: string;
+  department: string;
+  studentId: string;
+  session?: string;
+  gender: 'male' | 'female' | 'other';
+  tShirtSize: 'S' | 'M' | 'L' | 'XL' | 'XXL';
+  bloodGroup?: string;
+  emergencyContact: string;
+  status: 'confirmed' | 'pending';
+  bibNumber?: string; // e.g. "RBN-042"
+  createdAt: string;
+}
+

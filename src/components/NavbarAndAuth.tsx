@@ -330,11 +330,11 @@ export default function NavbarAndAuth() {
             <img src="/logo-center.png" alt="Rabian" className="absolute inset-0 w-full h-full object-contain p-2" />
             <img src="/logo-hands.png" alt="Rotating Hands" className="absolute inset-0 w-full h-full object-contain animate-[spin_12s_linear_infinite]" />
           </div>
-          <h1 className="mt-6 text-3xl sm:text-5xl font-extrabold tracking-tight drop-shadow-lg">
-            Rabian Solution
+          <h1 className="mt-6 text-3xl sm:text-5xl font-black tracking-tight drop-shadow-lg">
+            রাবিয়ান
           </h1>
-          <p className="mt-2 text-sm sm:text-base text-amber-300 font-medium text-center px-4">
-            রাজশাহী বিশ্ববিদ্যালয় স্মার্ট ক্যাম্পাস সলিউশন ও ডিজিটাল হাব
+          <p className="mt-2 text-sm sm:text-base text-amber-300 font-bold text-center px-4">
+            রাজশাহী বিশ্ববিদ্যালয় স্মার্ট ক্যাম্পাস প্ল্যাটফর্ম ও ডিজিটাল হাব
           </p>
           <p className="mt-6 text-xs text-emerald-200/80 bg-white/10 px-4 py-1.5 rounded-full backdrop-blur-sm">
             প্রবেশ করতে যেকোনো স্থানে স্পর্শ করুন
@@ -361,15 +361,15 @@ export default function NavbarAndAuth() {
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-base sm:text-xl text-slate-900 tracking-tight group-hover:text-blue-700 transition whitespace-nowrap">
-                  Rabian Solution
+                <span className="font-black text-lg sm:text-2xl text-slate-900 tracking-tight group-hover:text-emerald-700 transition whitespace-nowrap">
+                  রাবিয়ান
                 </span>
-                <span className="hidden xs:inline-block bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0">
-                  অফিশিয়াল
+                <span className="hidden xs:inline-block bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold px-2 py-0.5 rounded-full shrink-0">
+                  Rabian
                 </span>
               </div>
-              <p className="hidden sm:inline-block text-[11px] text-slate-500">
-                রাজশাহী বিশ্ববিদ্যালয় স্মার্ট ক্যাম্পাস সলিউশন
+              <p className="hidden sm:inline-block text-[11px] text-slate-500 font-medium">
+                রাজশাহী বিশ্ববিদ্যালয় স্মার্ট ক্যাম্পাস প্ল্যাটফর্ম
               </p>
             </div>
           </Link>
@@ -378,6 +378,8 @@ export default function NavbarAndAuth() {
           <nav className="hidden lg:flex items-center gap-1">
             {[
               { href: '/shop', label: 'শপ' },
+              { href: '/bus', label: '🚌 বাস' },
+              { href: '/marathon', label: '🏃‍♂️ ম্যারাথন' },
               { href: '/inside-ru', label: 'নিউজ ও সাহিত্য' },
               { href: '/academics', label: 'বিভাগ ও স্যার' },
               { href: '/blood', label: '🩸 রক্তদান' },
@@ -753,6 +755,8 @@ export default function NavbarAndAuth() {
             <div className="space-y-1">
               {[
                 { href: '/', label: '🏠 হোমপেজ' },
+                { href: '/bus', label: '🚌 রাবি বাস শিডিউল ও টাইমার' },
+                { href: '/marathon', label: '🏃‍♂️ মাসিক ক্যাম্পাস ম্যারাথন' },
                 { href: '/shop', label: '🛍️ শপ (হুডি, খেজুরের গুড়, নাড়ু)' },
                 { href: '/map', label: '🗺️ ৩-ধাপের ওয়াটার ম্যাপ ও সনদ' },
                 { href: '/inside-ru', label: '📰 নিউজ, সাহিত্য ও গবেষণা' },

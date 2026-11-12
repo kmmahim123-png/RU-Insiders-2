@@ -1,7 +1,9 @@
-// Rabian Solution Offline Service Worker
-const CACHE_NAME = 'rabian-solution-cache-v4';
+// Rabian Offline Service Worker
+const CACHE_NAME = 'rabian-cache-v5';
 const OFFLINE_URLS = [
   '/',
+  '/bus',
+  '/marathon',
   '/map',
   '/shop',
   '/merchant',

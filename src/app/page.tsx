@@ -13,6 +13,8 @@ import {
   HeartPulse,
   PlusCircle,
   Compass,
+  Bus,
+  Flame,
 } from 'lucide-react';
 import { Product, InsideRuArticle, BloodDonor } from '@/types';
 import { calculateDonorEligibility } from '@/lib/bloodUtils';
@@ -46,81 +48,96 @@ export default function HomePage() {
 
   return (
     <div className="space-y-12 sm:space-y-16 pb-12">
-      {/* 1. HERO SECTION */}
-      <section className="relative overflow-hidden bg-emerald-950 text-white min-h-[520px] sm:min-h-[580px] flex items-center">
+      {/* 1. HERO SECTION WITH GOL CHOTTOR (HERO ORBIT) PROMINENTLY AT TOP UNDER BREAKING NEWS */}
+      <section className="relative overflow-hidden bg-emerald-950 text-white flex flex-col items-center pt-4 pb-12 sm:pb-16">
         {/* Background Image with Deep Emerald Overlay */}
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: `linear-gradient(to right, rgba(2, 44, 34, 0.96) 0%, rgba(6, 78, 59, 0.88) 60%, rgba(2, 44, 34, 0.94) 100%), url('/campus/paris-road-rain.jpg')`,
+            backgroundImage: `linear-gradient(to bottom, rgba(2, 44, 34, 0.94) 0%, rgba(6, 78, 59, 0.90) 50%, rgba(2, 44, 34, 0.98) 100%), url('/campus/paris-road-rain.jpg')`,
           }}
         />
 
         {/* Paris Road Seasonal Ambient Particles (Leaves / Rain / Mist) */}
         <SeasonalParticles defaultMode="leaves" className="absolute inset-0" />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-16 w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
-          {/* Left Column: Clean Rabian Solution Identity + Focused Primary Actions */}
-          <div className="lg:col-span-7 space-y-5 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 backdrop-blur-md px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-extrabold text-amber-300 shadow-sm">
-              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />
-              <span>Rabian Solution • রাজশাহী বিশ্ববিদ্যালয় স্মার্ট ক্যাম্পাস সলিউশন</span>
-            </div>
-
-            <div className="space-y-3">
-              <h1 className="text-2xl sm:text-5xl font-black tracking-tight leading-[1.22] sm:leading-[1.15]">
-                Rabian Solution — রাবি শিক্ষার্থীদের সব ডিজিটাল সেবা এক প্ল্যাটফর্মে
-              </h1>
-              <p className="text-xs sm:text-base text-emerald-100/90 leading-relaxed max-w-xl mx-auto lg:mx-0 font-medium">
-                ক্লাব মেম্বারশিপ, ৫৯ বিভাগ ও স্যারদের ডিরেক্টরি, ৯০-দিন ব্লাড ব্যাংক, ৩-ধাপের ম্যাপ, নিউজ পোর্টাল ও ক্যাম্পাস কালেকশন — সবকিছু এখন একটি গোছানো সমাধানের ছায়ায়।
-              </p>
-            </div>
-
-            {/* Only 2 Clean Uncluttered Primary Actions (all 6 modules orbit cleanly alongside!) */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5 sm:gap-3 pt-1">
-              <Link
-                href="/shop"
-                className="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs sm:text-sm shadow-xl flex items-center justify-center gap-2 emil-press"
-              >
-                <ShoppingBag className="w-4 h-4 text-slate-950" />
-                <span>সলিউশন ও শপ দেখুন →</span>
-              </Link>
-
-              <a
-                href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('আসসালামু আলাইকুম! আমি Rabian Solution থেকে সেবা বা তথ্য জানতে চাই।')}`}
-                target="_blank"
-                rel="noreferrer"
-                className="px-5 py-3 rounded-2xl bg-emerald-600/90 hover:bg-emerald-600 border border-emerald-400/40 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 emil-press shadow-md"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span>WhatsApp যোগাযোগ</span>
-              </a>
-            </div>
-
-            {/* Compact Trust Pillars */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-4 border-t border-white/15 max-w-2xl mx-auto lg:mx-0 text-[11px] font-bold text-emerald-200">
-              <div className="flex items-center justify-center lg:justify-start gap-1.5">
-                <Trophy className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                <span>সকল ক্লাব ও আবেদন</span>
-              </div>
-              <div className="flex items-center justify-center lg:justify-start gap-1.5">
-                <GraduationCap className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                <span>৫৯ বিভাগ ও স্যার</span>
-              </div>
-              <div className="flex items-center justify-center lg:justify-start gap-1.5">
-                <HeartPulse className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                <span>৯০-দিন ব্লাড ব্যাংক</span>
-              </div>
-              <div className="flex items-center justify-center lg:justify-start gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                <span>১০০% ভেরিফাইড সেবা</span>
-              </div>
-            </div>
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 w-full flex flex-col items-center text-center space-y-6">
+          {/* Top Brand Pill */}
+          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-black text-amber-300 shadow-sm">
+            <Sparkles className="w-4 h-4 text-amber-400" />
+            <span>রাবিয়ান • রাজশাহী বিশ্ববিদ্যালয় স্মার্ট ক্যাম্পাস প্ল্যাটফর্ম</span>
           </div>
 
-          {/* Right Column: Movable Orbital Worker-Ant Icon Showcase & Central AI Observer */}
-          <div className="lg:col-span-5 flex items-center justify-center">
+          {/* গোল চত্বর: THE ORBITAL SERVICE CIRCLE DIRECTLY AT TOP UNDER BREAKING NEWS */}
+          <div className="w-full flex items-center justify-center py-1">
             <RabianHeroOrbit />
+          </div>
+
+          {/* Brand Headline in Bengali */}
+          <div className="space-y-2.5 max-w-2xl mx-auto">
+            <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-[1.2]">
+              রাবিয়ান — রাবি শিক্ষার্থীদের সব ডিজিটাল সেবা এক চত্বরে
+            </h1>
+            <p className="text-xs sm:text-base text-emerald-100/90 leading-relaxed font-medium">
+              বাস শিডিউল ও লাইভ টাইমার, মাসিক ক্যাম্পাস ম্যারাথন, ক্লাব মেম্বারশিপ, ৫৯ বিভাগ ও শিক্ষক ডিরেক্টরি, ৯০-দিন ব্লাড ব্যাংক ও ৩-ধাপের ওয়াটার ম্যাপ।
+            </p>
+          </div>
+
+          {/* Quick Primary Actions */}
+          <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3.5 pt-1">
+            <Link
+              href="/bus"
+              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs sm:text-sm shadow-xl flex items-center justify-center gap-2 emil-press border border-emerald-400/40"
+            >
+              <Bus className="w-4 h-4" />
+              <span>🚌 বাস শিডিউল ও লাইভ টাইমার</span>
+            </Link>
+
+            <Link
+              href="/marathon"
+              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-white font-black text-xs sm:text-sm shadow-xl flex items-center justify-center gap-2 emil-press border border-amber-300/40"
+            >
+              <Flame className="w-4 h-4" />
+              <span>🏃‍♂️ মাসিক ম্যারাথন আবেদন</span>
+            </Link>
+
+            <Link
+              href="/shop"
+              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs sm:text-sm shadow-xl flex items-center justify-center gap-2 emil-press"
+            >
+              <ShoppingBag className="w-4 h-4 text-slate-950" />
+              <span>শপ ও কালেকশন →</span>
+            </Link>
+
+            <a
+              href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('আসসালামু আলাইকুম! আমি রাবিয়ান থেকে সরাসরি যোগাযোগ করছি।')}`}
+              target="_blank"
+              rel="noreferrer"
+              className="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/25 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 emil-press shadow-md backdrop-blur-sm"
+            >
+              <MessageCircle className="w-4 h-4 text-emerald-300" />
+              <span>WhatsApp চ্যাট</span>
+            </a>
+          </div>
+
+          {/* Compact Trust Pillars */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-white/15 w-full max-w-2xl text-[11px] sm:text-xs font-bold text-emerald-200">
+            <div className="flex items-center justify-center gap-1.5">
+              <Trophy className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span>সকল ক্লাব ও আবেদন</span>
+            </div>
+            <div className="flex items-center justify-center gap-1.5">
+              <GraduationCap className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span>৫৯ বিভাগ ও স্যার</span>
+            </div>
+            <div className="flex items-center justify-center gap-1.5">
+              <HeartPulse className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span>৯০-দিন ব্লাড ব্যাংক</span>
+            </div>
+            <div className="flex items-center justify-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span>১০০% ভেরিফাইড সেবা</span>
+            </div>
           </div>
         </div>
       </section>

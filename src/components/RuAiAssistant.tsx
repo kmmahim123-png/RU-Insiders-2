@@ -47,11 +47,12 @@ export default function RuAiAssistant({ mode = 'floating' }: { mode?: 'embedded'
   const pathname = usePathname();
   const isInstalledApp = useIsInstalledApp();
   const [isOpen, setIsOpen] = useState(false);
+  const [orbitCenterVisible, setOrbitCenterVisible] = useState(false);
   const [messages, setMessages] = useState<AiChatMsg[]>([
     {
       role: 'assistant',
       content:
-        'আসসালামু আলাইকুম! আমি Rabian স্মার্ট AI ও MCP অ্যাসিস্ট্যান্ট 🤖\n\nআমি সরাসরি লাইভ ডেটাবেজ থেকে:\n• যেকোনো গ্রুপের রক্তদাতা (৯০ দিনের হিসাব ও ফোন নম্বর)\n• ডিপার্টমেন্ট ও স্যারদের কন্টাক্ট তথ্য\n• শপের পণ্য সার্চ ও কথা বলেই অর্ডার প্লেস (`১. ইনটেক`)\n• ক্যাম্পাস ম্যাপ ও অর্ডার ট্র্যাকিং — সবকিছু করে দিতে পারি! কী জানতে বা অর্ডার করতে চান বলুন।',
+        'আসসালামু আলাইকুম! আমি রাবিয়ান (Rabian) স্মার্ট AI ও MCP অ্যাসিস্ট্যান্ট 🤖\n\nআমি সরাসরি লাইভ ডেটাবেজ থেকে:\n• রাবি বাস চলাচল ও পরবর্তী বাস ছাড়ার লাইভ কাউন্টডাউন\n• মাসিক ক্যাম্পাস ম্যারাথন ও রেজিস্ট্রেশন তথ্য\n• যেকোনো গ্রুপের রক্তদাতা (৯০ দিনের হিসাব ও ফোন নম্বর)\n• ডিপার্টমেন্ট ও স্যারদের কন্টাক্ট তথ্য\n• শপের পণ্য সার্চ ও কথা বলেই সরাসরি অর্ডার প্লেস\n• ক্যাম্পাস ম্যাপ ও অর্ডার ট্র্যাকিং — সবকিছু করে দিতে পারি! কী জানতে বা করতে চান বলুন।',
     },
   ]);
   const [input, setInput] = useState('');
@@ -63,6 +64,32 @@ export default function RuAiAssistant({ mode = 'floating' }: { mode?: 'embedded'
     window.addEventListener('ru_open_ai', handleOpen);
     return () => window.removeEventListener('ru_open_ai', handleOpen);
   }, []);
+
+  // Track visibility of central orbit AI hub on homepage
+  useEffect(() => {
+    let observer: IntersectionObserver | null = null;
+    const checkEl = () => {
+      const el = document.getElementById('orbit-ai-center');
+      if (!el) {
+        setOrbitCenterVisible(false);
+        return;
+      }
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          setOrbitCenterVisible(entry.isIntersecting);
+        },
+        { threshold: 0.15 }
+      );
+      observer.observe(el);
+    };
+
+    // Run check after initial render / navigation
+    const t = setTimeout(checkEl, 200);
+    return () => {
+      clearTimeout(t);
+      if (observer) observer.disconnect();
+    };
+  }, [pathname]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -143,7 +170,7 @@ export default function RuAiAssistant({ mode = 'floating' }: { mode?: 'embedded'
           </div>
           <div className="min-w-0">
             <h3 className="text-sm font-black truncate flex items-center gap-1.5">
-              <span>Rabian AI অ্যাসিস্ট্যান্ট</span>
+              <span>রাবিয়ান AI অ্যাসিস্ট্যান্ট</span>
               <span className="text-[10px] bg-emerald-500/30 border border-emerald-400/40 text-emerald-200 px-1.5 py-0.2 rounded font-bold">
                 MCP
               </span>
@@ -278,7 +305,13 @@ export default function RuAiAssistant({ mode = 'floating' }: { mode?: 'embedded'
   }
 
   return (
-    <div className="fixed bottom-20 lg:bottom-6 right-3 sm:right-6 z-40">
+    <div
+      className={`fixed bottom-20 lg:bottom-6 right-3 sm:right-6 z-40 transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+        orbitCenterVisible && !isOpen
+          ? 'opacity-0 pointer-events-none translate-y-8 scale-90'
+          : 'opacity-100 pointer-events-auto translate-y-0 scale-100'
+      }`}
+    >
       {isOpen ? (
         <div className="emil-pop-br">
           {renderChatBox(false)}
@@ -288,7 +321,7 @@ export default function RuAiAssistant({ mode = 'floating' }: { mode?: 'embedded'
           type="button"
           onClick={() => setIsOpen(true)}
           className="group flex items-center gap-2 pl-3.5 pr-4 py-3 rounded-full bg-gradient-to-r from-emerald-800 to-teal-700 hover:from-emerald-700 hover:to-teal-600 text-white shadow-xl border-2 border-amber-400/70 transition-[transform,box-shadow,background-color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:scale-[1.03] active:scale-[0.97] cursor-pointer"
-          title="Rabian AI অ্যাসিস্ট্যান্ট"
+          title="রাবিয়ান AI অ্যাসিস্ট্যান্ট"
         >
           <span className="w-7 h-7 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center">
             <Bot className="w-4 h-4" />

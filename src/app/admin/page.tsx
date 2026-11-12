@@ -56,6 +56,8 @@ import {
   BreakingNewsItem,
   BloodDonor,
   FacultyMember,
+  MarathonEvent,
+  MarathonRegistration,
 } from '@/types';
 import { RU_CAMPUS_PLACES } from '@/lib/ruCampusSvg';
 import { RAJSHAHI_PDF_REGIONS } from '@/lib/rajshahiPdfRegions';
@@ -63,6 +65,7 @@ import { DIVISION_DISTRICT_META } from '@/lib/divisionSpotsData';
 import { RU_DEPARTMENTS, RU_FACULTIES, RuDepartment } from '@/lib/ruAcademicData';
 import { RU_CLUBS, RuClub } from '@/lib/ruClubsData';
 import AdminBloodTab from '@/components/admin/AdminBloodTab';
+import AdminMarathonTab from '@/components/admin/AdminMarathonTab';
 import AdminAiStudioTab from '@/components/admin/AdminAiStudioTab';
 
 export default function AdminPage() {
@@ -75,12 +78,14 @@ export default function AdminPage() {
 
   // Super Admin / Shared state
   const [activeTab, setActiveTab] = useState<
-    'products' | 'orders' | 'map' | 'articles' | 'departments' | 'alumni' | 'clubs' | 'merchants' | 'blood' | 'ai' | 'settings'
+    'products' | 'orders' | 'map' | 'articles' | 'departments' | 'alumni' | 'clubs' | 'merchants' | 'blood' | 'marathon' | 'ai' | 'settings'
   >('products');
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [merchants, setMerchants] = useState<Merchant[]>([]);
   const [bloodDonors, setBloodDonors] = useState<BloodDonor[]>([]);
+  const [marathons, setMarathons] = useState<MarathonEvent[]>([]);
+  const [marathonRegistrations, setMarathonRegistrations] = useState<MarathonRegistration[]>([]);
   const [mapSpots, setMapSpots] = useState<Record<string, MapSpotCustomData>>({});
   const [clubs, setClubs] = useState<ClubInfo[]>([]);
   const [departments, setDepartments] = useState<Record<string, CustomDepartmentData>>({});
@@ -174,6 +179,8 @@ export default function AdminPage() {
           setAlumni(db.alumni || []);
           setMerchants(db.merchants || []);
           setBloodDonors(db.bloodDonors || []);
+          setMarathons(db.marathons || []);
+          setMarathonRegistrations(db.marathonRegistrations || []);
           setSettings(db.settings || null);
           setActiveTab('products');
           if (RU_DEPARTMENTS.length > 0) {
@@ -248,6 +255,8 @@ export default function AdminPage() {
               setAlumni(db.alumni || []);
               setMerchants(db.merchants || []);
               setBloodDonors(db.bloodDonors || []);
+              setMarathons(db.marathons || []);
+              setMarathonRegistrations(db.marathonRegistrations || []);
               setSettings(db.settings || null);
               if (RU_DEPARTMENTS.length > 0) {
                 const firstD = RU_DEPARTMENTS[0];
@@ -1775,6 +1784,18 @@ export default function AdminPage() {
                 </button>
 
                 <button
+                  onClick={() => setActiveTab('marathon')}
+                  className={`py-2 px-4 rounded-xl text-xs font-extrabold shrink-0 transition flex items-center gap-1.5 ${
+                    activeTab === 'marathon'
+                      ? 'bg-amber-600 text-white shadow-sm'
+                      : 'bg-white border border-slate-200 text-slate-700 hover:bg-amber-50'
+                  }`}
+                >
+                  <Flame className="w-4 h-4 text-amber-500" />
+                  <span>🏃‍♂️ ম্যারাথন ({marathonRegistrations.length})</span>
+                </button>
+
+                <button
                   onClick={() => setActiveTab('ai')}
                   className={`py-2 px-4 rounded-xl text-xs font-extrabold shrink-0 transition flex items-center gap-1.5 ${
                     activeTab === 'ai'
@@ -3149,6 +3170,21 @@ export default function AdminPage() {
               password={getActivePass()}
               safeParseApiResponse={safeParseApiResponse}
               onUpdated={(donors) => setBloodDonors(donors)}
+              showToast={showToast}
+            />
+          )}
+
+          {/* ============================================================================ */}
+          {/* TAB 6.6: MONTHLY CAMPUS MARATHON MANAGER (Super Admin) */}
+          {/* ============================================================================ */}
+          {role === 'SUPER_ADMIN' && activeTab === 'marathon' && (
+            <AdminMarathonTab
+              marathons={marathons}
+              registrations={marathonRegistrations}
+              password={getActivePass()}
+              safeParseApiResponse={safeParseApiResponse}
+              onMarathonsUpdated={(updated) => setMarathons(updated)}
+              onRegistrationsUpdated={(updated) => setMarathonRegistrations(updated)}
               showToast={showToast}
             />
           )}

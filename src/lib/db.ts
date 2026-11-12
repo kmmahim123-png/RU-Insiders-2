@@ -14,6 +14,8 @@ import {
   CustomDepartmentData,
   Merchant,
   BloodDonor,
+  MarathonEvent,
+  MarathonRegistration,
 } from '@/types';
 
 // Path resolution supporting both local development and Vercel serverless runtime
@@ -36,6 +38,8 @@ export interface DatabaseSchema {
   merchants?: Merchant[];
   departments?: Record<string, CustomDepartmentData>;
   bloodDonors?: BloodDonor[];
+  marathons?: MarathonEvent[];
+  marathonRegistrations?: MarathonRegistration[];
   whatsappSessions?: Record<string, { role: 'user' | 'assistant'; content: string; updatedAt: string }[]>;
 }
 
@@ -77,7 +81,7 @@ const INITIAL_DB: DatabaseSchema = {
       geminiEnabled: true,
       priorityOrder: ['openrouter1', 'openrouter2', 'gemini'],
       systemPersonaBn:
-        'তুমি Rabian Solution (রাজশাহী বিশ্ববিদ্যালয় স্মার্ট ক্যাম্পাস সলিউশন)-এর স্মার্ট AI অ্যাসিস্ট্যান্ট। সবসময় ভদ্র, আন্তরিক ও নির্ভুল বাংলায় উত্তর দাও। রক্তদানের তথ্য, ডিপার্টমেন্ট ও স্যারদের কন্টাক্ট, শপের পণ্য এবং অর্ডার তৈরির জন্য সবসময় লাইভ টুলস ব্যবহার করো; কখনোই মনগড়া সংখ্যা বা ফোন নম্বর বানাবে না।',
+        'তুমি রাবিয়ান (Rabian - রাজশাহী বিশ্ববিদ্যালয় স্মার্ট ক্যাম্পাস প্ল্যাটফর্ম)-এর স্মার্ট AI অ্যাসিস্ট্যান্ট। সবসময় ভদ্র, আন্তরিক ও নির্ভুল বাংলায় উত্তর দাও। বাস সময়সূচী ও টাইমার, মাসিক ক্যাম্পাস ম্যারাথন, রক্তদানের তথ্য, ডিপার্টমেন্ট ও স্যারদের কন্টাক্ট, শপের পণ্য এবং অর্ডার তৈরির জন্য সবসময় লাইভ টুলস ব্যবহার করো; কখনোই মনগড়া তথ্য বানাবে না।',
       trainingDocs: [
         {
           id: 'tr-1',
@@ -541,6 +545,26 @@ const INITIAL_DB: DatabaseSchema = {
       createdAt: '2026-11-01T10:00:00.000Z',
     },
   ],
+  marathons: [
+    {
+      id: 'marathon-nov-2026',
+      title: '১ম রাবিয়ান ক্যাম্পাস রান ২০২৬',
+      edition: 'নভেম্বর ২০২৬ সংস্করণ',
+      date: '২০২৬-১১-৩০',
+      time: 'সকাল ০৬:৩০ মি.',
+      distance: '৭.৫ কিমি (ক্যাম্পাস ট্র্যাক)',
+      route: 'সাবাশ বাংলাদেশ চত্বর -> প্যারিস রোড -> কাজলা গেট -> জোহা চত্বর -> শহীদ মিনার চত্বর',
+      registrationFee: 0,
+      deadline: '2026-11-28T23:59:59.000Z',
+      isOpen: true,
+      description: 'স্বাস্থ্য সচেতনতা ও ক্যাম্পাসের ভ্রাতৃত্ববোধ বাড়াতে রাবিয়ান-এর নিয়মিত মাসিক ক্যাম্পাস ম্যারাথন। শিক্ষক, কর্মকর্তা ও শিক্ষার্থী সকলের জন্য উন্মুক্ত। ফিনিশারদের জন্য রয়েছে আকর্ষণীয় মেডেল ও ডিজিটাল সনদ!',
+      rewards: ['অফিশিয়াল রানিং ব্যাজ ও ই-সনদ', 'ফিনিশার মেডেল (শীর্ষ ৫০ জন)', 'স্বাস্থ্যসম্মত নাস্তা ও পানি সরবরাহ'],
+      maxParticipants: 300,
+      contactNumber: '01712345678',
+      createdAt: '2026-11-10T00:00:00.000Z',
+    },
+  ],
+  marathonRegistrations: [],
 };
 
 // Atomic Queue to prevent concurrent file write race conditions
@@ -596,12 +620,18 @@ function ensureDbDefaults(db: DatabaseSchema): DatabaseSchema {
   const bloodDonors =
     db.bloodDonors && db.bloodDonors.length > 0 ? db.bloodDonors : INITIAL_DB.bloodDonors;
 
+  const marathons =
+    Array.isArray(db.marathons) && db.marathons.length > 0 ? db.marathons : INITIAL_DB.marathons;
+  const marathonRegistrations = Array.isArray(db.marathonRegistrations) ? db.marathonRegistrations : [];
+
   return {
     ...db,
     settings,
     products,
     merchants,
     bloodDonors,
+    marathons,
+    marathonRegistrations,
     whatsappSessions: db.whatsappSessions || {},
   };
 }
