@@ -87,10 +87,14 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   icons: {
     icon: [
-      { url: '/favicon.ico' },
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon-48.png', sizes: '48x48', type: 'image/png' },
+      { url: '/icon-96.png', sizes: '96x96', type: 'image/png' },
+      { url: '/icon-144.png', sizes: '144x144', type: 'image/png' },
       { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/logo.png', sizes: '512x512', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
     ],
+    shortcut: '/favicon.ico',
     apple: [
       { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
@@ -108,6 +112,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="bn">
       <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/png" sizes="48x48" href="/icon-48.png" />
+        <link rel="icon" type="image/png" sizes="96x96" href="/icon-96.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <meta name="google-site-verification" content="2FsLnx8Q7XZ3aUJmF3whq8sVLTvkpkVvXGQ6SqzOW4A" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -149,6 +159,62 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     height: 1024,
                   },
                   sameAs: ['https://wa.me/8801325661777'],
+                },
+                {
+                  '@type': 'ItemList',
+                  '@id': 'https://rabian.site/#sitelinks',
+                  name: 'Rabian Site Navigation Links',
+                  itemListElement: [
+                    {
+                      '@type': 'SiteNavigationElement',
+                      position: 1,
+                      name: 'রাবি বাস সময়সূচী ও লাইভ টাইমার',
+                      description: 'সকল রুটের বাস শিডিউল ও পরবর্তী বাস ছাড়ার লাইভ কাউন্টডাউন টাইমার',
+                      url: 'https://rabian.site/bus',
+                    },
+                    {
+                      '@type': 'SiteNavigationElement',
+                      position: 2,
+                      name: 'শিক্ষক ও কর্মকর্তা ফোনবুক ডিরেক্টরি',
+                      description: '৩,৮৭৭ জন শিক্ষক, ডিন, প্রক্টর ও কর্মকর্তার মোবাইল নম্বর ও ইমেইল',
+                      url: 'https://rabian.site/directory',
+                    },
+                    {
+                      '@type': 'SiteNavigationElement',
+                      position: 3,
+                      name: 'রাবি ব্লাড ব্যাংক ও জরুরি রক্তদাতা',
+                      description: '৯০+ দিন সম্পন্ন উপযুক্ত রক্তদাতাদের তালিকা ও তাৎক্ষণিক কল',
+                      url: 'https://rabian.site/blood',
+                    },
+                    {
+                      '@type': 'SiteNavigationElement',
+                      position: 4,
+                      name: '৩-ধাপের ইন্টারঅ্যাক্টিভ ম্যাপ ও সনদ',
+                      description: 'রাবি ক্যাম্পাস, রাজশাহী জেলা ও রাজশাহী বিভাগের পূর্ণাঙ্গ ম্যাপ ও সনদপত্র',
+                      url: 'https://rabian.site/map',
+                    },
+                    {
+                      '@type': 'SiteNavigationElement',
+                      position: 5,
+                      name: 'মাসিক ক্যাম্পাস ম্যারাথন রেজিস্ট্রেশন',
+                      description: 'রাবিয়ান ক্যাম্পাস ম্যারাথন তথ্য ও অনলাইনে ফ্রি রেজিস্ট্রেশন ফর্ম',
+                      url: 'https://rabian.site/marathon',
+                    },
+                    {
+                      '@type': 'SiteNavigationElement',
+                      position: 6,
+                      name: 'অনুষদ, ৫৯টি বিভাগ ও ক্যারিয়ার',
+                      description: '১২টি অনুষদ ও ৫৯টি বিভাগের ভবন, আসন সংখ্যা ও অ্যালামনাই নেটওয়ার্ক',
+                      url: 'https://rabian.site/academics',
+                    },
+                    {
+                      '@type': 'SiteNavigationElement',
+                      position: 7,
+                      name: 'রাবিয়ান শপ ও কালেকশন',
+                      description: 'উইন্টার হুডি, টি-শার্ট, রাজশাহীর খাঁটি খেজুরের গুড় ও নাড়ু',
+                      url: 'https://rabian.site/shop',
+                    },
+                  ],
                 },
               ],
             }),
