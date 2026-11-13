@@ -37,7 +37,7 @@ export default function ShopPage() {
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-8 pb-24 sm:pb-12 space-y-8">
       {/* 1. Collection Story Highlights at Top */}
       <StoryHighlights products={products} />
 

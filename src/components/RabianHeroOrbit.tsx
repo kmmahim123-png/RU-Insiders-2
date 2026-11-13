@@ -262,12 +262,7 @@ export default function RabianHeroOrbit() {
   };
 
   const handleCenterAiClick = () => {
-    if (isInstalledApp) {
-      window.dispatchEvent(new Event('ru_open_ai'));
-    } else {
-      setAppHintVisible(true);
-      setTimeout(() => setAppHintVisible(false), 4500);
-    }
+    window.dispatchEvent(new Event('ru_open_ai'));
   };
 
   return (
@@ -303,7 +298,7 @@ export default function RabianHeroOrbit() {
           type="button"
           onClick={handleCenterAiClick}
           className="relative z-20 w-[86px] h-[86px] sm:w-[104px] sm:h-[104px] rounded-full bg-gradient-to-b from-slate-900 via-emerald-950 to-slate-950 border-2 border-amber-400/80 shadow-[0_0_32px_rgba(251,191,36,0.28)] flex flex-col items-center justify-center gap-0.5 emil-press cursor-pointer group"
-          title={isInstalledApp ? 'রাবিয়ান AI খুলুন' : 'AI শুধু রাবিয়ান অ্যাপে ব্যবহারযোগ্য'}
+          title="রাবিয়ান AI সহকারী খুলুন"
         >
           {/* Subtle inner halo */}
           <span className="absolute -inset-1.5 rounded-full border border-amber-400/25 pointer-events-none" />
@@ -315,8 +310,8 @@ export default function RabianHeroOrbit() {
             রাবিয়ান AI
           </span>
           <span className="text-[8px] sm:text-[9px] font-bold text-emerald-300 flex items-center gap-1 leading-none">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            {isInstalledApp ? 'অ্যাক্টিভ' : 'পর্যবেক্ষণে'}
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            লাইভ অ্যাক্টিভ
           </span>
         </button>
 
@@ -380,17 +375,10 @@ export default function RabianHeroOrbit() {
           </span>
         </div>
 
-        {appHintVisible && !isInstalledApp ? (
-          <div className="px-3 py-2 rounded-2xl bg-amber-400 text-slate-950 text-[11px] font-black flex items-center justify-center gap-1.5 shadow-lg animate-scaleUp">
-            <Download className="w-3.5 h-3.5 shrink-0" />
-            <span>AI চ্যাট শুধু রাবিয়ান অ্যাপে সক্রিয় (ব্রাউজার থেকে Install / Open App করুন)</span>
-          </div>
-        ) : (
-          <p className="text-[10px] text-emerald-200/75 flex items-center justify-center gap-1 font-medium">
-            <MoveHorizontal className="w-3 h-3 text-amber-300" />
-            <span>আইকনগুলো ঘুরাতে ড্র্যাগ করুন • সরাসরি প্রবেশ করতে ট্যাপ করুন</span>
-          </p>
-        )}
+        <p className="text-[10px] text-emerald-200/80 flex items-center justify-center gap-1.5 font-medium">
+          <MoveHorizontal className="w-3 h-3 text-amber-300" />
+          <span>ঘুরাতে ড্র্যাগ করুন • যেকোনো সেবায় বা AI-তে সরাসরি ট্যাপ করুন</span>
+        </p>
       </div>
     </div>
   );

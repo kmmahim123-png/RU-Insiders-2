@@ -38,7 +38,7 @@ export default async function BusPage({
   const isWidget = resolvedParams?.widget === '1' || resolvedParams?.mode === 'widget';
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-16">
+    <div className="min-h-screen bg-slate-50/50 pb-24 sm:pb-16">
       <BusScheduleView initialWidgetMode={isWidget} />
     </div>
   );

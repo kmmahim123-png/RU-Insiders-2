@@ -30,7 +30,7 @@ export const metadata: Metadata = {
 
 export default function MapPage() {
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-16 font-bengali">
+    <div className="min-h-screen bg-slate-50/50 pb-24 sm:pb-16 font-bengali">
       <InteractiveThreeMaps />
     </div>
   );

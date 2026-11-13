@@ -143,7 +143,7 @@ export default function MarathonPage() {
   const isRegistrationClosed = !selectedMarathon?.isOpen || timeLeft.isExpired;
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-20 pt-6">
+    <div className="min-h-screen bg-slate-50/50 pb-24 pt-6">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-8">
         {/* 1. HERO BANNER */}
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-950 via-teal-900 to-slate-900 text-white p-6 sm:p-10 shadow-2xl border border-emerald-500/20">

@@ -313,8 +313,8 @@ export default function RuAiAssistant({ mode = 'floating' }: { mode?: 'embedded'
     return renderChatBox(true);
   }
 
-  // Do not duplicate floating widget on Admin / Merchant panels, and restrict customer AI strictly to Installed App
-  if (pathname?.startsWith('/admin') || pathname?.startsWith('/merchant') || !isInstalledApp) {
+  // Do not duplicate floating widget on Admin / Merchant panels
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/merchant')) {
     return null;
   }
 

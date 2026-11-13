@@ -171,7 +171,7 @@ export default function BloodBankSection({ isHomepage = false }: BloodBankSectio
   const visibleDonors = isHomepage && selectedGroup === 'all' && !search.trim() ? filtered.slice(0, 6) : filtered;
 
   return (
-    <div className={isHomepage ? 'space-y-6' : 'max-w-6xl mx-auto px-4 py-8 sm:py-10 space-y-6'}>
+    <div className={isHomepage ? 'space-y-6' : 'max-w-6xl mx-auto px-4 py-8 sm:py-10 pb-24 sm:pb-12 space-y-6'}>
       {/* Hero Banner */}
       <div className="bg-gradient-to-br from-rose-700 via-red-700 to-rose-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

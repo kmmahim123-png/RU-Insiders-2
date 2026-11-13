@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 
 export default function DirectoryPage() {
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-16">
+    <div className="min-h-screen bg-slate-50/50 pb-24 sm:pb-16">
       <CampusDirectoryView />
     </div>
   );

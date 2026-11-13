@@ -15,6 +15,8 @@ import {
   Compass,
   Bus,
   Flame,
+  Users,
+  Phone,
 } from 'lucide-react';
 import { Product, InsideRuArticle, BloodDonor } from '@/types';
 import { calculateDonorEligibility } from '@/lib/bloodUtils';
@@ -23,6 +25,9 @@ import ProductCard from '@/components/ProductCard';
 import SeasonalParticles from '@/components/SeasonalParticles';
 import CampusAudioPlayer from '@/components/CampusAudioPlayer';
 import RabianHeroOrbit from '@/components/RabianHeroOrbit';
+import HomeBusWidget from '@/components/HomeBusWidget';
+import HomeDirectoryQuickSearch from '@/components/HomeDirectoryQuickSearch';
+import HomeMarathonWidget from '@/components/HomeMarathonWidget';
 
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -47,9 +52,9 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="space-y-12 sm:space-y-16 pb-12">
+    <div className="space-y-10 sm:space-y-14 pb-24 sm:pb-16">
       {/* 1. HERO SECTION WITH GOL CHOTTOR (HERO ORBIT) PROMINENTLY AT TOP UNDER BREAKING NEWS */}
-      <section className="relative overflow-hidden bg-emerald-950 text-white flex flex-col items-center pt-4 pb-12 sm:pb-16">
+      <section className="relative overflow-hidden bg-emerald-950 text-white flex flex-col items-center pt-4 pb-10 sm:pb-14">
         {/* Background Image with Deep Emerald Overlay */}
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -61,86 +66,134 @@ export default function HomePage() {
         {/* Paris Road Seasonal Ambient Particles (Leaves / Rain / Mist) */}
         <SeasonalParticles defaultMode="leaves" className="absolute inset-0" />
 
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 w-full flex flex-col items-center text-center space-y-6">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 w-full flex flex-col items-center text-center space-y-5">
           {/* Top Brand Pill */}
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-black text-amber-300 shadow-sm">
             <Sparkles className="w-4 h-4 text-amber-400" />
             <span>রাবিয়ান • রাজশাহী বিশ্ববিদ্যালয় স্মার্ট ক্যাম্পাস প্ল্যাটফর্ম</span>
           </div>
 
-          {/* গোল চত্বর: THE ORBITAL SERVICE CIRCLE DIRECTLY AT TOP UNDER BREAKING NEWS */}
-          <div className="w-full flex items-center justify-center py-1">
-            <RabianHeroOrbit />
-          </div>
-
           {/* Brand Headline in Bengali */}
-          <div className="space-y-2.5 max-w-2xl mx-auto">
-            <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-[1.2]">
-              রাবিয়ান — রাবি শিক্ষার্থীদের সব ডিজিটাল সেবা এক চত্বরে
+          <div className="space-y-2 max-w-3xl mx-auto">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight">
+              রাবিয়ান — রাবি শিক্ষার্থীদের স্মার্ট ডিজিটাল ক্যাম্পাস
             </h1>
             <p className="text-xs sm:text-base text-emerald-100/90 leading-relaxed font-medium">
-              বাস শিডিউল ও লাইভ টাইমার, মাসিক ক্যাম্পাস ম্যারাথন, ক্লাব মেম্বারশিপ, ৫৯ বিভাগ ও শিক্ষক ডিরেক্টরি, ৯০-দিন ব্লাড ব্যাংক ও ৩-ধাপের ওয়াটার ম্যাপ।
+              বাস শিডিউল ও লাইভ টাইমার • ৩,৮৭৭+ শিক্ষক ফোনবুক • ৯০-দিন ব্লাড ব্যাংক • মাসিক ম্যারাথন • ক্যাম্পাস শপ
             </p>
           </div>
 
-          {/* Quick Primary Actions */}
-          <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3.5 pt-1">
+          {/* গোল চত্বর: THE ORBITAL SERVICE CIRCLE DIRECTLY AT TOP UNDER BREAKING NEWS */}
+          <div className="w-full flex items-center justify-center py-0.5">
+            <RabianHeroOrbit />
+          </div>
+
+          {/* Modern Quick Service Dock (Clean, Compact, Intuitive) */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 w-full max-w-4xl pt-2">
             <Link
               href="/bus"
-              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs sm:text-sm shadow-xl flex items-center justify-center gap-2 emil-press border border-emerald-400/40"
+              className="p-3 rounded-2xl bg-white/10 hover:bg-emerald-600/40 border border-white/15 hover:border-emerald-400/50 backdrop-blur-md transition-all duration-200 flex flex-col items-center text-center gap-1 group emil-press shadow-sm"
             >
-              <Bus className="w-4 h-4" />
-              <span>🚌 বাস শিডিউল ও লাইভ টাইমার</span>
+              <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow group-hover:scale-105 transition-transform">
+                <Bus className="w-4 h-4" />
+              </span>
+              <span className="text-xs font-black text-white group-hover:text-amber-300 transition-colors">
+                বাস শিডিউল
+              </span>
+              <span className="text-[10px] text-emerald-200/80 font-medium">
+                লাইভ টাইমার ও রুট
+              </span>
+            </Link>
+
+            <Link
+              href="/directory"
+              className="p-3 rounded-2xl bg-white/10 hover:bg-sky-600/40 border border-white/15 hover:border-sky-400/50 backdrop-blur-md transition-all duration-200 flex flex-col items-center text-center gap-1 group emil-press shadow-sm"
+            >
+              <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center text-white shadow group-hover:scale-105 transition-transform">
+                <Users className="w-4 h-4" />
+              </span>
+              <span className="text-xs font-black text-white group-hover:text-amber-300 transition-colors">
+                শিক্ষক ফোনবুক
+              </span>
+              <span className="text-[10px] text-emerald-200/80 font-medium">
+                ৩,৮৭৭ জন ও ১-ট্যাপ কল
+              </span>
+            </Link>
+
+            <Link
+              href="/blood"
+              className="p-3 rounded-2xl bg-white/10 hover:bg-rose-600/40 border border-white/15 hover:border-rose-400/50 backdrop-blur-md transition-all duration-200 flex flex-col items-center text-center gap-1 group emil-press shadow-sm"
+            >
+              <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 flex items-center justify-center text-white shadow group-hover:scale-105 transition-transform">
+                <HeartPulse className="w-4 h-4" />
+              </span>
+              <span className="text-xs font-black text-white group-hover:text-amber-300 transition-colors">
+                ব্লাড ব্যাংক
+              </span>
+              <span className="text-[10px] text-emerald-200/80 font-medium">
+                ৯০-দিন লাইভ যাচাই
+              </span>
             </Link>
 
             <Link
               href="/marathon"
-              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-white font-black text-xs sm:text-sm shadow-xl flex items-center justify-center gap-2 emil-press border border-amber-300/40"
+              className="p-3 rounded-2xl bg-white/10 hover:bg-amber-600/40 border border-white/15 hover:border-amber-400/50 backdrop-blur-md transition-all duration-200 flex flex-col items-center text-center gap-1 group emil-press shadow-sm"
             >
-              <Flame className="w-4 h-4" />
-              <span>🏃‍♂️ মাসিক ম্যারাথন আবেদন</span>
+              <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-rose-600 flex items-center justify-center text-white shadow group-hover:scale-105 transition-transform">
+                <Flame className="w-4 h-4" />
+              </span>
+              <span className="text-xs font-black text-white group-hover:text-amber-300 transition-colors">
+                ক্যাম্পাস ম্যারাথন
+              </span>
+              <span className="text-[10px] text-emerald-200/80 font-medium">
+                মাসিক রান ও মেডেল
+              </span>
             </Link>
 
             <Link
               href="/shop"
-              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs sm:text-sm shadow-xl flex items-center justify-center gap-2 emil-press"
+              className="col-span-2 sm:col-span-1 p-3 rounded-2xl bg-white/10 hover:bg-orange-600/40 border border-white/15 hover:border-amber-400/50 backdrop-blur-md transition-all duration-200 flex flex-col items-center text-center gap-1 group emil-press shadow-sm"
             >
-              <ShoppingBag className="w-4 h-4 text-slate-950" />
-              <span>শপ ও কালেকশন →</span>
+              <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-slate-950 shadow group-hover:scale-105 transition-transform">
+                <ShoppingBag className="w-4 h-4" />
+              </span>
+              <span className="text-xs font-black text-white group-hover:text-amber-300 transition-colors">
+                অফিশিয়াল শপ
+              </span>
+              <span className="text-[10px] text-emerald-200/80 font-medium">
+                হুডি, গুড় ও জার্সি
+              </span>
             </Link>
-
-            <a
-              href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('আসসালামু আলাইকুম! আমি রাবিয়ান থেকে সরাসরি যোগাযোগ করছি।')}`}
-              target="_blank"
-              rel="noreferrer"
-              className="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/25 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 emil-press shadow-md backdrop-blur-sm"
-            >
-              <MessageCircle className="w-4 h-4 text-emerald-300" />
-              <span>WhatsApp চ্যাট</span>
-            </a>
           </div>
 
           {/* Compact Trust Pillars */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-white/15 w-full max-w-2xl text-[11px] sm:text-xs font-bold text-emerald-200">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-white/15 w-full max-w-2xl text-[11px] sm:text-xs font-bold text-emerald-200">
             <div className="flex items-center justify-center gap-1.5">
-              <Trophy className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span>সকল ক্লাব ও আবেদন</span>
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span>১০০% ভেরিফাইড রাবিয়ান সেবা</span>
             </div>
             <div className="flex items-center justify-center gap-1.5">
               <GraduationCap className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span>৫৯ বিভাগ ও স্যার</span>
+              <span>৩,৮৭৭+ শিক্ষক ও কর্মকর্তা</span>
             </div>
             <div className="flex items-center justify-center gap-1.5">
               <HeartPulse className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span>৯০-দিন ব্লাড ব্যাংক</span>
+              <span>৯০-দিন লাইভ রক্তদাতা</span>
             </div>
             <div className="flex items-center justify-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span>১০০% ভেরিফাইড সেবা</span>
+              <Trophy className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span>ক্যাম্পাস ক্লাব ও ম্যারাথন</span>
             </div>
           </div>
         </div>
       </section>
+
+      {/* 1.5 LIVE CAMPUS UTILITY HUB (BUS DEPARTURE, INSTANT PHONEBOOK LOOKUP & MARATHON) */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 space-y-6">
+        <HomeBusWidget />
+        <HomeDirectoryQuickSearch />
+        <HomeMarathonWidget />
+      </div>
 
       {/* 2. CAMPUS STORIES SECTION */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6">

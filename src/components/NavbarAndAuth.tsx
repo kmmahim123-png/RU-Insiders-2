@@ -23,6 +23,9 @@ import {
   Copy,
   Check,
   ExternalLink,
+  Bus,
+  Users,
+  HeartPulse,
 } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 import { BreakingNewsItem } from '@/types';
@@ -887,14 +890,14 @@ export default function NavbarAndAuth() {
         </div>
       )}
 
-      {/* 6. Sticky Mobile Bottom Navigation (One UI 6.1 thumb ergonomics) */}
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 py-1.5 flex items-center justify-around shadow-[0_-4px_20px_rgba(15,23,42,0.06)]">
+      {/* 6. Sticky Mobile Bottom Navigation (One UI 6.1 thumb ergonomics: Home, Bus, Phonebook, Blood, Shop) */}
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-1 py-1.5 flex items-center justify-around shadow-[0_-4px_20px_rgba(15,23,42,0.06)]">
         {[
           { href: '/', label: 'হোম', icon: Home },
-          { href: '/shop', label: 'শপ', icon: ShoppingBag },
-          { href: '/inside-ru', label: 'নিউজ', icon: Newspaper },
-          { href: '/map', label: 'ম্যাপ', icon: MapPin },
-          { href: '/cart', label: 'কার্ট', icon: ShoppingBag, badge: cartCount },
+          { href: '/bus', label: 'বাস', icon: Bus },
+          { href: '/directory', label: 'ফোনবুক', icon: Users },
+          { href: '/blood', label: 'রক্তদান', icon: HeartPulse },
+          { href: '/shop', label: 'শপ', icon: ShoppingBag, badge: cartCount },
         ].map((item) => {
           const Icon = item.icon;
           const active = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
@@ -902,14 +905,16 @@ export default function NavbarAndAuth() {
             <Link
               key={item.href}
               href={item.href}
-              className={`min-w-[56px] min-h-[44px] flex flex-col items-center justify-center rounded-xl px-2 relative ${
-                active ? 'text-blue-700 font-extrabold' : 'text-slate-600 font-medium'
+              className={`min-w-[58px] min-h-[46px] flex flex-col items-center justify-center rounded-2xl px-2 py-1 relative transition-all duration-150 ${
+                active
+                  ? 'text-emerald-800 font-black bg-emerald-50/80 scale-[1.02]'
+                  : 'text-slate-600 font-bold hover:text-slate-900 active:scale-95'
               }`}
             >
-              <Icon className="w-5 h-5" />
-              <span className="text-[11px] mt-0.5">{item.label}</span>
+              <Icon className={`w-5 h-5 ${active ? 'text-emerald-700 stroke-[2.5]' : ''}`} />
+              <span className="text-[10px] sm:text-[11px] mt-0.5 tracking-tight">{item.label}</span>
               {item.badge ? (
-                <span className="absolute top-0.5 right-2 bg-red-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                <span className="absolute top-1 right-2 bg-red-600 text-white text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
                   {item.badge}
                 </span>
               ) : null}
