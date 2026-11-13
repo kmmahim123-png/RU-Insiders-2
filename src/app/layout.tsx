@@ -81,6 +81,9 @@ export const metadata: Metadata = {
     description: 'রাবি বাস শিডিউল, ম্যারাথন, ৩,৮৭৭ শিক্ষক ফোনবুক ও রক্তদান এক প্ল্যাটফর্মে।',
     images: ['/og-image.png'],
   },
+  verification: {
+    google: '2FsLnx8Q7XZ3aUJmF3whq8sVLTvkpkVvXGQ6SqzOW4A',
+  },
   manifest: '/manifest.json',
   icons: {
     icon: [
