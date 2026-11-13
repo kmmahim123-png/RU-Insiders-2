@@ -295,6 +295,11 @@ export interface SiteSettings {
   metaWhatsappPhoneNumberId?: string;
   metaWhatsappAccountId?: string;
   metaWhatsappAccessToken?: string;
+  facebookPageId?: string;
+  facebookPageAccessToken?: string;
+  facebookVerifyToken?: string;
+  facebookAutoPostEnabled?: boolean;
+  facebookMessengerReplyEnabled?: boolean;
   aiConfig?: AiConfig;
 }
 

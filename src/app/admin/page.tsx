@@ -39,6 +39,7 @@ import {
   Phone,
   Mail,
   UserPlus,
+  Share2,
 } from 'lucide-react';
 import {
   Product,
@@ -67,6 +68,7 @@ import { RU_CLUBS, RuClub } from '@/lib/ruClubsData';
 import AdminBloodTab from '@/components/admin/AdminBloodTab';
 import AdminMarathonTab from '@/components/admin/AdminMarathonTab';
 import AdminAiStudioTab from '@/components/admin/AdminAiStudioTab';
+import AdminFacebookTab from '@/components/admin/AdminFacebookTab';
 
 export default function AdminPage() {
   const [password, setPassword] = useState('');
@@ -78,7 +80,7 @@ export default function AdminPage() {
 
   // Super Admin / Shared state
   const [activeTab, setActiveTab] = useState<
-    'products' | 'orders' | 'map' | 'articles' | 'departments' | 'alumni' | 'clubs' | 'merchants' | 'blood' | 'marathon' | 'ai' | 'settings'
+    'products' | 'orders' | 'map' | 'articles' | 'departments' | 'alumni' | 'clubs' | 'merchants' | 'blood' | 'marathon' | 'ai' | 'facebook' | 'settings'
   >('products');
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -1808,6 +1810,18 @@ export default function AdminPage() {
                 </button>
 
                 <button
+                  onClick={() => setActiveTab('facebook')}
+                  className={`py-2 px-4 rounded-xl text-xs font-extrabold shrink-0 transition flex items-center gap-1.5 ${
+                    activeTab === 'facebook'
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'bg-white border border-slate-200 text-slate-700 hover:bg-blue-50'
+                  }`}
+                >
+                  <Share2 className="w-4 h-4 text-blue-500" />
+                  <span>📢 ফেসবুক অটোমেশন</span>
+                </button>
+
+                <button
                   onClick={() => setActiveTab('settings')}
                   className={`py-2 px-4 rounded-xl text-xs font-extrabold shrink-0 transition flex items-center gap-1.5 ${
                     activeTab === 'settings'
@@ -3201,6 +3215,31 @@ export default function AdminPage() {
                 setSettings((prev) => (prev ? { ...prev, aiConfig } : prev))
               }
               showToast={showToast}
+            />
+          )}
+
+          {/* ============================================================================ */}
+          {/* TAB 6.9: FACEBOOK PAGE & MESSENGER AI AUTOMATION (Super Admin) */}
+          {/* ============================================================================ */}
+          {role === 'SUPER_ADMIN' && activeTab === 'facebook' && (
+            <AdminFacebookTab
+              settings={settings}
+              onSaveSettings={async (newSettings) => {
+                const res = await fetch('/api/store', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    action: 'UPDATE_SETTINGS',
+                    password: getActivePass(),
+                    payload: { settings: newSettings },
+                  }),
+                });
+                const updatedDb = await safeParseApiResponse(res);
+                if (updatedDb?.settings) {
+                  setSettings(updatedDb.settings);
+                  showToast('✓ ফেসবুক অটোমেশন সেটিংস সংরক্ষিত হয়েছে!');
+                }
+              }}
             />
           )}
 
