@@ -402,6 +402,20 @@ export default function InteractiveThreeMaps() {
     const boxW = 470;
     const boxH = 675;
 
+    // Official Rabian Seal on Certificate
+    const certLogo = new Image();
+    certLogo.src = '/logo-full.png';
+    const renderCertLogo = () => {
+      try {
+        ctx.drawImage(certLogo, 530, 50, 105, 105);
+      } catch {}
+    };
+    if (certLogo.complete && certLogo.naturalWidth !== 0) {
+      renderCertLogo();
+    } else {
+      certLogo.onload = renderCertLogo;
+    }
+
     // Map Card Frame (Light Cream #f2eee3 matching website)
     ctx.fillStyle = '#f2eee3';
     ctx.roundRect(boxX, boxY, boxW, boxH, 24);

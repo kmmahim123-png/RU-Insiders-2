@@ -1,9 +1,10 @@
 // Rabian Offline Service Worker
-const CACHE_NAME = 'rabian-cache-v5';
+const CACHE_NAME = 'rabian-cache-v6';
 const OFFLINE_URLS = [
   '/',
   '/bus',
   '/marathon',
+  '/directory',
   '/map',
   '/shop',
   '/merchant',
@@ -13,8 +14,10 @@ const OFFLINE_URLS = [
   '/clubs',
   '/inside-ru',
   '/logo.png',
-  '/logo-center.png',
-  '/logo-hands.png',
+  '/logo-full.png',
+  '/icon-192.png',
+  '/icon-512.png',
+  '/apple-touch-icon.png',
   '/manifest.json',
   '/merchant-manifest.json'
 ];

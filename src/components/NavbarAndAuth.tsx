@@ -326,9 +326,8 @@ export default function NavbarAndAuth() {
             backgroundPosition: 'center',
           }}
         >
-          <div className="relative flex items-center justify-center w-36 h-36 rounded-full border-4 border-amber-400 shadow-[0_0_50px_rgba(250,204,21,0.6)] bg-white/10 backdrop-blur-md p-3 overflow-hidden">
-            <img src="/logo-center.png" alt="Rabian" className="absolute inset-0 w-full h-full object-contain p-2" />
-            <img src="/logo-hands.png" alt="Rotating Hands" className="absolute inset-0 w-full h-full object-contain animate-[spin_12s_linear_infinite]" />
+          <div className="relative flex items-center justify-center w-36 h-36 sm:w-44 sm:h-44 rounded-full border-4 border-amber-400 shadow-[0_0_50px_rgba(250,204,21,0.6)] bg-white p-3 overflow-hidden animate-in zoom-in-95 duration-300">
+            <img src="/logo-full.png" alt="রাবিয়ান" className="w-full h-full object-contain" />
           </div>
           <h1 className="mt-6 text-3xl sm:text-5xl font-black tracking-tight drop-shadow-lg">
             রাবিয়ান
@@ -345,18 +344,13 @@ export default function NavbarAndAuth() {
       {/* 2. Main Header (Top Bar removed as requested) */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2">
-          {/* Logo & Brand with Animated Rotating Hands */}
+          {/* Official Rabian Brand Logo */}
           <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-            <div className="relative w-11 h-11 rounded-full border-2 border-amber-400 bg-white flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
+            <div className="relative w-11 h-11 rounded-full border-2 border-amber-400 bg-white flex items-center justify-center overflow-hidden shrink-0 shadow-sm p-0.5 group-hover:scale-105 transition-transform">
               <img
-                src="/logo-center.png"
-                alt="RU Emblem"
-                className="absolute inset-0 w-full h-full object-contain p-1"
-              />
-              <img
-                src="/logo-hands.png"
-                alt="Rotating Hands"
-                className="absolute inset-0 w-full h-full object-contain animate-[spin_12s_linear_infinite]"
+                src="/logo.png"
+                alt="রাবিয়ান"
+                className="w-full h-full object-contain"
               />
             </div>
             <div>
