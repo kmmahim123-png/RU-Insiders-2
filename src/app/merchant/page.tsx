@@ -2075,7 +2075,7 @@ export default function MerchantPortalPage() {
                       <button
                         type="button"
                         onClick={() => {
-                          const targetUrl = typeof window !== 'undefined' ? `${window.location.origin}/merchant` : 'https://ruinsider-2.vercel.app/merchant';
+                          const targetUrl = typeof window !== 'undefined' ? `${window.location.origin}/merchant` : 'https://rabian.site/merchant';
                           const htmlLauncher = `<!DOCTYPE html><html lang="bn"><head><meta charset="utf-8"><title>RU Merchant Hub - ${merchant.shopName}</title><meta http-equiv="refresh" content="0;url=${targetUrl}"></head><body style="font-family:sans-serif;text-align:center;padding:40px;background:#064e3b;color:#fff;"><h2>RU Merchant Hub লোড হচ্ছে...</h2><p>স্বয়ংক্রিয়ভাবে চালু না হলে <a href="${targetUrl}" style="color:#fbbf24;">এখানে ক্লিক করুন</a>।</p><script>window.location.replace("${targetUrl}");</script></body></html>`;
                           const blob = new Blob([htmlLauncher], { type: 'text/html;charset=utf-8' });
                           const url = URL.createObjectURL(blob);

@@ -55,7 +55,7 @@ export async function callOpenRouterDecision(
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiKey}`,
-      'HTTP-Referer': 'https://ruinsider-2.vercel.app',
+      'HTTP-Referer': 'https://rabian.site',
       'X-Title': 'Rabian Jev Decision Router',
     },
     body: JSON.stringify({ model, state, questions }),

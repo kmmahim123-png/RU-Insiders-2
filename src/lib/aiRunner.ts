@@ -122,7 +122,7 @@ export async function runOpenRouterSlot(
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
-        'HTTP-Referer': 'https://ruinsider-2.vercel.app',
+        'HTTP-Referer': 'https://rabian.site',
         'X-Title': 'Rabian AI & MCP Agent',
       },
       body: JSON.stringify(reqBody),

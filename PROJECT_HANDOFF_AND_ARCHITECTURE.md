@@ -9,7 +9,7 @@
 - **Project Name:** `ru-insiders` (`v1.0.0`)
 - **Framework:** Next.js `15.x` (App Router), React `19`, TypeScript `5.6`, Tailwind CSS `3.4`, Lucide Icons
 - **GitHub Repository:** `https://github.com/kmmahim123-png/RU-Insiders-2.git` (Primary branch: `main`)
-- **Production Website (Vercel):** `https://ruinsider-2.vercel.app`
+- **Official Production Domain:** `https://rabian.site` (Vercel deployment: `https://ruinsider-2.vercel.app`)
 - **Companion Docs Already in Repo Root:**
   - `MAP_SYSTEM_SPECIFICATION.md` — Full 3-stage Interactive Map & Certificate architecture
   - `ALL_MAPS_SEPARATED_SOURCE_CODES.md` — Separated map datasets & SVG logic

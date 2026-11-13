@@ -864,7 +864,7 @@ export default function NavbarAndAuth() {
                     Supabase Dashboard → Auth → Google <ExternalLink className="w-3 h-3" />
                   </a>
                   -এ বসিয়ে <strong>Enable Google</strong> অন করে Save দিন (এবং Site URL-এ{" "}
-                  <code className="bg-white px-1 rounded">https://ruinsider-2.vercel.app</code> যুক্ত করুন)।
+                  <code className="bg-white px-1 rounded">https://rabian.site</code> যুক্ত করুন)।
                 </li>
               </ol>
               <p className="text-[11px] text-emerald-800 font-bold pt-1">

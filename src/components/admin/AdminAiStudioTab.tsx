@@ -233,11 +233,11 @@ export default function AdminAiStudioTab({
   const [newDocCategory, setNewDocCategory] = useState('website');
   const [newDocContent, setNewDocContent] = useState('');
 
-  const [mcpEndpointUrl, setMcpEndpointUrl] = useState('https://ruinsider-2.vercel.app/api/mcp');
+  const [mcpEndpointUrl, setMcpEndpointUrl] = useState('https://rabian.site/api/mcp');
   const [copiedMcp, setCopiedMcp] = useState(false);
   const [testingDecision, setTestingDecision] = useState(false);
   const [decisionTestResult, setDecisionTestResult] = useState<{ ok: boolean; msg: string } | null>(null);
-  const [waWebhookUrl, setWaWebhookUrl] = useState('https://ruinsider-2.vercel.app/api/whatsapp');
+  const [waWebhookUrl, setWaWebhookUrl] = useState('https://rabian.site/api/whatsapp');
   const [copiedWa, setCopiedWa] = useState(false);
   const [waTestPrompt, setWaTestPrompt] = useState('আমার B+ রক্ত লাগবে, ৯০+ দিন হয়েছে এমন কতজন আছেন ও নম্বর দিন?');
   const [testingWa, setTestingWa] = useState(false);

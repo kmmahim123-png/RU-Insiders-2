@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
 
   // Support Meta Commerce Manager / Google Merchant CSV Feed export (?format=csv)
   if (formatParam === 'csv') {
-    const origin = req.nextUrl.origin || 'https://ruinsider-2.vercel.app';
+    const origin = req.nextUrl.origin || 'https://rabian.site';
     const headers = [
       'id',
       'title',
