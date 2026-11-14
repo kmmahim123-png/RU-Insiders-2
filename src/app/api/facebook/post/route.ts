@@ -66,20 +66,33 @@ export async function POST(req: NextRequest) {
 
     let payload: FbPostPayload;
 
-    if (body.type && ['bus', 'marathon', 'directory', 'merch', 'blood'].includes(body.type)) {
+    if (body.type && ['bus', 'directory', 'merch', 'blood'].includes(body.type)) {
       payload = generatePresetCampusPost(body.type as any);
-      // Allow overriding link or image if passed
       if (body.link) payload.link = body.link;
       if (body.imageUrl) payload.imageUrl = body.imageUrl;
+    } else if (body.type === 'marathon') {
+      // Safety guard: Marathon post is blocked when no active marathon event is running
+      return NextResponse.json(
+        { ok: false, error: 'বর্তমানে কোনো সক্রিয় ম্যারাথন ইভেন্ট চলমান নেই। অযথা পোস্ট করা স্থগিত রাখা হয়েছে।' },
+        { status: 400 }
+      );
     } else if (body.message) {
+      const msg = body.message.trim();
+      // Safety Guard: Block test, spam, or nonsense dummy posts from publishing to live page
+      if (msg.length < 15 || /^(test|testing|check|hello|hi|asdf|demo)$/i.test(msg)) {
+        return NextResponse.json(
+          { ok: false, error: 'অসম্পূর্ণ, ডামি বা পরীক্ষামূলক পোস্ট ফেসবুক পেজে প্রকাশ করা নিষিদ্ধ। অর্থপূর্ণ বার্তা প্রদান করুন।' },
+          { status: 400 }
+        );
+      }
       payload = {
-        message: body.message,
+        message: msg,
         link: body.link || undefined,
         imageUrl: body.imageUrl || undefined,
       };
     } else {
       return NextResponse.json(
-        { ok: false, error: 'পোস্টের ধরন (type) অথবা বার্তা (message) প্রদান করুন।' },
+        { ok: false, error: 'পোস্টের সঠিক ধরন (bus, directory, blood, merch) অথবা অর্থপূর্ণ বার্তা প্রদান করুন।' },
         { status: 400 }
       );
     }
