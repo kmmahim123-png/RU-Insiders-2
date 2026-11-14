@@ -264,37 +264,37 @@ export function generateSmartFacebookReply(incomingText: string): string {
   return `আসসালামু আলাইকুম! রাবিয়ান (Rabian) — রাজশাহী বিশ্ববিদ্যালয় শিক্ষার্থীদের স্মার্ট ডিজিটাল ক্যাম্পাস প্ল্যাটফর্মে আপনাকে স্বাগতম। 🎓\n\nআমাদের প্ল্যাটফর্মে আপনি পাচ্ছেন:\n• 🚌 রাবি বাস শিডিউল ও লাইভ টাইমার: https://rabian.site/bus\n• 📞 ৩,৮৭৭ জন শিক্ষক ও কর্মকর্তা ফোনবুক: https://rabian.site/directory\n• 🩸 ৯০-দিন লাইভ ব্লাড ব্যাংক: https://rabian.site/blood\n• 🏃‍♂️ মাসিক ম্যারাথন আবেদন: https://rabian.site/marathon\n• 🛍️ ক্যাম্পাস শপ ও হুডি: https://rabian.site/shop\n\nআপনার যেকোনো তথ্যের জন্য আমাদের ওয়েবসাইটে ভিজিট করতে পারেন অথবা সরাসরি এখানে মেসেজ দিন!`;
 }
 
-/** Pre-built viral campus post generator for 1-click publishing */
+/** Pre-built viral campus post generator for 1-click publishing (Teaser-to-Website Funnel) */
 export function generatePresetCampusPost(type: 'bus' | 'marathon' | 'directory' | 'merch' | 'blood'): FbPostPayload {
   switch (type) {
+    case 'blood':
+      return {
+        message: `🩸 জরুরি রক্তের প্রয়োজনে পাশে আছে রাবিয়ান ব্লাড ব্যাংক!\n\nমতিহার ক্যাম্পাসের ১,২০০+ শিক্ষার্থীর মধ্যে এই মুহূর্তে কাদের রক্তদানের ৯০ দিন পূর্ণ হয়েছে এবং কোন গ্রুপের ডোনাররা প্রস্তুত—নিরাপত্তার স্বার্থে সকল রক্তদাতার নম্বর ফেসবুকে প্রকাশ করা সম্ভব নয়।\n\n👉 আপনার কাঙ্ক্ষিত রক্তের গ্রুপ (A+, B+, O+, AB+) সিলেক্ট করে সম্পূর্ণ তালিকা দেখতে ও সরাসরি ডোনারকে কল দিতে ভিজিট করুন:\n🌐 https://rabian.site/blood\n\n#BloodDonation #RUBloodBank #RajshahiUniversity #Rabian #রাবিয়ান #রক্তদান #SaveLives`,
+        link: 'https://rabian.site/blood',
+      };
+
     case 'bus':
       return {
-        message: `🚌 রাবিয়ান বাস ট্র্যাকার • আজকের বাস কখন ছাড়বে?\n\nমতিহার ক্যাম্পাস থেকে শহর এবং শহর থেকে ক্যাম্পাসের সকল রুটের (কাটাখালী, তালাইমারী, নওদাপাড়া, রেলগেট, বিনোদপুর) বাস শিডিউল ও পরবর্তী বাস ছাড়ার লাইভ কাউন্টডাউন টাইমার এখন সরাসরি রাবিয়ানে!\n\nবাসে ওঠার আগে এক নজরে সময় দেখে নিন:\n👉 https://rabian.site/bus\n\n#RajshahiUniversity #RUBus #Rabian #রাবিয়ান #ক্যাম্পাসবাস`,
+        message: `🚌 রাবিয়ান বাস ট্র্যাকার • আজকের বাস কখন ছাড়বে?\n\nমতিহার ক্যাম্পাস থেকে কাটাখালী, তালাইমারী, নওদাপাড়া, রেলগেট ও শহরের সকল রুটের বাসের পরবর্তী সময়সূচী নিয়ে আর বিভ্রান্তি নয়।\n\n👉 বাসের সম্পূর্ণ শিডিউল, স্টপেজ-ভিত্তিক সময় ও লাইভ কাউন্টডাউন টাইমার দেখতে এখনই ভিজিট করুন:\n🌐 https://rabian.site/bus\n\n#RajshahiUniversity #RUBus #Rabian #রাবিয়ান #ক্যাম্পাসবাস`,
         link: 'https://rabian.site/bus',
       };
 
     case 'directory':
       return {
-        message: `📞 রাবি শিক্ষার্থীদের জন্য ৩,৮৭৭ জন শিক্ষক ও কর্মকর্তার পূর্ণাঙ্গ ফোনবুক ডিরেক্টরি!\n\nক্লাস, পরীক্ষা, থিসিস বা যেকোনো প্রয়োজনে সম্মানিত শিক্ষকবৃন্দ, চেয়ারম্যান, ডিন ও প্রশাসনিক কর্মকর্তাদের ভেরিফাইড মোবাইল নম্বর ও অফিশিয়াল ইমেইল খুঁজুন মাত্র ১ সেকেন্ডে — নাম বা ডিপার্টমেন্ট (যেমন: CSE, পদার্থ, গণিত) লিখে সরাসরি ১-ট্যাপে কল ও WhatsApp করুন।\n\nএখনই ডিরেক্টরি ব্রাউজ করুন:\n👉 https://rabian.site/directory\n\n#RajshahiUniversity #RUPhonebook #TeacherContact #Rabian`,
+        message: `📞 রাবি শিক্ষার্থীদের জন্য ৩,৮৭৭ জন শিক্ষক ও কর্মকর্তার পূর্ণাঙ্গ ফোনবুক ডিরেক্টরি!\n\nক্লাস, পরীক্ষা, থিসিস বা জরুরি প্রয়োজনে সম্মানিত শিক্ষকবৃন্দ, চেয়ারম্যান, ডিন ও কর্মকর্তাদের ভেরিফাইড মোবাইল নম্বর ও অফিসিয়াল ইমেইল খুঁজুন মাত্র ১ সেকেন্ডে।\n\n👉 বিভাগ অনুযায়ী শিক্ষকের নাম লিখে সরাসরি ১-ট্যাপে কল ও WhatsApp করতে সম্পূর্ণ ডিরেক্টরি দেখুন:\n🌐 https://rabian.site/directory\n\n#RajshahiUniversity #RUPhonebook #TeacherContact #Rabian`,
         link: 'https://rabian.site/directory',
-      };
-
-    case 'marathon':
-      return {
-        message: `🏃‍♂️ মাসিক রাবিয়ান ক্যাম্পাস রান ২০২৬ — রেজিস্ট্রেশন চলছে!\n\nপ্যারিস রোডের শান্ত নিসর্গে ৫ কিমি ক্যাম্পাস দৌড়ে অংশ নিন এবং জিতে নিন আকর্ষণীয় অফিশিয়াল রানিং টি-শার্ট ও ফিনিশার মেডেল।\n\nআবেদনের শেষ সময় পর্যন্ত লাইভ টাইমার চলছে! এখনই আপনার ফর্ম পূরণ করুন:\n👉 https://rabian.site/marathon\n\n#RUMarathon #CampusRun #ParisRoad #Rabian #রাবিয়ান`,
-        link: 'https://rabian.site/marathon',
       };
 
     case 'merch':
       return {
-        message: `🔥 রাবি অফিশিয়াল উইন্টার হুডি ও রাজশাহীর খাঁটি খেজুরের গুড়ের প্রি-অর্ডার চলছে!\n\n✓ ১০০% ক্যাশ অন ডেলিভারি (কোনো অগ্রিম টাকা দিতে হবে না)\n✓ মতিহার ক্যাম্পাসে ফ্রি ও দ্রুততম হোম ডেলিভারি\n✓ প্রিমিয়াম ফেব্রিক ও আকর্ষণীয় রাবি ডিজাইন\n\nআপনার সাইজ বুক করতে আজই অর্ডার করুন:\n👉 https://rabian.site/shop\n\n#RUHoodie #RabianShop #RajshahiUniversity #WinterCollection`,
+        message: `🔥 রাবি অফিশিয়াল উইন্টার হুডি ও রাজশাহীর খাঁটি খেজুরের গুড়ের প্রি-অর্ডার শুরু!\n\n✓ ১০০% ক্যাশ অন ডেলিভারি (কোনো অগ্রিম টাকা দিতে হবে না)\n✓ মতিহার ক্যাম্পাসে ফ্রি ও দ্রুততম হোম ডেলিভারি\n\n👉 সম্পূর্ণ কালেকশন, সাইজ চার্ট ও মূল্য দেখতে ভিজিট করুন:\n🌐 https://rabian.site/shop\n\n#RUHoodie #RabianShop #RajshahiUniversity #WinterCollection`,
         link: 'https://rabian.site/shop',
       };
 
-    case 'blood':
+    case 'marathon':
       return {
-        message: `🩸 জরুরি রক্তের প্রয়োজনে পাশে আছে রাবিয়ান ব্লাড ব্যাংক!\n\nশেষ রক্তদানের তারিখ থেকে স্বয়ংক্রিয়ভাবে ৯০ দিন (৩ মাস) হিসাব করে প্রস্তুত রক্তদাতাদের তালিকা পাওয়া যাবে সরাসরি। রক্তের গ্রুপ (A+, B+, O+, AB+) সিলেক্ট করে সরাসরি কল দিন বা নিজেই একজন গর্বিত রক্তদাতা হিসেবে নাম যুক্ত করুন:\n👉 https://rabian.site/blood\n\n#BloodDonation #RUBloodBank #Rajshahi #SaveLives #Rabian`,
-        link: 'https://rabian.site/blood',
+        message: `🏃‍♂️ মাসিক রাবিয়ান ক্যাম্পাস রান — বিস্তারিত আসছে!\n\nপ্যারিস রোডের শান্ত নিসর্গে ৫ কিমি ক্যাম্পাস দৌড়ে অংশ নিতে ও বিস্তারিত জানতে ভিজিট করুন:\n🌐 https://rabian.site/marathon\n\n#RUMarathon #CampusRun #ParisRoad #Rabian #রাবিয়ান`,
+        link: 'https://rabian.site/marathon',
       };
   }
 }

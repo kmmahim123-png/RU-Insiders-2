@@ -28,6 +28,7 @@ import RabianHeroOrbit from '@/components/RabianHeroOrbit';
 import HomeBusWidget from '@/components/HomeBusWidget';
 import HomeDirectoryQuickSearch from '@/components/HomeDirectoryQuickSearch';
 import HomeMarathonWidget from '@/components/HomeMarathonWidget';
+import HomeVideoSocialHub from '@/components/HomeVideoSocialHub';
 
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -193,6 +194,11 @@ export default function HomePage() {
         <HomeBusWidget />
         <HomeDirectoryQuickSearch />
         <HomeMarathonWidget />
+      </div>
+
+      {/* 1.8 RABIAN VIDEO & FACEBOOK CAMPAIGN HUB */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-6">
+        <HomeVideoSocialHub />
       </div>
 
       {/* 2. CAMPUS STORIES SECTION */}

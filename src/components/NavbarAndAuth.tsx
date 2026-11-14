@@ -26,6 +26,8 @@ import {
   Bus,
   Users,
   HeartPulse,
+  ArrowLeft,
+  Video,
 } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 import { BreakingNewsItem } from '@/types';
@@ -37,6 +39,24 @@ export interface UserSession {
   email: string;
   avatar: string;
   role: 'admin' | 'student' | 'visitor';
+}
+
+function getPageDetails(pathname: string): { title: string } {
+  if (pathname.startsWith('/bus')) return { title: 'বাস সময়সূচী ও টাইমার' };
+  if (pathname.startsWith('/directory')) return { title: 'শিক্ষক ও কর্মকর্তা ফোনবুক' };
+  if (pathname.startsWith('/blood')) return { title: 'লাইভ রাবি ব্লাড ব্যাংক' };
+  if (pathname.startsWith('/marathon')) return { title: 'মাসিক ক্যাম্পাস ম্যারাথন' };
+  if (pathname.startsWith('/shop')) return { title: 'রাবিয়ান অফিশিয়াল শপ' };
+  if (pathname.startsWith('/video')) return { title: 'ভিডিও ও মিডিয়া হাব' };
+  if (pathname.startsWith('/inside-ru')) return { title: 'ইনসাইড রাবি নিউজ ও সাহিত্য' };
+  if (pathname.startsWith('/academics')) return { title: 'বিভাগ, স্যার ও অনুষদ' };
+  if (pathname.startsWith('/clubs')) return { title: 'ক্যাম্পাস ক্লাবসমূহ' };
+  if (pathname.startsWith('/map')) return { title: '৩-স্তরের ক্যাম্পাস মানচিত্র' };
+  if (pathname.startsWith('/track')) return { title: 'অর্ডার ট্র্যাকিং' };
+  if (pathname.startsWith('/cart')) return { title: 'শপিং কার্ট' };
+  if (pathname.startsWith('/admin')) return { title: 'অ্যাডমিন পোর্টাল' };
+  if (pathname.startsWith('/merchant')) return { title: 'মার্চেন্ট পোর্টাল' };
+  return { title: 'পেজ বিবরণ' };
 }
 
 export default function NavbarAndAuth() {
@@ -381,6 +401,7 @@ export default function NavbarAndAuth() {
               { href: '/inside-ru', label: 'নিউজ ও সাহিত্য' },
               { href: '/academics', label: 'বিভাগ ও স্যার' },
               { href: '/blood', label: '🩸 রক্তদান' },
+              { href: '/video', label: '🎥 ভিডিও' },
               { href: '/clubs', label: 'ক্লাবসমূহ' },
               { href: '/map', label: 'ম্যাপ' },
               { href: '/track', label: 'অর্ডার' },
@@ -762,6 +783,7 @@ export default function NavbarAndAuth() {
                 { href: '/merchant', label: '🏪 মার্চেন্ট পোর্টাল (পণ্য বিক্রি করুন)' },
                 { href: '/academics', label: '🎓 বিভাগ, স্যার ও অ্যালামনাই ডিরেক্টরি' },
                 { href: '/blood', label: '🩸 রাবি ব্লাড ব্যাংক (৯০+ দিন এভেইলেবল)' },
+                { href: '/video', label: '🎥 রাবিয়ান ভিডিও ও ফেসবুক মিডিয়া' },
                 { href: '/clubs', label: '🏆 ক্লাবসমূহ ও মেম্বারশিপ' },
                 { href: '/track', label: '📦 অর্ডার ট্র্যাকিং' },
                 { href: '/admin', label: '🔐 অ্যাডমিন ও মার্চেন্ট লগইন' },
@@ -779,6 +801,52 @@ export default function NavbarAndAuth() {
           </div>
         )}
       </header>
+
+      {/* 4.5 Subpage Breadcrumb & Instant Back Navigation Bar (Visible on all subpages) */}
+      {pathname !== '/' && (
+        <div className="sticky top-16 z-30 bg-slate-50/95 dark:bg-slate-900/95 border-b border-slate-200 dark:border-slate-800 backdrop-blur-md px-3 sm:px-6 py-2 shadow-xs transition-all">
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== 'undefined' && window.history.length > 1) {
+                  window.history.back();
+                } else {
+                  window.location.href = '/';
+                }
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs sm:text-sm shadow-xs hover:bg-emerald-50 dark:hover:bg-slate-700 hover:text-emerald-700 hover:border-emerald-300 transition-all cursor-pointer emil-press shrink-0"
+              title="পূর্ববর্তী পেজে ফিরে যান"
+            >
+              <ArrowLeft className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <span>← ফিরে যান (Back)</span>
+            </button>
+
+            {/* Breadcrumb Path */}
+            <div className="flex items-center gap-1 sm:gap-1.5 text-xs font-semibold text-slate-500 truncate max-w-[180px] xs:max-w-xs sm:max-w-md">
+              <Link href="/" className="hover:text-emerald-700 flex items-center gap-1 shrink-0">
+                <Home className="w-3.5 h-3.5" />
+                <span className="hidden xs:inline">হোম</span>
+              </Link>
+              <span className="shrink-0 text-slate-300">/</span>
+              <span className="text-slate-900 dark:text-white font-extrabold truncate">
+                {getPageDetails(pathname).title}
+              </span>
+            </div>
+
+            {/* Quick Home Pill */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-100/70 dark:bg-emerald-950/80 hover:bg-emerald-200/80 px-2.5 py-1 rounded-xl border border-emerald-300/60 dark:border-emerald-800 transition shadow-xs"
+              >
+                <span>মূল পাতায় যান</span>
+                <ArrowRight className="w-3 h-3" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 5. Google OAuth Setup Helper (Shown only if Supabase Google Provider is not yet enabled in Dashboard) */}
       {showGoogleSetupModal && (
