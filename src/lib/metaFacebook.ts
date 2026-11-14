@@ -225,6 +225,19 @@ export function generateSmartFacebookReply(incomingText: string): string {
     return `🩸 আসসালামু আলাইকুম! রক্তের জরুরি প্রয়োজনে রাবি শিক্ষার্থীদের ৯০-দিন ভেরিফাইড লাইভ ব্লাড ব্যাংক ভিজিট করুন। রক্তের গ্রুপ অনুযায়ী ফিল্টার করে সরাসরি ডোনারকে কল করতে পারবেন:\n👉 https://rabian.site/blood\n\nআপনিও রক্তদাতা হিসেবে নিবন্ধন করতে পারবেন।`;
   }
 
+  // 3.5. Admission Test & Campus News
+  if (
+    text.includes('ভর্তি') ||
+    text.includes('admission') ||
+    text.includes('আবেদন') ||
+    text.includes('নিউজ') ||
+    text.includes('news') ||
+    text.includes('ইউনিট') ||
+    text.includes('যোগ্যতা')
+  ) {
+    return `🎓 আসসালামু আলাইকুম! রাজশাহী বিশ্ববিদ্যালয় (রাবি) ভর্তি পরীক্ষা ও ক্যাম্পাসের সর্বশেষ ব্রেকিং নিউজ:\n\n• অনলাইন প্রাথমিক আবেদন: ১৫ নভেম্বর দুপুর ১২টা থেকে ৩০ নভেম্বর ২০২৬ পর্যন্ত।\n• পরীক্ষা: ১২, ১৩ ও ২০ ফেব্রুয়ারি ২০২৭ (বি, সি, এ ইউনিট)।\n\n👉 আবেদনের বিস্তারিত যোগ্যতা, মানবণ্টন ও ক্যাম্পাসের সকল খবর দেখতে ভিজিট করুন:\n🌐 https://rabian.site/inside-ru`;
+  }
+
   // 4. Campus Marathon
   if (
     text.includes('ম্যারাথন') ||
@@ -265,8 +278,15 @@ export function generateSmartFacebookReply(incomingText: string): string {
 }
 
 /** Pre-built viral campus post generator for 1-click publishing (Teaser-to-Website Funnel) */
-export function generatePresetCampusPost(type: 'bus' | 'marathon' | 'directory' | 'merch' | 'blood'): FbPostPayload {
+export function generatePresetCampusPost(type: 'bus' | 'marathon' | 'directory' | 'merch' | 'blood' | 'news'): FbPostPayload {
   switch (type) {
+    case 'news':
+      return {
+        message: `🚨 ব্রেকিং নিউজ • রাজশাহী বিশ্ববিদ্যালয় (রাবি) স্নাতক ১ম বর্ষ ভর্তি পরীক্ষা ২০২৬-২৭!\n\nমতিহারের সবুজ ক্যাম্পাসে স্বপ্নপূরণের সুযোগ! আগামীকাল ১৫ নভেম্বর (রবিবার) দুপুর ১২:০০টা থেকে শুরু হচ্ছে অনলাইন প্রাথমিক আবেদন। চলবে ৩০ নভেম্বর ২০২৬ রাত ১১:৫৯ মিনিট পর্যন্ত।\n\n🗓️ চূড়ান্ত ভর্তি পরীক্ষার সময়সূচি:\n• 'বি' ইউনিট (বাণিজ্য শাখা): ১২ ফেব্রুয়ারি ২০২৭\n• 'সি' ইউনিট (বিজ্ঞান শাখা): ১৩ ফেব্রুয়ারি ২০২৭\n• 'এ' ইউনিট (মানবিক শাখা): ২০ ফেব্রুয়ারি ২০২৭\n\n📌 এ বছর শিক্ষার্থীদের আবেদনের যোগ্যতা শিথিল করা হয়েছে (মানবিক ও বাণিজ্যে নূন্যতম ৬.৫০ এবং বিজ্ঞানে ৭.৫০)। ১০০ নম্বরের MCQ পদ্ধতিতে পরীক্ষা অনুষ্ঠিত হবে।\n\n👉 আবেদনের বিস্তারিত শর্তাবলি, ইউনিটভিত্তিক বিভাগ ও আসন সংখ্যা এবং ভর্তি নির্দেশিকা জানতে ভিজিট করুন:\n🌐 https://rabian.site/inside-ru\n\n#RajshahiUniversity #RUAdmission #Rabian #রাবিয়ান #ভর্তিপরীক্ষা #ক্যাম্পাসনিউজ #মতিহারেরস্বপ্ন`,
+        link: 'https://rabian.site/inside-ru',
+        imageUrl: 'https://rabian.site/campus/ru-admin.jpg',
+      };
+
     case 'blood':
       return {
         message: `🩸 জরুরি রক্তের প্রয়োজনে পাশে আছে রাবিয়ান ব্লাড ব্যাংক!\n\nমতিহার ক্যাম্পাসের ১,২০০+ শিক্ষার্থীর মধ্যে এই মুহূর্তে কাদের রক্তদানের ৯০ দিন পূর্ণ হয়েছে এবং কোন গ্রুপের ডোনাররা প্রস্তুত—নিরাপত্তার স্বার্থে সকল রক্তদাতার নম্বর ফেসবুকে প্রকাশ করা সম্ভব নয়।\n\n👉 আপনার কাঙ্ক্ষিত রক্তের গ্রুপ (A+, B+, O+, AB+) সিলেক্ট করে সম্পূর্ণ তালিকা দেখতে ও সরাসরি ডোনারকে কল দিতে ভিজিট করুন:\n🌐 https://rabian.site/blood\n\n#BloodDonation #RUBloodBank #RajshahiUniversity #Rabian #রাবিয়ান #রক্তদান #SaveLives`,

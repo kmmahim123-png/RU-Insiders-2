@@ -38,7 +38,7 @@ export async function GET() {
     pageId: creds.pageId ? `${creds.pageId.slice(0, 4)}••••${creds.pageId.slice(-4)}` : null,
     verifyToken: creds.verifyToken,
     webhookUrl: 'https://rabian.site/api/facebook/webhook',
-    presets: ['bus', 'marathon', 'directory', 'merch', 'blood'],
+    presets: ['bus', 'marathon', 'directory', 'merch', 'blood', 'news'],
   });
 }
 
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
 
     let payload: FbPostPayload;
 
-    if (body.type && ['bus', 'directory', 'merch', 'blood'].includes(body.type)) {
+    if (body.type && ['bus', 'directory', 'merch', 'blood', 'news'].includes(body.type)) {
       payload = generatePresetCampusPost(body.type as any);
       if (body.link) payload.link = body.link;
       if (body.imageUrl) payload.imageUrl = body.imageUrl;

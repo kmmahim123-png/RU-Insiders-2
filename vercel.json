@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/facebook/cron?preset=blood",
+      "schedule": "30 2 * * *"
+    },
+    {
+      "path": "/api/facebook/cron?preset=news",
+      "schedule": "30 7 * * *"
+    },
+    {
+      "path": "/api/facebook/cron?preset=bus",
+      "schedule": "30 13 * * *"
+    }
+  ]
+}
