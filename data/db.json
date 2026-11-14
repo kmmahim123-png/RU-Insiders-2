@@ -594,7 +594,11 @@
     ],
     "metaWhatsappPhoneNumberId": "1457167637475986",
     "metaWhatsappAccountId": "1754655413326949",
-    "metaWhatsappAccessToken": ""
+    "metaWhatsappAccessToken": "",
+    "facebookPageId": "1548164021704400",
+    "facebookVerifyToken": "rabian_fb_verify_2026",
+    "facebookAutoPostEnabled": true,
+    "facebookMessengerReplyEnabled": true
   },
   "departments": {
     "dept-mcj": {

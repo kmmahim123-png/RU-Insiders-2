@@ -4,31 +4,26 @@ import {
   sendFacebookMessengerReply,
   replyToFacebookComment,
 } from '@/lib/metaFacebook';
-import fs from 'fs';
-import path from 'path';
+import { readDb } from '@/lib/db';
 
-const DATA_FILE = path.join(process.cwd(), 'src', 'data', 'ruStoreData.json');
-
-function getStoredFacebookCredentials() {
+async function getStoredFacebookCredentials() {
   try {
-    if (fs.existsSync(DATA_FILE)) {
-      const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
-      const s = data.settings || {};
-      return {
-        pageId: process.env.FACEBOOK_PAGE_ID || s.facebookPageId || '',
-        pageAccessToken: process.env.FACEBOOK_PAGE_ACCESS_TOKEN || s.facebookPageAccessToken || '',
-        verifyToken: process.env.FACEBOOK_VERIFY_TOKEN || s.facebookVerifyToken || 'rabian_fb_verify_2026',
-        autoReplyEnabled: s.facebookMessengerReplyEnabled !== false,
-      };
-    }
-  } catch {}
-
-  return {
-    pageId: process.env.FACEBOOK_PAGE_ID || '',
-    pageAccessToken: process.env.FACEBOOK_PAGE_ACCESS_TOKEN || '',
-    verifyToken: process.env.FACEBOOK_VERIFY_TOKEN || 'rabian_fb_verify_2026',
-    autoReplyEnabled: true,
-  };
+    const db = await readDb();
+    const s = db.settings || ({} as any);
+    return {
+      pageId: process.env.FACEBOOK_PAGE_ID || s.facebookPageId || '',
+      pageAccessToken: process.env.FACEBOOK_PAGE_ACCESS_TOKEN || s.facebookPageAccessToken || '',
+      verifyToken: process.env.FACEBOOK_VERIFY_TOKEN || s.facebookVerifyToken || 'rabian_fb_verify_2026',
+      autoReplyEnabled: s.facebookMessengerReplyEnabled !== false,
+    };
+  } catch {
+    return {
+      pageId: process.env.FACEBOOK_PAGE_ID || '',
+      pageAccessToken: process.env.FACEBOOK_PAGE_ACCESS_TOKEN || '',
+      verifyToken: process.env.FACEBOOK_VERIFY_TOKEN || 'rabian_fb_verify_2026',
+      autoReplyEnabled: true,
+    };
+  }
 }
 
 /**
@@ -41,7 +36,7 @@ export async function GET(req: NextRequest) {
   const token = searchParams.get('hub.verify_token');
   const challenge = searchParams.get('hub.challenge');
 
-  const { verifyToken } = getStoredFacebookCredentials();
+  const { verifyToken } = await getStoredFacebookCredentials();
 
   if (mode === 'subscribe' && token === verifyToken) {
     console.log('[Meta Webhook] Successfully verified webhook handshake.');
@@ -62,7 +57,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Not a page event' }, { status: 404 });
     }
 
-    const { pageAccessToken, pageId, autoReplyEnabled } = getStoredFacebookCredentials();
+    const { pageAccessToken, pageId, autoReplyEnabled } = await getStoredFacebookCredentials();
 
     if (!pageAccessToken || !autoReplyEnabled) {
       // Return 200 OK to Meta even if automation is temporarily muted in Admin settings

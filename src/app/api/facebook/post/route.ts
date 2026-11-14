@@ -4,38 +4,33 @@ import {
   generatePresetCampusPost,
   FbPostPayload,
 } from '@/lib/metaFacebook';
-import fs from 'fs';
-import path from 'path';
+import { readDb } from '@/lib/db';
 
-const DATA_FILE = path.join(process.cwd(), 'src', 'data', 'ruStoreData.json');
-
-function getStoredFacebookCredentials() {
+async function getStoredFacebookCredentials() {
   try {
-    if (fs.existsSync(DATA_FILE)) {
-      const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
-      const s = data.settings || {};
-      return {
-        pageId: process.env.FACEBOOK_PAGE_ID || s.facebookPageId || '',
-        pageAccessToken: process.env.FACEBOOK_PAGE_ACCESS_TOKEN || s.facebookPageAccessToken || '',
-        verifyToken: process.env.FACEBOOK_VERIFY_TOKEN || s.facebookVerifyToken || 'rabian_fb_verify_2026',
-        autoPostEnabled: s.facebookAutoPostEnabled !== false,
-      };
-    }
-  } catch {}
-
-  return {
-    pageId: process.env.FACEBOOK_PAGE_ID || '',
-    pageAccessToken: process.env.FACEBOOK_PAGE_ACCESS_TOKEN || '',
-    verifyToken: process.env.FACEBOOK_VERIFY_TOKEN || 'rabian_fb_verify_2026',
-    autoPostEnabled: true,
-  };
+    const db = await readDb();
+    const s = db.settings || ({} as any);
+    return {
+      pageId: process.env.FACEBOOK_PAGE_ID || s.facebookPageId || '',
+      pageAccessToken: process.env.FACEBOOK_PAGE_ACCESS_TOKEN || s.facebookPageAccessToken || '',
+      verifyToken: process.env.FACEBOOK_VERIFY_TOKEN || s.facebookVerifyToken || 'rabian_fb_verify_2026',
+      autoPostEnabled: s.facebookAutoPostEnabled !== false,
+    };
+  } catch {
+    return {
+      pageId: process.env.FACEBOOK_PAGE_ID || '',
+      pageAccessToken: process.env.FACEBOOK_PAGE_ACCESS_TOKEN || '',
+      verifyToken: process.env.FACEBOOK_VERIFY_TOKEN || 'rabian_fb_verify_2026',
+      autoPostEnabled: true,
+    };
+  }
 }
 
 /**
  * GET Handler: Check Facebook connection status & available presets
  */
 export async function GET() {
-  const creds = getStoredFacebookCredentials();
+  const creds = await getStoredFacebookCredentials();
 
   return NextResponse.json({
     ok: true,
@@ -54,7 +49,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const creds = getStoredFacebookCredentials();
+    const creds = await getStoredFacebookCredentials();
 
     const pageId = body.pageId || creds.pageId;
     const accessToken = body.accessToken || creds.pageAccessToken;
