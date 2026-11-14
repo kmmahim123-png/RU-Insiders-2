@@ -70,6 +70,7 @@ export async function POST(req: NextRequest) {
       payload = generatePresetCampusPost(body.type as any);
       if (body.link) payload.link = body.link;
       if (body.imageUrl) payload.imageUrl = body.imageUrl;
+      if (body.videoUrl) payload.videoUrl = body.videoUrl;
     } else if (body.type === 'marathon') {
       // Safety guard: Marathon post is blocked when no active marathon event is running
       return NextResponse.json(
@@ -89,6 +90,8 @@ export async function POST(req: NextRequest) {
         message: msg,
         link: body.link || undefined,
         imageUrl: body.imageUrl || undefined,
+        videoUrl: body.videoUrl || undefined,
+        videoTitle: body.videoTitle || undefined,
       };
     } else {
       return NextResponse.json(

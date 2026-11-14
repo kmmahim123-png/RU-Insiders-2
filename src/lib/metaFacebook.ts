@@ -8,6 +8,8 @@ export interface FbPostPayload {
   message: string;
   link?: string;
   imageUrl?: string;
+  videoUrl?: string;
+  videoTitle?: string;
 }
 
 export interface FbPublishResult {
@@ -33,7 +35,30 @@ export async function publishFacebookPost(
   }
 
   try {
-    // 1. If an image is provided, publish as photo post
+    // 1. If a video is provided, publish as video post
+    if (payload.videoUrl && payload.videoUrl.startsWith('http')) {
+      const url = `https://graph.facebook.com/v21.0/${pageId}/videos`;
+      const params = new URLSearchParams({
+        file_url: payload.videoUrl,
+        description: payload.link ? `${payload.message}\n\n👉 সরাসরি যুক্ত হোন: ${payload.link}` : payload.message,
+        title: payload.videoTitle || 'রাবিয়ান • রাজশাহী বিশ্ববিদ্যালয়',
+        access_token: accessToken,
+      });
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString(),
+      });
+      const data = await res.json();
+
+      if (data.id) {
+        return { ok: true, postId: data.id };
+      }
+      return { ok: false, error: data.error?.message || 'Failed to publish video post' };
+    }
+
+    // 2. If an image is provided, publish as photo post
     if (payload.imageUrl && payload.imageUrl.startsWith('http')) {
       const url = `https://graph.facebook.com/v21.0/${pageId}/photos`;
       const params = new URLSearchParams({
