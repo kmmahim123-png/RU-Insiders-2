@@ -611,15 +611,6 @@ export default function NavbarAndAuth() {
               <ThemeToggle />
             </div>
 
-            {/* Admin Portal Shortcut (Desktop & Tablet) */}
-            <Link
-              href="/admin"
-              className="hidden sm:flex w-10 h-10 sm:w-auto sm:h-11 px-2.5 rounded-xl border border-slate-200 text-slate-600 hover:text-amber-600 hover:bg-slate-50 items-center justify-center transition shrink-0"
-              title="অ্যাডমিন ও ক্লাব পোর্টাল"
-            >
-              <ShieldCheck className="w-4 h-4" />
-            </Link>
-
             {/* Shopping Bag Button with Slide-Over Drawer */}
             <button
               id="ru-cart-icon-badge"
@@ -786,7 +777,6 @@ export default function NavbarAndAuth() {
                 { href: '/video', label: '🎥 রাবিয়ান ভিডিও ও ফেসবুক মিডিয়া' },
                 { href: '/clubs', label: '🏆 ক্লাবসমূহ ও মেম্বারশিপ' },
                 { href: '/track', label: '📦 অর্ডার ট্র্যাকিং' },
-                { href: '/admin', label: '🔐 অ্যাডমিন ও মার্চেন্ট লগইন' },
               ].map((item) => (
                 <Link
                   key={item.href}

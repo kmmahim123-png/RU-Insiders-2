@@ -507,7 +507,6 @@ export default function HomePage() {
                 <li><Link href="/track" className="hover:text-white transition">অর্ডার ট্র্যাকিং</Link></li>
                 <li><Link href="/clubs" className="hover:text-white transition">ক্লাব মেম্বারশিপ</Link></li>
                 <li><Link href="/cart" className="hover:text-white transition">শপিং কার্ট ও ক্যাশ মেমো</Link></li>
-                <li><Link href="/admin" className="hover:text-amber-400 transition">অ্যাডমিন ও ক্লাব পোর্টাল</Link></li>
               </ul>
             </div>
 
