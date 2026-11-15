@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Video,
@@ -10,20 +10,86 @@ import {
   VolumeX,
   ExternalLink,
   HeartPulse,
-  Share2,
-  MessageCircle,
   ThumbsUp,
   Sparkles,
   ShieldCheck,
   CheckCircle2,
   Clock,
   ArrowRight,
+  Film,
 } from 'lucide-react';
 
+export const VIDEO_EPISODES = [
+  {
+    id: 'angle1',
+    badge: '🚨 মিডনাইট ইমার্জেন্সি',
+    title: 'রাত ২টায় রক্তের জন্য ফেসবুকে পোস্ট দিয়ে অপেক্ষা নয়',
+    hook: 'হাসপাতালের গেটে রক্তের হাহাকার থামাতে রাবিয়ানে ১ ক্লিকেই ক্যাম্পাসের প্রস্তুত রক্তদাতার সরাসরি নম্বর।',
+    src: '/videos/blood_donation_ugc_5_angles/Rabian_Blood_Angle1_Emergency.mp4',
+    poster: '/videos/blood_donation_ugc_5_angles/Rabian_Blood_Angle1_Emergency_preview.jpg',
+    fbUrl: 'https://www.facebook.com/1548164021704400',
+  },
+  {
+    id: 'angle2',
+    badge: '❤️ স্বস্তি ও কৃতজ্ঞতা',
+    title: 'মাত্র ৫ মিনিটে রক্তের ডোনার পাওয়ার বাস্তব অভিজ্ঞতা',
+    hook: 'ছোট ভাইয়ের জীবন বাঁচাতে ৫ মিনিটে ডোনার পেয়েছি—রাবিয়ান ভেরিফায়েড লিস্ট সত্যিই জীবন বাঁচায়!',
+    src: '/videos/blood_donation_ugc_5_angles/Rabian_Blood_Angle2_Relief.mp4',
+    poster: '/videos/blood_donation_ugc_5_angles/Rabian_Blood_Angle2_Relief_preview.jpg',
+    fbUrl: 'https://www.facebook.com/1548164021704400',
+  },
+  {
+    id: 'angle3',
+    badge: '🦸‍♂️ ক্যাম্পাস রিয়েল হিরো',
+    title: 'রক্ত দিয়ে আপনিও হতে পারেন মতিহারের আসল হিরো',
+    hook: 'এক ব্যাগ রক্ত মানে নতুন একটি জীবন। রাবিয়ান ডোনার কমিউনিটিতে নিজের নাম যুক্ত করুন আজই।',
+    src: '/videos/blood_donation_ugc_5_angles/Rabian_Blood_Angle3_CampusHero.mp4',
+    poster: '/videos/blood_donation_ugc_5_angles/Rabian_Blood_Angle3_CampusHero_preview.jpg',
+    fbUrl: 'https://www.facebook.com/1548164021704400',
+  },
+  {
+    id: 'angle4',
+    badge: '📱 ১ ক্লিকে সমাধান',
+    title: '২০ জনকে কল দিয়ে ফোন বিজি পাওয়ার দিন শেষ',
+    hook: 'গ্রুপে গ্রুপে পোস্ট দিয়ে উত্তরের অপেক্ষা না করে সরাসরি রক্তের গ্রুপ ফিল্টার করে কল দিন।',
+    src: '/videos/blood_donation_ugc_5_angles/Rabian_Blood_Angle4_CallingVs1Click.mp4',
+    poster: '/videos/blood_donation_ugc_5_angles/Rabian_Blood_Angle4_CallingVs1Click_preview.jpg',
+    fbUrl: 'https://www.facebook.com/1548164021704400',
+  },
+  {
+    id: 'angle5',
+    badge: '🩸 রেয়ার নেগেটিভ ক্রাইসিস',
+    title: 'নেগেটিভ রক্তের গ্রুপ সংকটে শেষ ভরসা রাবিয়ান',
+    hook: 'ও-নেগেটিভ বা এবি-নেগেটিভ রক্তের চরম সংকটে আলাদা করে রেয়ার রক্তদাতাদের খুঁজে পান ১ সেকেন্ডে।',
+    src: '/videos/blood_donation_ugc_5_angles/Rabian_Blood_Angle5_RareNegativeBlood.mp4',
+    poster: '/videos/blood_donation_ugc_5_angles/Rabian_Blood_Angle5_RareNegativeBlood_preview.jpg',
+    fbUrl: 'https://www.facebook.com/1548164021704400',
+  },
+  {
+    id: 'master',
+    badge: '🌟 মূল মাস্টার সংস্করণ',
+    title: '১ ব্যাগ রক্তে বাঁচে ৪টি জীবন • পূর্ণাঙ্গ সচেতনতা',
+    hook: 'প্লাটিলেট, প্লাজমা ও লোহিত কণিকা দিয়ে ৪ জনের জীবন রক্ষা সম্ভব—ভয় নয়, রক্ত দিন নিয়মিত।',
+    src: '/videos/Blood_Donation_Master_clean.mp4',
+    poster: '/videos/Blood_Donation_Master_clean_preview.jpg',
+    fbUrl: 'https://www.facebook.com/1548164021704400/videos/3748722558616260',
+  },
+];
+
 export default function HomeVideoSocialHub() {
+  const [selectedIdx, setSelectedIdx] = useState(0);
+  const currentVideo = VIDEO_EPISODES[selectedIdx];
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
+
+  // When changing video, reset play state
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.load();
+      videoRef.current.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+    }
+  }, [selectedIdx]);
 
   const togglePlay = () => {
     if (!videoRef.current) return;
@@ -53,13 +119,13 @@ export default function HomeVideoSocialHub() {
           <div className="space-y-2 max-w-2xl">
             <span className="inline-flex items-center gap-1.5 bg-rose-500/20 border border-rose-400/30 text-rose-300 px-3.5 py-1 rounded-full text-xs font-black tracking-wide">
               <Video className="w-3.5 h-3.5 text-rose-400 animate-pulse" />
-              <span>রাবিয়ান মিডিয়া • অফিসিয়াল ফেসবুক ভিডিও ও রিলস হাব</span>
+              <span>রাবিয়ান মিডিয়া • ৫টি ভাইরাল রক্তদান UGC ভিডিও ও রিলস হাব</span>
             </span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight leading-tight">
-              ক্যাম্পাস সচেতনতা ও লাইভ ভিডিও আপডেট
+              ক্যাম্পাস সচেতনতা ও লাইভ ভিডিও ক্যাম্পেইন
             </h2>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-medium">
-              রাবিয়ান ফেসবুক পেজে প্রকাশিত রক্তদান ক্যাম্পেইনের বিশেষ উপস্থাপনা। ভিডিওটি দেখুন এবং রাজশাহী বিশ্ববিদ্যালয়ের জরুরি প্রয়োজনে পাশে থাকুন।
+              জরুরি মুহূর্তে রক্ত খোঁজার ভোগান্তি দূর করতে নির্মিত ৫টি বাস্তবমুখী অবতার ভিডিও। প্রতিটি ভিডিও দেখুন ও ক্যাম্পাসের বন্ধুদের সাথে শেয়ার করুন।
             </p>
           </div>
 
@@ -85,6 +151,25 @@ export default function HomeVideoSocialHub() {
           </div>
         </div>
 
+        {/* Video Selector Horizontal Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+          {VIDEO_EPISODES.map((ep, idx) => (
+            <button
+              key={ep.id}
+              type="button"
+              onClick={() => setSelectedIdx(idx)}
+              className={`shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer border ${
+                selectedIdx === idx
+                  ? 'bg-rose-600 text-white border-rose-500 shadow-lg shadow-rose-600/30'
+                  : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <Film className="w-3.5 h-3.5" />
+              <span>{ep.badge}</span>
+            </button>
+          ))}
+        </div>
+
         {/* Video & Info Split Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
           {/* Left Column: Vertical/Shorts Video Player with Custom Controls (5 Cols) */}
@@ -92,8 +177,8 @@ export default function HomeVideoSocialHub() {
             <div className="relative w-full max-w-[320px] aspect-[9/16] rounded-3xl overflow-hidden shadow-2xl border-2 border-white/20 bg-black group">
               <video
                 ref={videoRef}
-                src="/videos/Blood_Donation_Master_clean.mp4"
-                poster="/videos/Blood_Donation_Master_clean_preview.jpg"
+                src={currentVideo.src}
+                poster={currentVideo.poster}
                 playsInline
                 loop
                 muted={isMuted}
@@ -107,10 +192,10 @@ export default function HomeVideoSocialHub() {
               <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
                 <span className="bg-rose-600/90 backdrop-blur-md text-white text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 shadow-md">
                   <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
-                  <span>লাইভ ক্যাম্পেইন</span>
+                  <span>{currentVideo.badge}</span>
                 </span>
                 <span className="bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-lg border border-white/20">
-                  ৩০ সেকেন্ড
+                  ৯:১৬ রিলস
                 </span>
               </div>
 
@@ -137,7 +222,7 @@ export default function HomeVideoSocialHub() {
                 </button>
 
                 <p className="text-[11px] font-bold text-slate-200 line-clamp-1 px-2">
-                  ১ ব্যাগ রক্তে বাঁচে ৪টি জীবন
+                  {currentVideo.title}
                 </p>
 
                 <button
@@ -158,20 +243,20 @@ export default function HomeVideoSocialHub() {
             <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-5 space-y-3">
               <div className="flex items-center gap-2 text-rose-400 text-xs font-black">
                 <HeartPulse className="w-4 h-4" />
-                <span>রক্তদান সচেতনতা ক্যাম্পেইন • ১ম সংস্করণ</span>
+                <span>ভিডিও #{selectedIdx + 1}: {currentVideo.badge}</span>
               </div>
               <h3 className="text-xl sm:text-2xl font-black text-white">
-                হাসপাতালে ১ ব্যাগ রক্তের জন্য হাহাকার আপনি দেখেছেন?
+                {currentVideo.title}
               </h3>
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
-                আপনার দেওয়া মাত্র এক ব্যাগ রক্ত প্রক্রিয়াজাত করে প্লাটিলেট, প্লাজমা ও লোহিত কণিকা দিয়ে ৪ জন মানুষের জীবন বাঁচানো সম্ভব। রক্তদানে ভয় নয়, নিয়মিত রক্ত দিন—নিজে সুস্থ থাকুন ও অন্যকে বাঁচান।
+                {currentVideo.hook}
               </p>
 
               {/* Teaser Traffic Warning Box */}
               <div className="bg-amber-400/10 border border-amber-300/30 rounded-xl p-3 text-xs text-amber-200 flex items-start gap-2.5">
                 <span className="text-amber-400 text-base leading-none shrink-0">💡</span>
                 <p className="leading-relaxed">
-                  <strong>বিশেষ দ্রষ্টব্য:</strong> ফেসবুক পেজে রক্তদাতাদের পূর্ণাঙ্গ ফোন নম্বর বা তালিকা প্রকাশ করা হয় না। রক্তদাতার রক্তের গ্রুপ নির্বাচন করে সরাসরি কল দিতে সবসময় <strong>rabian.site/blood</strong> ভিজিট করুন।
+                  <strong>সরাসরি ডোনার কল:</strong> ফেসবুক পেজে কারো ব্যক্তিগত গোপনীয়তা ক্ষুণ্ণ না করতে পূর্ণাঙ্গ নম্বর দেওয়া হয় না। কাঙ্ক্ষিত গ্রুপের রক্তদাতার নম্বর পেতে ও ১-ক্লিকে কল দিতে সবসময় <strong>rabian.site/blood</strong> ভিজিট করুন।
                 </p>
               </div>
             </div>
@@ -190,47 +275,52 @@ export default function HomeVideoSocialHub() {
               </Link>
 
               <a
-                href="https://www.facebook.com/1548164021704400/videos/3748722558616260"
+                href={currentVideo.fbUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="p-3.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-xs sm:text-sm flex items-center justify-between transition-all group emil-press"
               >
                 <div className="flex items-center gap-2">
                   <ThumbsUp className="w-4 h-4 text-blue-400" />
-                  <span>ফেসবুকে ভিডিওটি দেখুন ও শেয়ার করুন</span>
+                  <span>ফেসবুক পেজে রিলসটি দেখুন</span>
                 </div>
                 <ExternalLink className="w-4 h-4 opacity-70 group-hover:opacity-100" />
               </a>
             </div>
 
-            {/* Daily 3 Video Pipeline Schedule */}
+            {/* 5 Video UGC Playlist Grid */}
             <div className="bg-slate-950/60 border border-white/10 rounded-2xl p-4 space-y-2.5 text-xs">
               <div className="flex items-center justify-between text-slate-300 font-bold border-b border-white/10 pb-2">
                 <span className="flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-amber-400" />
-                  <span>দৈনিক ৩টি ক্যাম্পেইন ভিডিও সময়সূচী</span>
+                  <span>৫টি ভাইরাল ভিডিও প্লেলিস্ট (ক্লিক করে শুনুন)</span>
                 </span>
                 <span className="text-[10px] text-emerald-400 bg-emerald-950/60 border border-emerald-800 px-2 py-0.5 rounded-full">
-                  নিয়মিত আপডেট
+                  ৬টি ভিডিও রেডি ✓
                 </span>
               </div>
 
-              <div className="space-y-1.5 text-slate-300">
-                <div className="flex items-center justify-between py-1 bg-white/5 px-2.5 rounded-xl border border-white/5">
-                  <span className="font-extrabold text-white">🌅 সকাল ০৮:৩০:</span>
-                  <span className="text-slate-300 truncate max-w-[200px] sm:max-w-xs">১ ব্যাগ রক্তে বাঁচে ৪টি জীবন</span>
-                  <span className="text-emerald-400 font-black text-[10px] bg-emerald-500/20 px-2 py-0.5 rounded">লাইভ ✓</span>
-                </div>
-                <div className="flex items-center justify-between py-1 px-2.5 rounded-xl text-slate-400">
-                  <span className="font-extrabold">☀️ দুপুর ০১:৩০:</span>
-                  <span className="truncate max-w-[200px] sm:max-w-xs">রক্তের ৯০ দিনের বৈজ্ঞানিক নিয়ম</span>
-                  <span className="text-amber-300 text-[10px]">শিডিউল ⏳</span>
-                </div>
-                <div className="flex items-center justify-between py-1 px-2.5 rounded-xl text-slate-400">
-                  <span className="font-extrabold">🌙 সন্ধ্যা ০৭:৩০:</span>
-                  <span className="truncate max-w-[200px] sm:max-w-xs">১ ক্লিকে ক্যাম্পাসে রক্তের সন্ধান</span>
-                  <span className="text-amber-300 text-[10px]">শিডিউল ⏳</span>
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {VIDEO_EPISODES.map((ep, idx) => (
+                  <button
+                    key={ep.id}
+                    type="button"
+                    onClick={() => setSelectedIdx(idx)}
+                    className={`text-left p-2.5 rounded-xl border transition flex items-center gap-2.5 cursor-pointer ${
+                      selectedIdx === idx
+                        ? 'bg-rose-950/60 border-rose-500/80 text-rose-200'
+                        : 'bg-white/5 border-white/5 text-slate-300 hover:bg-white/10 hover:text-white'
+                    }`}
+                  >
+                    <div className="w-7 h-7 rounded-lg bg-rose-600/30 text-rose-300 flex items-center justify-center font-black text-xs shrink-0">
+                      {idx + 1}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-xs truncate">{ep.badge}</p>
+                      <p className="text-[10px] text-slate-400 truncate">{ep.title}</p>
+                    </div>
+                  </button>
+                ))}
               </div>
             </div>
           </div>
