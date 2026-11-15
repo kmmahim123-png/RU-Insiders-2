@@ -615,9 +615,10 @@
     "facebookVerifyToken": "rabian_fb_verify_2026",
     "facebookAutoPostEnabled": true,
     "facebookMessengerReplyEnabled": true,
-    "facebookPageAccessToken": "EAAflKtBvZBPwBS7xqLu8xZCVXLQuxw5H6LW8SjSlOiSBZAfxFhcWddcioIqSyVpmMaUZAHxYD82jR4etJXpfpybBONmbnmXcFFNAjZAeEOewzZA3uOcnDnCVSMQHltFwvQA6ajvzIBDRGmaWk753CMP1G0f45Y2mohBiFOSLkOZCHgMAIrmQM42VnaboNsytZAsUcW1vY9Q5ml0GvE1TsGKi6dDIb9lxTlS7hYSW69BdZAqcJPWVzyTlmMc4ZD",
+    "facebookPageAccessToken": "EAAflKtBvZBPwBSZBqGqe7kFlgzuP7cCEGqmyDM8sUfhfOveXJPmtzqkbF1LBKSavc8UjIJRVL2r90pYFHwDVCpTkfl80TDCuJbZCfZAFpAXOsknHSvawKJoGKZAehxuyVxZC3l2vUZCRU05P8wZCFmuVZAaWHZAnZCpV6RvHtMdZB1dSt9ImlZC8UPRPE0RQ0icNaZAWcEo06tfCrIfn9ATw8LKqQuAGXY",
     "facebookAppId": "2222296885360892",
-    "facebookAppSecret": "847c7134d003b83105abf544bb728560"
+    "facebookAppSecret": "847c7134d003b83105abf544bb728560",
+    "facebookTokenExpires": "NEVER"
   },
   "departments": {
     "dept-mcj": {
