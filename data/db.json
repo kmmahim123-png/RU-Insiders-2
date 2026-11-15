@@ -720,7 +720,8 @@
       "totalDonations": 4,
       "isPublicPhone": true,
       "note": "ক্যাম্পাসে জরুরি রক্তদানে সার্বক্ষণিক প্রস্তুত",
-      "createdAt": "2026-11-01T10:00:00.000Z"
+      "createdAt": "2026-11-01T10:00:00.000Z",
+      "location": "রাজশাহী"
     },
     {
       "id": "bd-2",
@@ -733,7 +734,8 @@
       "totalDonations": 6,
       "isPublicPhone": true,
       "note": "রামেক ও ক্যাম্পাসে দ্রুত পৌঁছাতে পারব",
-      "createdAt": "2026-11-01T10:00:00.000Z"
+      "createdAt": "2026-11-01T10:00:00.000Z",
+      "location": "রাজশাহী"
     },
     {
       "id": "bd-3",
@@ -745,7 +747,8 @@
       "lastDonationDate": "",
       "totalDonations": 1,
       "isPublicPhone": true,
-      "createdAt": "2026-11-01T10:00:00.000Z"
+      "createdAt": "2026-11-01T10:00:00.000Z",
+      "location": "রাজশাহী"
     },
     {
       "id": "bd-4",
@@ -758,7 +761,24 @@
       "totalDonations": 2,
       "isPublicPhone": true,
       "note": "অক্টোবরে রক্ত দিয়েছেন (৯০ দিন পূর্ণ হতে বাকি)",
-      "createdAt": "2026-11-01T10:00:00.000Z"
+      "createdAt": "2026-11-01T10:00:00.000Z",
+      "location": "রাজশাহী"
+    },
+    {
+      "id": "bd-dhaka-1",
+      "nameBn": "মোঃ ফাহিম মুনতাসির (রাবি প্রাক্তন)",
+      "bloodGroup": "B+",
+      "phone": "01799887766",
+      "location": "ঢাকা",
+      "departmentBn": "আইবিএ (IBA-RU)",
+      "hallBn": "মিরপুর-১০ / ধানমন্ডি, ঢাকা",
+      "lastDonationDate": "2026-06-15",
+      "totalDonations": 5,
+      "isPublicPhone": true,
+      "isRuStudent": false,
+      "isVerified": true,
+      "note": "ঢাকায় যেকোনো জরুরি প্রয়োজনে রক্তদানে প্রস্তুত",
+      "createdAt": "2026-11-15T05:54:08.345Z"
     }
   ]
 }

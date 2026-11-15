@@ -22,6 +22,24 @@ import {
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'] as const;
 
+export const BANGLADESH_LOCATIONS = [
+  'রাজশাহী',
+  'ঢাকা',
+  'চট্টগ্রাম',
+  'সিলেট',
+  'খুলনা',
+  'বরিশাল',
+  'রংপুর',
+  'ময়মনসিংহ',
+  'বগুড়া',
+  'নাটোর',
+  'নওগাঁ',
+  'চাঁপাইনবাবগঞ্জ',
+  'পাবনা',
+  'সিরাজগঞ্জ',
+  'অন্যান্য',
+] as const;
+
 interface BloodBankSectionProps {
   isHomepage?: boolean;
 }
@@ -32,6 +50,7 @@ export default function BloodBankSection({ isHomepage = false }: BloodBankSectio
   const [donors, setDonors] = useState<BloodDonor[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedGroup, setSelectedGroup] = useState<string>('all');
+  const [selectedLocation, setSelectedLocation] = useState<string>('all');
   const [onlyEligible, setOnlyEligible] = useState<boolean>(true);
   const [search, setSearch] = useState('');
 
@@ -41,6 +60,7 @@ export default function BloodBankSection({ isHomepage = false }: BloodBankSectio
     nameBn: '',
     bloodGroup: 'B+',
     phone: '',
+    location: 'রাজশাহী',
     hallBn: '',
     departmentBn: '',
     isRuStudent: false,
@@ -84,15 +104,21 @@ export default function BloodBankSection({ isHomepage = false }: BloodBankSectio
   const filtered = enrichedDonors.filter((d) => {
     const groupMatch = selectedGroup === 'all' || d.bloodGroup === selectedGroup;
     const eligMatch = !onlyEligible || d.eligibility.isEligible;
+    const donorLoc = (d.location || 'রাজশাহী').trim();
+    const locMatch =
+      selectedLocation === 'all' ||
+      donorLoc === selectedLocation ||
+      (d.hallBn || '').includes(selectedLocation);
     const q = search.trim().toLowerCase();
     const searchMatch =
       !q ||
       d.nameBn.toLowerCase().includes(q) ||
       d.departmentBn.toLowerCase().includes(q) ||
       (d.hallBn || '').toLowerCase().includes(q) ||
+      (d.location || '').toLowerCase().includes(q) ||
       (d.studentRoll || '').toLowerCase().includes(q) ||
       d.bloodGroup.toLowerCase().includes(q);
-    return groupMatch && eligMatch && searchMatch;
+    return groupMatch && eligMatch && locMatch && searchMatch;
   });
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -120,6 +146,7 @@ export default function BloodBankSection({ isHomepage = false }: BloodBankSectio
             nameBn: '',
             bloodGroup: 'B+',
             phone: '',
+            location: 'রাজশাহী',
             hallBn: '',
             departmentBn: '',
             isRuStudent: false,
@@ -279,6 +306,85 @@ export default function BloodBankSection({ isHomepage = false }: BloodBankSectio
         </div>
       </div>
 
+      {/* Location Filter Selector for Blood Seekers */}
+      <div className="bg-slate-50 border border-slate-200/90 p-3 rounded-2xl flex flex-wrap items-center justify-between gap-2.5">
+        <div className="flex items-center gap-1.5 text-xs font-black text-slate-800">
+          <MapPin className="w-4 h-4 text-rose-600 shrink-0" />
+          <span>লোকেশন ফিল্টার:</span>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-1.5 flex-1 justify-start sm:justify-end">
+          <button
+            type="button"
+            onClick={() => setSelectedLocation('all')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer ${
+              selectedLocation === 'all'
+                ? 'bg-rose-600 text-white shadow-xs'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+            }`}
+          >
+            সকল জেলা ({donors.length})
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSelectedLocation('রাজশাহী')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer flex items-center gap-1 ${
+              selectedLocation === 'রাজশাহী'
+                ? 'bg-rose-600 text-white shadow-xs'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+            }`}
+          >
+            <span>📍 রাজশাহী</span>
+            <span className="text-[10px] opacity-80">
+              ({enrichedDonors.filter((d) => (d.location || 'রাজশাহী').includes('রাজশাহী')).length})
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSelectedLocation('ঢাকা')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer flex items-center gap-1 ${
+              selectedLocation === 'ঢাকা'
+                ? 'bg-rose-600 text-white shadow-xs'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+            }`}
+          >
+            <span>📍 ঢাকা</span>
+            <span className="text-[10px] opacity-80">
+              ({enrichedDonors.filter((d) => (d.location || '').includes('ঢাকা') || (d.hallBn || '').includes('ঢাকা')).length})
+            </span>
+          </button>
+
+          {/* District Dropdown for other areas */}
+          <select
+            value={['all', 'রাজশাহী', 'ঢাকা'].includes(selectedLocation) ? '' : selectedLocation}
+            onChange={(e) => {
+              if (e.target.value) setSelectedLocation(e.target.value);
+            }}
+            className="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 focus:outline-none focus:border-rose-500"
+          >
+            <option value="">অন্যান্য জেলা...</option>
+            {BANGLADESH_LOCATIONS.filter((loc) => loc !== 'রাজশাহী' && loc !== 'ঢাকা').map((loc) => (
+              <option key={loc} value={loc}>
+                📍 {loc} ({enrichedDonors.filter((d) => (d.location || '').includes(loc) || (d.hallBn || '').includes(loc)).length})
+              </option>
+            ))}
+          </select>
+
+          {selectedLocation !== 'all' && (
+            <button
+              type="button"
+              onClick={() => setSelectedLocation('all')}
+              className="p-1 rounded-lg text-slate-400 hover:text-rose-600"
+              title="লোকেশন ফিল্টার রিসেট"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Filters Row */}
       <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div className="relative flex-1">
@@ -349,14 +455,19 @@ export default function BloodBankSection({ isHomepage = false }: BloodBankSectio
                         </span>
                       )}
                     </div>
-                    {donor.hallBn && (
-                      <p className="text-xs text-rose-700 font-bold flex items-center gap-1 mt-0.5">
-                        <MapPin className="w-3.5 h-3.5 shrink-0" />
-                        <span>আবাসন: {donor.hallBn}</span>
-                      </p>
-                    )}
+                    <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-black px-2 py-0.5 rounded-md bg-rose-50 text-rose-800 border border-rose-200">
+                        <MapPin className="w-3 h-3 text-rose-600 shrink-0" />
+                        <span>{donor.location || 'রাজশাহী'}</span>
+                      </span>
+                      {donor.hallBn && (
+                        <span className="text-xs text-slate-600 font-semibold truncate">
+                          • {donor.hallBn}
+                        </span>
+                      )}
+                    </div>
                     {donor.departmentBn && (
-                      <p className="text-[11px] text-slate-600 font-semibold mt-0.5">{donor.departmentBn}</p>
+                      <p className="text-[11px] text-slate-500 font-medium mt-0.5">{donor.departmentBn}</p>
                     )}
                   </div>
                   <span className="px-3 py-1 rounded-xl bg-rose-600 text-white font-black text-sm shadow-xs shrink-0">
@@ -471,10 +582,27 @@ export default function BloodBankSection({ isHomepage = false }: BloodBankSectio
                   />
                 </div>
 
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 block">
+                    আপনার অবস্থান / শহর নির্বাচন করুন *:
+                  </label>
+                  <select
+                    value={regForm.location}
+                    onChange={(e) => setRegForm({ ...regForm, location: e.target.value })}
+                    className="w-full p-3 border border-slate-200 rounded-xl font-bold text-slate-900 bg-white"
+                  >
+                    {BANGLADESH_LOCATIONS.map((loc) => (
+                      <option key={loc} value={loc}>
+                        {loc === 'রাজশাহী' ? '📍 রাজশাহী (ক্যাম্পাস / শহর)' : loc === 'ঢাকা' ? '📍 ঢাকা' : `📍 ${loc}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 <input
                   type="text"
                   required
-                  placeholder="আবাসনের স্থান * (যেমন: শহীদ জিয়াউর রহমান হল / বিনোদপুর / কাজলা)"
+                  placeholder="আবাসনের স্থান / এরিয়া * (যেমন: শহীদ জিয়াউর রহমান হল / বিনোদপুর / মিরপুর-১০ / ধানমন্ডি)"
                   value={regForm.hallBn}
                   onChange={(e) => setRegForm({ ...regForm, hallBn: e.target.value })}
                   className="w-full p-3 border border-slate-200 rounded-xl font-bold text-slate-900 bg-white"

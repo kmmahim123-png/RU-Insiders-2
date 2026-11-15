@@ -32,6 +32,7 @@ const createEmptyDonor = (): Partial<BloodDonor> => ({
   nameBn: '',
   bloodGroup: 'B+',
   phone: '',
+  location: 'রাজশাহী',
   departmentBn: '',
   hallBn: '',
   studentRoll: '',
@@ -294,10 +295,31 @@ export default function AdminBloodTab({
               onChange={(e) => setFormDonor({ ...formDonor, departmentBn: e.target.value })}
               className="text-xs border border-slate-200 rounded-xl p-2.5"
             />
+            <select
+              value={formDonor.location || 'রাজশাহী'}
+              onChange={(e) => setFormDonor({ ...formDonor, location: e.target.value })}
+              className="text-xs border border-slate-200 rounded-xl p-2.5 font-bold text-slate-800"
+            >
+              <option value="রাজশাহী">📍 রাজশাহী</option>
+              <option value="ঢাকা">📍 ঢাকা</option>
+              <option value="চট্টগ্রাম">📍 চট্টগ্রাম</option>
+              <option value="সিলেট">📍 সিলেট</option>
+              <option value="খুলনা">📍 খুলনা</option>
+              <option value="বরিশাল">📍 বরিশাল</option>
+              <option value="রংপুর">📍 রংপুর</option>
+              <option value="ময়মনসিংহ">📍 ময়মনসিংহ</option>
+              <option value="বগুড়া">📍 বগুড়া</option>
+              <option value="নাটোর">📍 নাটোর</option>
+              <option value="নওগাঁ">📍 নওগাঁ</option>
+              <option value="চাঁপাইনবাবগঞ্জ">📍 চাঁপাইনবাবগঞ্জ</option>
+              <option value="পাবনা">📍 পাবনা</option>
+              <option value="সিরাজগঞ্জ">📍 সিরাজগঞ্জ</option>
+              <option value="অন্যান্য">📍 অন্যান্য</option>
+            </select>
             <input
               type="text"
               required
-              placeholder="আবাসনের স্থান / হল * (যেমন: শের-ই-বাংলা হল / বিনোদপুর)"
+              placeholder="আবাসনের স্থান / এলাকা * (যেমন: শের-ই-বাংলা হল / বিনোদপুর / মিরপুর)"
               value={formDonor.hallBn || ''}
               onChange={(e) => setFormDonor({ ...formDonor, hallBn: e.target.value })}
               className="text-xs border border-slate-200 rounded-xl p-2.5 font-bold"
@@ -396,6 +418,9 @@ export default function AdminBloodTab({
                 <div>
                   <div className="flex flex-wrap items-center gap-1.5">
                     <h4 className="text-sm font-black text-slate-900">{donor.nameBn}</h4>
+                    <span className="text-[10px] font-black bg-rose-50 text-rose-800 border border-rose-200 px-1.5 py-0.5 rounded">
+                      📍 {donor.location || 'রাজশাহী'}
+                    </span>
                     {donor.isVerified && (
                       <span className="text-[10px] font-black bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full">
                         ✓ রোল ভেরিফাইড{donor.studentRoll ? `: ${donor.studentRoll}` : ''}

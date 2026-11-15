@@ -130,7 +130,8 @@ export interface BloodDonor {
   bloodGroup: 'A+' | 'A-' | 'B+' | 'B-' | 'O+' | 'O-' | 'AB+' | 'AB-';
   phone: string;
   departmentBn: string;
-  hallBn?: string; // আবাসনের স্থান / হল / বর্তমান ঠিকানা
+  location?: string; // জেলা বা শহর (যেমন: রাজশাহী, ঢাকা, চট্টগ্রাম, ইত্যাদি)
+  hallBn?: string; // আবাসনের স্থান / হল / বর্তমান এলাকা বা ঠিকানা
   studentRoll?: string; // রাবি রোল / আইডি (যদি রাবি শিক্ষার্থী / ভেরিফাইড হয়)
   isRuStudent?: boolean; // রাবি শিক্ষার্থী হিসেবে রোল দিয়ে ভেরিফাই করেছেন কিনা
   isVerified?: boolean;
