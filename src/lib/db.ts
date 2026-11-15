@@ -606,6 +606,12 @@ function ensureDbDefaults(db: DatabaseSchema): DatabaseSchema {
   const settings = {
     ...INITIAL_DB.settings,
     ...(db.settings || {}),
+    ...(process.env.ADMIN_PASSWORD ? { superAdminPassword: process.env.ADMIN_PASSWORD } : {}),
+    ...(process.env.PRODUCT_MANAGER_PASSWORD ? { productManagerPassword: process.env.PRODUCT_MANAGER_PASSWORD } : {}),
+    ...(process.env.FACEBOOK_PAGE_ACCESS_TOKEN ? { facebookPageAccessToken: process.env.FACEBOOK_PAGE_ACCESS_TOKEN } : {}),
+    ...(process.env.FACEBOOK_APP_SECRET ? { facebookAppSecret: process.env.FACEBOOK_APP_SECRET } : {}),
+    ...(process.env.FACEBOOK_PAGE_ID ? { facebookPageId: process.env.FACEBOOK_PAGE_ID } : {}),
+    ...(process.env.FACEBOOK_APP_ID ? { facebookAppId: process.env.FACEBOOK_APP_ID } : {}),
     breakingNewsItems:
       db.settings?.breakingNewsItems !== undefined
         ? db.settings.breakingNewsItems

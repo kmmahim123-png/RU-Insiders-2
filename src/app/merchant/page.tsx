@@ -1148,31 +1148,9 @@ export default function MerchantPortalPage() {
                   <span>ড্যাশবোর্ডে প্রবেশ করুন</span>
                 </button>
 
-                {/* Demo Quick Fill */}
-                <div className="pt-4 border-t border-slate-100 space-y-2 text-center">
-                  <p className="text-[11px] font-bold text-slate-400">টেস্টিং ডেমো অ্যাকাউন্ট:</p>
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setLoginIdentifier('01711223344');
-                        setLoginPassword('motihar-2026');
-                      }}
-                      className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold cursor-pointer"
-                    >
-                      🛍️ মতিহার ক্রাফটস (আলাদা লগইন)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setLoginIdentifier('01822334455');
-                        setLoginPassword('varendra-2026');
-                      }}
-                      className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold cursor-pointer"
-                    >
-                      🍯 বরেন্দ্র খাঁটি গুড় (আলাদা লগইন)
-                    </button>
-                  </div>
+                {/* Secure Notice */}
+                <div className="pt-4 border-t border-slate-100 text-center">
+                  <p className="text-[11px] font-bold text-slate-400">🔒 সুরক্ষিত মার্চেন্ট পোর্টাল • নিবন্ধিত মোবাইল নম্বর ও পাসওয়ার্ড দিন</p>
                 </div>
               </form>
             ) : (

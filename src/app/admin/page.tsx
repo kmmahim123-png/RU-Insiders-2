@@ -167,7 +167,10 @@ export default function AdminPage() {
       if (data.ok) {
         setRole(data.role);
         setRoleTitle(data.roleTitle);
-        sessionStorage.setItem('ru_admin_pass', password.trim());
+        if (data.sessionToken) {
+          sessionStorage.setItem('ru_admin_token', data.sessionToken);
+        }
+        sessionStorage.removeItem('ru_admin_pass');
 
         if (data.role === 'SUPER_ADMIN' && data.fullDb) {
           const db = data.fullDb;
@@ -229,74 +232,85 @@ export default function AdminPage() {
     }
   };
 
-  // Re-login check from sessionStorage
+  // Re-login check from sessionStorage (Token-first with fallback)
   useEffect(() => {
-    const saved = sessionStorage.getItem('ru_admin_pass');
-    if (saved) {
-      setPassword(saved);
-      fetch('/api/store', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'VERIFY_PASSWORD', password: saved }),
-      })
-        .then((r) => (r.ok ? r.json() : null))
-        .then((data) => {
-          if (!data) return;
-          if (data.ok) {
-            setRole(data.role);
-            setRoleTitle(data.roleTitle);
-            if (data.role === 'SUPER_ADMIN' && data.fullDb) {
-              const db = data.fullDb;
-              setProducts(db.products || []);
-              setOrders(db.orders || []);
-              setMapSpots(db.mapSpots || {});
-              setClubs(db.clubs || []);
-              setDepartments(db.departments || {});
-              setClubApplications(db.clubApplications || []);
-              setArticles(db.articles || []);
-              setAlumni(db.alumni || []);
-              setMerchants(db.merchants || []);
-              setBloodDonors(db.bloodDonors || []);
-              setMarathons(db.marathons || []);
-              setMarathonRegistrations(db.marathonRegistrations || []);
-              setSettings(db.settings || null);
-              if (RU_DEPARTMENTS.length > 0) {
-                const firstD = RU_DEPARTMENTS[0];
-                const customD = db.departments?.[firstD.id];
-                setEditDept({
-                  departmentId: firstD.id,
-                  nameBn: customD?.nameBn || firstD.nameBn,
-                  overviewBn: customD?.overviewBn !== undefined ? customD.overviewBn : firstD.overviewBn,
-                  locationBuildingBn: customD?.locationBuildingBn !== undefined ? customD.locationBuildingBn : firstD.locationBuildingBn,
-                  seatCount: customD?.seatCount !== undefined ? customD.seatCount : firstD.seatCount,
-                  degreeOfferedBn: customD?.degreeOfferedBn !== undefined ? customD.degreeOfferedBn : firstD.degreeOfferedBn,
-                  images: customD?.images?.length ? customD.images : (firstD.images || ['/campus/ru-admin.jpg', '/campus/paris-road-rain.jpg']),
-                  teachers: customD?.teachers || [],
-                });
-              }
-              if (db.clubs?.length > 0) {
-                setEditClub(db.clubs[0]);
-                setSelectedClubToEditId(db.clubs[0].id);
-              }
-            } else if (data.role === 'PRODUCT_MANAGER') {
-              setProducts(data.products || []);
-              setOrders(data.orders || []);
-              setActiveTab('orders');
-            } else if (data.role === 'CLUB_ADMIN') {
-              setClubId(data.clubId);
-              setClubApplications(data.applications || []);
-              if (data.clubInfo) {
-                setEditClub(data.clubInfo);
-                setSelectedClubToEditId(data.clubId);
-              }
-            }
+    const savedToken = sessionStorage.getItem('ru_admin_token');
+    const savedPass = sessionStorage.getItem('ru_admin_pass');
+    if (!savedToken && !savedPass) return;
+
+    const authPayload = savedToken
+      ? { action: 'VERIFY_TOKEN', sessionToken: savedToken }
+      : { action: 'VERIFY_PASSWORD', password: savedPass };
+
+    fetch('/api/store', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(authPayload),
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!data || !data.ok) {
+          sessionStorage.removeItem('ru_admin_token');
+          sessionStorage.removeItem('ru_admin_pass');
+          return;
+        }
+        if (data.sessionToken) {
+          sessionStorage.setItem('ru_admin_token', data.sessionToken);
+          sessionStorage.removeItem('ru_admin_pass');
+        }
+        setRole(data.role);
+        setRoleTitle(data.roleTitle);
+        if (data.role === 'SUPER_ADMIN' && data.fullDb) {
+          const db = data.fullDb;
+          setProducts(db.products || []);
+          setOrders(db.orders || []);
+          setMapSpots(db.mapSpots || {});
+          setClubs(db.clubs || []);
+          setDepartments(db.departments || {});
+          setClubApplications(db.clubApplications || []);
+          setArticles(db.articles || []);
+          setAlumni(db.alumni || []);
+          setMerchants(db.merchants || []);
+          setBloodDonors(db.bloodDonors || []);
+          setMarathons(db.marathons || []);
+          setMarathonRegistrations(db.marathonRegistrations || []);
+          setSettings(db.settings || null);
+          if (RU_DEPARTMENTS.length > 0) {
+            const firstD = RU_DEPARTMENTS[0];
+            const customD = db.departments?.[firstD.id];
+            setEditDept({
+              departmentId: firstD.id,
+              nameBn: customD?.nameBn || firstD.nameBn,
+              overviewBn: customD?.overviewBn !== undefined ? customD.overviewBn : firstD.overviewBn,
+              locationBuildingBn: customD?.locationBuildingBn !== undefined ? customD.locationBuildingBn : firstD.locationBuildingBn,
+              seatCount: customD?.seatCount !== undefined ? customD.seatCount : firstD.seatCount,
+              degreeOfferedBn: customD?.degreeOfferedBn !== undefined ? customD.degreeOfferedBn : firstD.degreeOfferedBn,
+              images: customD?.images?.length ? customD.images : (firstD.images || ['/campus/ru-admin.jpg', '/campus/paris-road-rain.jpg']),
+              teachers: customD?.teachers || [],
+            });
           }
-        })
-        .catch(() => {});
-    }
+          if (db.clubs?.length > 0) {
+            setEditClub(db.clubs[0]);
+            setSelectedClubToEditId(db.clubs[0].id);
+          }
+        } else if (data.role === 'PRODUCT_MANAGER') {
+          setProducts(data.products || []);
+          setOrders(data.orders || []);
+          setActiveTab('orders');
+        } else if (data.role === 'CLUB_ADMIN') {
+          setClubId(data.clubId);
+          setClubApplications(data.applications || []);
+          if (data.clubInfo) {
+            setEditClub(data.clubInfo);
+            setSelectedClubToEditId(data.clubId);
+          }
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const handleLogout = () => {
+    sessionStorage.removeItem('ru_admin_token');
     sessionStorage.removeItem('ru_admin_pass');
     setRole(null);
     setPassword('');
@@ -1298,7 +1312,7 @@ export default function AdminPage() {
                 <input
                   type="password"
                   required
-                  placeholder="পাসওয়ার্ড দিন (যেমন: ru-admin-2026)"
+                  placeholder="আপনার গোপন পাসওয়ার্ড দিন"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-9 pr-4 py-3 text-base sm:text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-blue-600 font-mono"
@@ -1306,56 +1320,18 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* Mobile 1-Tap Quick Password Autofill Pills */}
-            <div className="pt-1">
-              <p className="text-[11px] font-bold text-slate-500 mb-1.5">মোবাইলে দ্রুত লগইনের জন্য চাপুন:</p>
-              <div className="flex flex-wrap gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => setPassword('ru-admin-2026')}
-                  className="px-2.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-[11px] font-bold border border-blue-200 transition"
-                >
-                  👑 সুপার অ্যাডমিন
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPassword('ru-shop-2026')}
-                  className="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[11px] font-bold border border-emerald-200 transition"
-                >
-                  🛍️ শপ ম্যানেজার
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPassword('rucs-2026')}
-                  className="px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 text-[11px] font-bold border border-amber-200 transition"
-                >
-                  🏆 ক্লাব RUCS
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPassword('badhan-2026')}
-                  className="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold border border-rose-200 transition"
-                >
-                  🩸 বাঁধন (Badhan)
-                </button>
-              </div>
-            </div>
-
             <button
               type="submit"
               disabled={loggingIn}
-              className="w-full py-3.5 min-h-[48px] rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-sm shadow-md transition disabled:opacity-50 active:scale-[0.99]"
+              className="w-full py-3.5 min-h-[48px] rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-sm shadow-md transition disabled:opacity-50 active:scale-[0.99] cursor-pointer"
             >
               {loggingIn ? 'রোল যাচাই হচ্ছে...' : 'লগইন করুন →'}
             </button>
           </form>
 
-          {/* Helper Credentials Hint */}
-          <div className="pt-4 border-t border-slate-100 text-[11px] text-slate-400 text-left space-y-1">
-            <p className="font-bold text-slate-600">ডিফল্ট পাসওয়ার্ডসমূহ:</p>
-            <p>• সুপার অ্যাডমিন: <code className="text-blue-700 font-mono">ru-admin-2026</code></p>
-            <p>• প্রোডাক্ট ম্যানেজার: <code className="text-emerald-700 font-mono">ru-shop-2026</code></p>
-            <p>• ক্লাবসমূহ: <code className="text-amber-700 font-mono">rucs-2026</code>, <code className="text-amber-700 font-mono">rudeu-2026</code>, <code className="text-amber-700 font-mono">badhan-2026</code> ইত্যাদি</p>
+          {/* Secure Hint */}
+          <div className="pt-4 border-t border-slate-100 text-[11px] text-slate-400 text-center">
+            <p className="text-slate-500">🔒 সুরক্ষিত অ্যাডমিন গেটওয়ে • সঠিক পাসওয়ার্ড দিয়ে প্রবেশ করুন</p>
           </div>
         </div>
       </div>

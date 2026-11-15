@@ -1,6 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { readDb, writeDb } from '@/lib/db';
 import { supabase, checkSupabaseStatus } from '@/lib/supabase';
+
+const SESSION_SECRET = process.env.SESSION_SECRET || 'ru-session-secret-rabian-2026';
+
+interface AdminSessionPayload {
+  role: 'SUPER_ADMIN' | 'PRODUCT_MANAGER' | 'MERCHANT' | 'CLUB_ADMIN';
+  entityId?: string;
+  exp: number;
+}
+
+function createSessionToken(payload: AdminSessionPayload): string {
+  const data = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const signature = crypto.createHmac('sha256', SESSION_SECRET).update(data).digest('base64url');
+  return `${data}.${signature}`;
+}
+
+function verifySessionToken(token: string): AdminSessionPayload | null {
+  if (!token || typeof token !== 'string' || !token.includes('.')) return null;
+  const parts = token.split('.');
+  if (parts.length !== 2) return null;
+  const [data, signature] = parts;
+  const expectedSig = crypto.createHmac('sha256', SESSION_SECRET).update(data).digest('base64url');
+  if (signature !== expectedSig) return null;
+  try {
+    const payload = JSON.parse(Buffer.from(data, 'base64url').toString('utf-8')) as AdminSessionPayload;
+    if (payload.exp && payload.exp < Date.now()) return null;
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+// In-memory rate limiting map for login attempts (max 5 failed attempts per 15 minutes per IP)
+const failedLoginAttempts = new Map<string, { count: number; lockedUntil: number }>();
 
 export const dynamic = 'force-dynamic';
 
@@ -165,25 +199,109 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { action, password, payload } = body;
+    const { action, password, sessionToken, payload } = body;
     const db = await readDb();
 
-    // 1. Single Password Box Role Detection
-    if (action === 'VERIFY_PASSWORD') {
-      const cleanPass = (password || '').trim();
-      if (cleanPass === db.settings.superAdminPassword) {
+    // 0. Extract Session Token from body or Authorization Header
+    const authHeader = req.headers.get('authorization') || '';
+    const rawBearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+    const incomingToken = sessionToken || rawBearer;
+    const tokenSession = incomingToken ? verifySessionToken(incomingToken) : null;
+
+    // 1. Session Token Verification & Auto-Login
+    if (action === 'VERIFY_TOKEN') {
+      if (!tokenSession) {
+        return NextResponse.json(
+          { ok: false, error: 'সেশন মেয়াদোত্তীর্ণ হয়েছে বা অবৈধ। আবার লগইন করুন।' },
+          { status: 401 }
+        );
+      }
+      if (tokenSession.role === 'SUPER_ADMIN') {
         return NextResponse.json({
           ok: true,
           role: 'SUPER_ADMIN',
           roleTitle: 'সুপার অ্যাডমিন (সম্পূর্ণ নিয়ন্ত্রণ)',
+          sessionToken: incomingToken,
           fullDb: db,
         });
       }
-      if (cleanPass === db.settings.productManagerPassword) {
+      if (tokenSession.role === 'PRODUCT_MANAGER') {
         return NextResponse.json({
           ok: true,
           role: 'PRODUCT_MANAGER',
           roleTitle: 'প্রোডাক্ট ও অর্ডার ম্যানেজার',
+          sessionToken: incomingToken,
+          products: db.products,
+          orders: db.orders,
+          categories: db.settings.categories,
+          deliveryCharges: db.settings.deliveryCharges,
+        });
+      }
+      if (tokenSession.role === 'MERCHANT' && tokenSession.entityId) {
+        const m = (db.merchants || []).find((x) => x.id === tokenSession.entityId);
+        if (!m) return NextResponse.json({ ok: false, error: 'মার্চেন্ট অ্যাকাউন্ট পাওয়া যায়নি' }, { status: 401 });
+        return NextResponse.json({
+          ok: true,
+          role: 'MERCHANT',
+          merchantId: m.id,
+          roleTitle: `${m.shopName} — মার্চেন্ট ড্যাশবোর্ড`,
+          sessionToken: incomingToken,
+          merchant: m,
+          products: db.products.filter((p) => p.merchantId === m.id),
+          orders: db.orders.filter((o) => (o.items || []).some((it) => it.merchantId === m.id)),
+        });
+      }
+      if (tokenSession.role === 'CLUB_ADMIN' && tokenSession.entityId) {
+        const c = db.clubs.find((x) => x.id === tokenSession.entityId);
+        if (!c) return NextResponse.json({ ok: false, error: 'ক্লাব পাওয়া যায়নি' }, { status: 401 });
+        return NextResponse.json({
+          ok: true,
+          role: 'CLUB_ADMIN',
+          clubId: c.id,
+          roleTitle: `${c.nameBn} — ক্লাব পোর্টাল`,
+          sessionToken: incomingToken,
+          clubInfo: c,
+          applications: db.clubApplications.filter((app) => app.clubId === c.id),
+        });
+      }
+      return NextResponse.json({ ok: false, error: 'অবৈধ সেশন' }, { status: 401 });
+    }
+
+    // 2. Single Password Box Role Detection with Brute-Force Rate Limiting
+    if (action === 'VERIFY_PASSWORD') {
+      const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+                 req.headers.get('x-real-ip') ||
+                 'unknown-ip';
+      const now = Date.now();
+      const loginAttempt = failedLoginAttempts.get(ip);
+      if (loginAttempt && loginAttempt.lockedUntil > now) {
+        const waitMin = Math.ceil((loginAttempt.lockedUntil - now) / 60000);
+        return NextResponse.json(
+          { ok: false, error: `অতিরিক্ত ভুল চেষ্টার কারণে এক্সেস স্থগিত। ${waitMin} মিনিট পর আবার চেষ্টা করুন।` },
+          { status: 429 }
+        );
+      }
+
+      const cleanPass = (password || '').trim();
+      if (cleanPass === db.settings.superAdminPassword) {
+        failedLoginAttempts.delete(ip);
+        const token = createSessionToken({ role: 'SUPER_ADMIN', exp: now + 7 * 24 * 3600 * 1000 });
+        return NextResponse.json({
+          ok: true,
+          role: 'SUPER_ADMIN',
+          roleTitle: 'সুপার অ্যাডমিন (সম্পূর্ণ নিয়ন্ত্রণ)',
+          sessionToken: token,
+          fullDb: db,
+        });
+      }
+      if (cleanPass === db.settings.productManagerPassword) {
+        failedLoginAttempts.delete(ip);
+        const token = createSessionToken({ role: 'PRODUCT_MANAGER', exp: now + 7 * 24 * 3600 * 1000 });
+        return NextResponse.json({
+          ok: true,
+          role: 'PRODUCT_MANAGER',
+          roleTitle: 'প্রোডাক্ট ও অর্ডার ম্যানেজার',
+          sessionToken: token,
           products: db.products,
           orders: db.orders,
           categories: db.settings.categories,
@@ -192,11 +310,14 @@ export async function POST(req: NextRequest) {
       }
       const matchedMerchant = (db.merchants || []).find((m) => m.password === cleanPass);
       if (matchedMerchant) {
+        failedLoginAttempts.delete(ip);
+        const token = createSessionToken({ role: 'MERCHANT', entityId: matchedMerchant.id, exp: now + 7 * 24 * 3600 * 1000 });
         return NextResponse.json({
           ok: true,
           role: 'MERCHANT',
           merchantId: matchedMerchant.id,
           roleTitle: `${matchedMerchant.shopName} — মার্চেন্ট ড্যাশবোর্ড`,
+          sessionToken: token,
           merchant: matchedMerchant,
           products: db.products.filter((p) => p.merchantId === matchedMerchant.id),
           orders: db.orders.filter((o) => (o.items || []).some((it) => it.merchantId === matchedMerchant.id)),
@@ -204,16 +325,35 @@ export async function POST(req: NextRequest) {
       }
       const matchedClub = db.clubs.find((c) => c.password === cleanPass);
       if (matchedClub) {
+        failedLoginAttempts.delete(ip);
+        const token = createSessionToken({ role: 'CLUB_ADMIN', entityId: matchedClub.id, exp: now + 7 * 24 * 3600 * 1000 });
         return NextResponse.json({
           ok: true,
           role: 'CLUB_ADMIN',
           clubId: matchedClub.id,
           roleTitle: `${matchedClub.nameBn} — ক্লাব পোর্টাল`,
+          sessionToken: token,
           clubInfo: matchedClub,
           applications: db.clubApplications.filter((app) => app.clubId === matchedClub.id),
         });
       }
-      return NextResponse.json({ ok: false, error: 'পাসওয়ার্ড সঠিক নয়! আবার চেষ্টা করুন।' }, { status: 401 });
+
+      // Record failed attempt
+      const currentAttempt = failedLoginAttempts.get(ip) || { count: 0, lockedUntil: 0 };
+      currentAttempt.count += 1;
+      if (currentAttempt.count >= 5) {
+        currentAttempt.lockedUntil = now + 15 * 60 * 1000;
+        failedLoginAttempts.set(ip, currentAttempt);
+        return NextResponse.json(
+          { ok: false, error: 'পরপর ৫ বার ভুল পাসওয়ার্ড দেওয়ার কারণে ১৫ মিনিটের জন্য এক্সেস স্থগিত করা হয়েছে।' },
+          { status: 429 }
+        );
+      }
+      failedLoginAttempts.set(ip, currentAttempt);
+      return NextResponse.json(
+        { ok: false, error: `পাসওয়ার্ড সঠিক নয়! আর ${5 - currentAttempt.count} বার চেষ্টা করতে পারবেন।` },
+        { status: 401 }
+      );
     }
 
     // 2. Customer Order Creation with Server-Side Price Validation
@@ -725,12 +865,15 @@ export async function POST(req: NextRequest) {
     // 8. Role-Protected Actions
     const cleanPass = (password || '').trim();
     const targetMerchantId = (body.merchantId || payload?.merchantId || '').trim();
-    const isSuper = cleanPass === db.settings.superAdminPassword;
-    const isProdMgr = cleanPass === db.settings.productManagerPassword;
-    const matchedClub = db.clubs.find((c) => c.password === cleanPass);
+    const isSuper = cleanPass === db.settings.superAdminPassword || tokenSession?.role === 'SUPER_ADMIN';
+    const isProdMgr = cleanPass === db.settings.productManagerPassword || tokenSession?.role === 'PRODUCT_MANAGER';
+    const matchedClub = db.clubs.find((c) => c.password === cleanPass) ||
+      (tokenSession?.role === 'CLUB_ADMIN' && tokenSession.entityId ? db.clubs.find((c) => c.id === tokenSession.entityId) : undefined);
     const matchedMerchant = targetMerchantId
-      ? (db.merchants || []).find((m) => m.id === targetMerchantId && m.password === cleanPass)
-      : (db.merchants || []).find((m) => m.password === cleanPass);
+      ? ((db.merchants || []).find((m) => m.id === targetMerchantId && m.password === cleanPass) ||
+         (tokenSession?.role === 'MERCHANT' && tokenSession.entityId === targetMerchantId ? (db.merchants || []).find((m) => m.id === targetMerchantId) : undefined))
+      : ((db.merchants || []).find((m) => m.password === cleanPass) ||
+         (tokenSession?.role === 'MERCHANT' ? (db.merchants || []).find((m) => m.id === tokenSession.entityId) : undefined));
 
     // Product & Order Manager + Super Admin + Merchant Actions
     if (action === 'SAVE_PRODUCT' && (isSuper || isProdMgr || matchedMerchant)) {

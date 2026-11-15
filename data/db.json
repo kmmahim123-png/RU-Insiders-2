@@ -615,9 +615,9 @@
     "facebookVerifyToken": "rabian_fb_verify_2026",
     "facebookAutoPostEnabled": true,
     "facebookMessengerReplyEnabled": true,
-    "facebookPageAccessToken": "EAAflKtBvZBPwBSZBqGqe7kFlgzuP7cCEGqmyDM8sUfhfOveXJPmtzqkbF1LBKSavc8UjIJRVL2r90pYFHwDVCpTkfl80TDCuJbZCfZAFpAXOsknHSvawKJoGKZAehxuyVxZC3l2vUZCRU05P8wZCFmuVZAaWHZAnZCpV6RvHtMdZB1dSt9ImlZC8UPRPE0RQ0icNaZAWcEo06tfCrIfn9ATw8LKqQuAGXY",
+    "facebookPageAccessToken": "",
     "facebookAppId": "2222296885360892",
-    "facebookAppSecret": "847c7134d003b83105abf544bb728560",
+    "facebookAppSecret": "",
     "facebookTokenExpires": "NEVER"
   },
   "departments": {

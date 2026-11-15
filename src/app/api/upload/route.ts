@@ -4,14 +4,48 @@ import path from 'path';
 import { supabase } from '@/lib/supabase';
 
 const ALLOWED_EXT = ['.jpg', '.jpeg', '.png', '.webp'];
+const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB per file
+const MAX_FILES_PER_REQ = 5;
+
+// In-memory rate limiter for uploads (30 requests per minute per IP)
+const uploadRateLimit = new Map<string, { count: number; resetAt: number }>();
 
 export async function POST(req: NextRequest) {
   try {
+    // 1. IP Rate Limiting Check
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+               req.headers.get('x-real-ip') ||
+               'unknown-uploader';
+    const now = Date.now();
+    const rateData = uploadRateLimit.get(ip) || { count: 0, resetAt: now + 60000 };
+
+    if (now > rateData.resetAt) {
+      rateData.count = 1;
+      rateData.resetAt = now + 60000;
+    } else {
+      rateData.count += 1;
+      if (rateData.count > 30) {
+        return NextResponse.json(
+          { ok: false, error: 'এক মিনিটে অতিরিক্ত ছবি আপলোড করা হয়েছে। কিছুক্ষণ পর চেষ্টা করুন।' },
+          { status: 429 }
+        );
+      }
+    }
+    uploadRateLimit.set(ip, rateData);
+
     const formData = await req.formData();
     const files = formData.getAll('files') as File[];
 
     if (!files || files.length === 0) {
       return NextResponse.json({ ok: false, error: 'কোনো ছবি নির্বাচন করা হয়নি' }, { status: 400 });
+    }
+
+    if (files.length > MAX_FILES_PER_REQ) {
+      return NextResponse.json(
+        { ok: false, error: `একসাথে সর্বোচ্চ ${MAX_FILES_PER_REQ}টি ছবি আপলোড করা যাবে` },
+        { status: 400 }
+      );
     }
 
     const uploadDir = path.join(process.cwd(), 'public', 'uploads');
@@ -22,9 +56,28 @@ export async function POST(req: NextRequest) {
     const uploadedUrls: string[] = [];
 
     for (const file of files) {
+      // 2. Validate File Size
+      if (file.size > MAX_FILE_SIZE) {
+        return NextResponse.json(
+          { ok: false, error: `"${file.name}" ফাইলের সাইজ ৫ মেগাবাইটের বেশি। সর্বোচ্চ ৫MB ফাইল গ্রহণযোগ্য।` },
+          { status: 400 }
+        );
+      }
+
+      // 3. Validate MIME Type & Extension
       let ext = path.extname(file.name).toLowerCase();
       if (!ext || !ALLOWED_EXT.includes(ext)) {
-        ext = '.webp';
+        return NextResponse.json(
+          { ok: false, error: `শুধুমাত্র JPG, PNG বা WEBP ছবি গ্রহণযোগ্য` },
+          { status: 400 }
+        );
+      }
+
+      if (file.type && !ALLOWED_MIME.includes(file.type.toLowerCase())) {
+        return NextResponse.json(
+          { ok: false, error: `অবৈধ ফাইল ফরম্যাট: ${file.type} গ্রহণযোগ্য নয়` },
+          { status: 400 }
+        );
       }
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
